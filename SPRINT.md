@@ -85,7 +85,7 @@ Tant que ce lot n'est pas terminé, **aucune ligne de code du package**. Si le p
 le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 
 - [x] Créer la sandbox sur `labs.iopole.io`
-- [x] Récupérer token Bearer + `customer-id` et les mettre dans `.env.local` (jamais dans le dépôt)
+- [x] Récupérer les identifiants OAuth2 + `customer-id`, placés dans le `.env` du playground (exclu de git)
 - [ ] Ouvrir un tunnel local (ngrok / expose) et noter l'URL publique
 - [ ] Pointer le tunnel sur le playground, ou sur un script PHP autonome — le lot 0 se fait
       volontairement **sans** le package, pour valider le calcul HMAC nu
@@ -404,4 +404,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | Docs | fait | CDC en v1.2, CLAUDE.md et SPRINT alignés — incohérences levées |
 | 2026-08-18 | D07 | fait | Routage multi-tenant, 4 stratégies — 21 tests verts |
 | 2026-08-18 | D05/D06 | fait | Signature HMAC validée contre l'implémentation de référence — 26 tests |
-| 2026-08-18 | Lot 0 | partiel | Sandbox créée, identifiants en place ; manque le secret et une capture réelle |
+| 2026-08-18 | Lot 0 | partiel | Sandbox opérationnelle : auth OAuth2 et appel API vérifiés en réel |
+| 2026-08-18 | D02 | corrigé | `/v1/config/customer/id` répond en text/html — ajout de `Client::raw()` |

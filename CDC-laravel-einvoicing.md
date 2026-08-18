@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.2 — 18 août 2026
+**Version** 1.3 — 18 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -416,3 +416,16 @@ factures comme vues. À vérifier sur la sandbox avant d'engager le lot correspo
 **Environnements.** Le CDC pointe `api.ppd.iopole.fr` ; la page de présentation du Lab annonce
 `api.iopole.com/v1/api`. Vraisemblablement pré-production et production. La valeur exacte de
 `IOPOLE_BASE_URL` sera confirmée par la sandbox.
+
+### v1.3 — 18 août 2026
+
+Premiers constats sur la sandbox réelle, environnement de pré-production.
+
+| Constat | Conséquence |
+|---|---|
+| L'authentification OAuth2 `client_credentials` fonctionne sur `auth.preprod.iopole.fr` | La v1.2 est confirmée sur le terrain. L'`access_token` fait environ 1,5 ko. |
+| `GET /v1/config/customer/id` répond en **`text/html`** avec l'identifiant nu | La spécification annonce `application/json`. Le client doit pouvoir lire une réponse non structurée ; tout supposer JSON casserait sur cet endpoint. |
+| `php://input` mesuré à **0 octet** sur une requête multipart | Confirme §8. Le checksum se calcule sur le fichier temporaire uploadé. |
+
+Enseignement : la documentation annonce des types de contenu qui ne correspondent pas toujours à
+la réalité. Chaque endpoint doit être observé avant d'être considéré comme acquis.
