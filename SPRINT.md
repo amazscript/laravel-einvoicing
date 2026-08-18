@@ -90,14 +90,16 @@ le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 - [ ] Pointer le tunnel sur le playground, ou sur un script PHP autonome — le lot 0 se fait
       volontairement **sans** le package, pour valider le calcul HMAC nu
 - [ ] Configurer un webhook `INBOUND` vers le tunnel, noter le secret HMAC
-- [ ] Émettre une facture de test depuis l'interface Iopole
-- [ ] Capturer le payload multipart réel et le figer dans `tests/Fixtures/`
-- [x] **Vérifier la signature HMAC à la main, en PHP** — fait par validation croisée contre
-      l'implémentation Node.js de la plateforme (`tests/Fixtures/hmac-vectors.generate.js`).
-      Reste à confirmer sur une livraison réelle de la plateforme.
+- [x] Émettre une facture de test — faite par l'API, statut `REJECTED` (destinataire non routable
+      dans l'annuaire), mais la livraison du statut a fourni le vecteur recherché
+- [~] Capturer le payload **multipart** réel — non obtenu : aucune facture entrante n'a pu être
+      remise. Le payload **JSON** d'un statut, lui, est figé en fixture.
+- [x] **Vérifier la signature HMAC à la main, en PHP** — d'abord par validation croisée contre
+      l'implémentation Node.js de la plateforme, puis **sur une livraison qu'elle a réellement
+      émise** : signature reproduite à l'octet près. Le risque technique du projet est levé.
 - [x] Capteur de requêtes en place dans le playground (`POST /capture/webhook`), éprouvé sur un
       multipart : **`php://input` mesuré à 0 octet**, le piège est confirmé empiriquement.
-- [ ] Vérifier la signature HMAC à la main sur un payload de statut JSON réel
+- [x] Vérifier la signature HMAC sur un payload de statut JSON réel
 - [ ] Consigner la méthode qui marche dans `docs/webhooks.md` (section « chaîne canonique »)
 
 > Piège identifié : en `multipart/form-data`, `php://input` est **vide** — le SAPI PHP a déjà
@@ -410,3 +412,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | Lot 0 | avancé | Webhook INBOUND activé vers le tunnel, secret HMAC déclaré |
 | 2026-08-18 | — | constat | Sandbox sans entité enregistrée : rien ne peut encore y être reçu |
 | 2026-08-18 | D04 | fait | Route webhook, capture du corps, signature — 11 tests, vérifié dans le playground |
+| 2026-08-18 | Lot 0 | **levé** | Livraison réelle capturée, signature reproduite à l'octet près |
+| 2026-08-18 | D06 | corrigé | Horodatage en millisecondes : le code rejetait 100 % des livraisons |

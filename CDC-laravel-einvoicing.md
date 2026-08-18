@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.3 — 18 août 2026
+**Version** 1.4 — 18 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -433,3 +433,20 @@ Premiers constats sur la sandbox réelle, environnement de pré-production.
 
 Enseignement : la documentation annonce des types de contenu qui ne correspondent pas toujours à
 la réalité. Chaque endpoint doit être observé avant d'être considéré comme acquis.
+
+### v1.4 — 18 août 2026
+
+Constats issus d'une **livraison réellement émise par la plateforme**, capturée sur un tunnel.
+Ces points ne figurent dans aucune page de sa documentation.
+
+| Constat | Conséquence |
+|---|---|
+| `X-Timestamp` est exprimé en **millisecondes** (13 chiffres) | Comparé tel quel à `time()`, l'écart se compte en milliers d'années : **toute livraison authentique aurait été rejetée**. L'unité n'étant pas contractuelle, secondes et millisecondes sont désormais toutes deux acceptées. |
+| L'en-tête d'idempotence s'appelle **`X-Idempotency-Key`** et porte un UUID | Répond au point resté ouvert depuis la v1.2 : la clé de déduplication du §7 est cet en-tête, et non un champ du payload. Le payload de statut ne contient effectivement aucun `eventId`. |
+| Un en-tête **`X-Target-Electronic-Address`** porte `scheme:valeur` du destinataire | Le routage multi-tenant (§9) peut s'appuyer sur un en-tête plutôt que sur un parcours du payload. Le schéma `0002` désigne un SIREN. |
+| La chaîne canonique est signée sur le **chemin seul**, sans le domaine | Confirme §8 : `path_with_query` et non l'URL complète. Vérifié en reproduisant la signature à l'octet près. |
+| Un statut porte `invoiceId` et `statusId`, jamais d'`eventId` | La clé d'unicité d'un statut est `statusId`, celle d'une facture `invoiceId`. |
+| En `OUTBOUND`, `interopData.endpoints` n'accepte que `status` et `authentication` | Contrainte de configuration à respecter par `einvoicing:webhooks:sync` (§11). |
+
+**Le risque technique du §18 est levé.** L'algorithme de signature du package reproduit exactement
+celui de la plateforme, vérifié sur une signature qu'elle a réellement émise.
