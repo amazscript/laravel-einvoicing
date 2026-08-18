@@ -74,9 +74,14 @@ final class Client
     }
 
     /**
-     * Récupère un corps binaire (XML, PDF, pièce jointe) sans tenter de le décoder.
+     * Récupère un corps sans tenter de le décoder.
+     *
+     * Nécessaire pour les fichiers (XML, PDF, pièces jointes) mais aussi pour
+     * certains endpoints qui renvoient une valeur nue : /v1/config/customer/id
+     * répond en text/html avec l'identifiant seul, malgré une documentation qui
+     * annonce de l'application/json.
      */
-    public function download(string $path): string
+    public function raw(string $path): string
     {
         return $this->send('get', $path, [])->body();
     }

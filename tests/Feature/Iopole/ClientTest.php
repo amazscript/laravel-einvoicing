@@ -204,7 +204,15 @@ it('accepte une réponse vide sur une suppression', function (): void {
 it('récupère un corps binaire sans tenter de le décoder', function (): void {
     fakeApi(Http::response('%PDF-1.4 binaire', 200, ['Content-Type' => 'application/pdf']));
 
-    expect(client()->download(Endpoints::downloadReadableInvoice('inv-1')))->toBe('%PDF-1.4 binaire');
+    expect(client()->raw(Endpoints::downloadReadableInvoice('inv-1')))->toBe('%PDF-1.4 binaire');
+});
+
+it('récupère une valeur nue renvoyée hors json', function (): void {
+    // Constaté sur l'API réelle : /v1/config/customer/id répond en text/html
+    // avec l'identifiant seul, alors que la spécification annonce du json.
+    fakeApi(Http::response('01a015b6-0000-0000-0000-000000000000', 200, ['Content-Type' => 'text/html']));
+
+    expect(client()->raw(Endpoints::customerId()))->toBe('01a015b6-0000-0000-0000-000000000000');
 });
 
 it('refuse une réponse json illisible', function (): void {

@@ -65,11 +65,8 @@ it('obtient un jeton auprès du serveur d\'authentification réel', function ():
 })->group('integration')->skip(sandboxCredentialsMissing(...), 'identifiants sandbox absents de l\'environnement');
 
 it('interroge l\'api réelle et retrouve le customer id', function (): void {
-    $reponse = sandboxClient()->get(Endpoints::customerId());
+    // Réponse constatée : text/html contenant l'identifiant nu, sans json.
+    $reponse = trim(sandboxClient()->raw(Endpoints::customerId()));
 
-    // Le contenu exact de la réponse est inconnu tant qu'on ne l'a pas vu :
-    // on vérifie qu'elle arrive et qu'elle est exploitable, pas sa forme.
-    expect($reponse)->toBeArray()->not->toBeEmpty();
-
-    dump('réponse de '.Endpoints::customerId().' : '.json_encode($reponse));
+    expect($reponse)->toBe(getenv('IOPOLE_CUSTOMER_ID'));
 })->group('integration')->skip(sandboxCredentialsMissing(...), 'identifiants sandbox absents de l\'environnement');
