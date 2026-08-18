@@ -1,0 +1,310 @@
+{
+  "_source": "docs.iopole.com — relevé le 2026-08-18",
+  "_note": "Liste factuelle méthode + chemin, figée pour les tests de contrat. Regénérer si l'API change.",
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/v1/config/business/entity"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/batch"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/business/entity/identifier/directory/{directoryId}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/identifier/directory/{directoryId}/self-billing"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/identifier/scheme/{identifierScheme}/value/{identifierValue}/network/{networkIdentifier}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/identifier/scheme/{identifierScheme}/value/{identifierValue}/self-billing"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/business/entity/identifier/{businessEntityIdentifierId}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/identifier/{businessEntityIdentifierId}/network/{networkIdentifier}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/legalunit"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/office"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/scheme/{identifierScheme}/value/{identifierValue}/claim"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/scheme/{identifierScheme}/value/{identifierValue}/identifier"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/business/entity/{businessEntityId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/business/entity/{businessEntityId}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/business/entity/{businessEntityId}/claim"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/{businessEntityId}/claim"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/config/business/entity/{businessEntityId}/claim"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/{businessEntityId}/configure"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/business/entity/{businessEntityId}/identifier"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/customer/id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/enrollment/{enrollmentId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/enrollment/{enrollmentId}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/config/enrollment/{enrollmentId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/enrollment/{enrollmentId}/evidences"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/enrollment/{enrollmentId}/link"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/enrollment/{scheme}/{identifier}/link"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/french/enrollment"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/config/french/enrollment"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/international/enrollment"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/config/international/enrollment"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/retry/strategy"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/retry/strategy"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/retry/strategy"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/webhook"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/config/webhook"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/config/webhook/{webhookId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/config/webhook/{webhookId}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/config/webhook/{webhookId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/directory/french"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/directory/international"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/directory/international/check/scheme/{scheme}/value/{value}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/invoice"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/file/{fileId}/download"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/notSeen"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/status/notSeen"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/invoice/status/{statusId}/markAsSeen"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}/download"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}/download/readable"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}/files"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}/files/attachments"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/invoice/{invoiceId}/markAsSeen"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/invoice/{invoiceId}/status"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/invoice/{invoiceId}/status-history"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/reporting/payment/invoice/scheme/{identifierScheme}/value/{identifierValue}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/reporting/payment/transaction/scheme/{identifierScheme}/value/{identifierValue}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/reporting/payment/{paymentId}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/reporting/payment/{paymentId}/invoice"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/reporting/payment/{paymentId}/transaction"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/reporting/report/scheme/{identifierScheme}/value/{identifierValue}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/reporting/report/{reportId}/transaction"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/reporting/transaction/invoice/scheme/{identifierScheme}/value/{identifierValue}"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/reporting/transaction/scheme/{identifierScheme}/value/{identifierValue}"
+    },
+    {
+      "method": "DELETE",
+      "path": "/v1/reporting/transaction/{transactionId}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/reporting/transaction/{transactionId}"
+    },
+    {
+      "method": "PUT",
+      "path": "/v1/reporting/transaction/{transactionId}/invoice"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/errorBreakdown"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/frequentSuppliers"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/lastErrors"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/messages"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/successErrors/{interval}"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/v1/stats/{network}/tagsDistribution"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/tools/cii/generate"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/tools/facturx/generate"
+    },
+    {
+      "method": "POST",
+      "path": "/v1/tools/ubl/generate"
+    }
+  ]
+}
