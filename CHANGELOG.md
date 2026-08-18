@@ -25,3 +25,6 @@ respecte [SemVer](https://semver.org/lang/fr/).
   quota (429, avec `Retry-After`) et panne serveur (5xx).
 - Chemins d'API encapsulés dans `Endpoints`, vérifiés par un test de contrat contre la
   spécification publiée.
+- Routage multi-tenant : contrat `TenantResolver`, implémentation `SiretResolver` résolvant par
+  identifiant externe, SIRET, SIREN puis tenant unique par défaut, et événement
+  `TenantResolutionFailed` en cas d'échec.

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing;
 
+use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
+use AmazScript\Einvoicing\Tenancy\SiretResolver;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\ServiceProvider;
@@ -34,6 +36,14 @@ final class EinvoicingServiceProvider extends ServiceProvider
                 $this->driverConfig('client_id'),
                 $this->driverConfig('client_secret'),
             );
+        });
+
+        // Le résolveur est remplaçable : une application dont le routage suit une
+        // autre règle déclare sa propre classe dans la configuration.
+        $this->app->bind(TenantResolver::class, function ($app): TenantResolver {
+            $configured = $app->make('config')->get('einvoicing.tenant_resolver', SiretResolver::class);
+
+            return $app->make(is_string($configured) ? $configured : SiretResolver::class);
         });
 
         $this->app->singleton(Client::class, function ($app): Client {
