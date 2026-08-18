@@ -256,16 +256,19 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D07 — Routage multi-tenant (point critique 5.2)
 
-- [ ] `Contracts/TenantResolver`, implémentation `Tenancy/SiretResolver`
-- [ ] Ordre de résolution : `idPath` → SIRET → SIREN → tenant unique actif par défaut
-- [ ] Fallback « tenant unique » : log niveau `warning` (filet, pas stratégie)
+- [x] `Contracts/TenantResolver`, implémentation `Tenancy/SiretResolver`
+- [x] Ordre de résolution : `idPath` → SIRET → SIREN → tenant unique actif par défaut
+- [x] Fallback « tenant unique » : log niveau `warning` (filet, pas stratégie)
 - [ ] Échec → persistance `status = UNROUTED`, `tenant_id = null`, payload conservé
-- [ ] Event `TenantResolutionFailed`
+      — le résolveur signale l'échec, la persistance revient au webhook (D04)
+- [x] Event `TenantResolutionFailed`
 - [ ] Réponse 2xx malgré l'échec, aucune perte de donnée
-- [ ] `Tenancy/TenantContext`
-- [ ] Tests : les 4 stratégies, une par une
-- [ ] Test : tenant introuvable → `UNROUTED` + 2xx + event
-- [ ] **DoD** : couverture ≥ 85 % sur `Tenancy/`
+- [-] `Tenancy/TenantContext` — reporté : aucun besoin réel tant qu'aucun job ne doit porter
+      un tenant courant. À créer en D10 si le besoin apparaît vraiment.
+- [x] Tests : les 4 stratégies, une par une
+- [x] Test : tenant introuvable → event émis (le `UNROUTED` + 2xx se testent en D04)
+- [ ] **DoD** : couverture ≥ 85 % sur `Tenancy/` — **non mesurée** : ni Xdebug ni PCOV installés
+      sur la machine de dev. À vérifier par la CI (D16), qui doit installer PCOV.
 
 ## D08 — Déduplication (point critique 5.3)
 
