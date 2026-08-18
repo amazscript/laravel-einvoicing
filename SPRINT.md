@@ -283,7 +283,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Contrainte unique en base sur `event_id` — pas de vérification applicative seule
 - [x] Violation de contrainte unique = **succès** (déjà traité), pas une erreur
 - [~] Insertion de l'événement faite ; le dispatch `after_commit` arrive avec les jobs (D10)
-- [ ] Échec définitif du job → `status = FAILED` + `failed_reason` — dépend des jobs (D10)
+- [x] Échec définitif du job → `status = FAILED` + `failed_reason` — dépend des jobs (D10)
 - [x] Test : même `event_id` deux fois → un seul traitement
 - [x] Test : deux requêtes concurrentes sur le même `event_id` → un seul job
 - [ ] **DoD** : un job mort ne rend pas la facture irrécupérable (voir D15 `events:retry`)
@@ -291,7 +291,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 ## D09 — Idempotence des factures (point critique 5.4)
 
 - [ ] Toute écriture de facture via `updateOrCreate` sur `(provider, provider_invoice_id)`
-- [ ] Idem pour les statuts sur `(provider, provider_status_id)`
+- [x] Idem pour les statuts sur `(provider, provider_status_id)`
 - [ ] Test : rejeu complet d'un webhook → aucun doublon en base
 - [ ] Test : deux événements différents pour la même facture → une seule ligne, mise à jour
 - [ ] **DoD** : rejouer 3 fois la même fixture laisse la base identique
@@ -308,13 +308,13 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D11 — Statuts de cycle de vie
 
-- [ ] `Jobs/ProcessStatusUpdate`
-- [ ] Parsing du payload JSON → `Status` (`code`, `value`, `description`, `dest_type`, `occurred_at`)
-- [ ] Rattachement à la facture quand l'ID est connu, `invoice_id` nullable sinon
-- [ ] `payload` : JSON + XML bruts conservés
-- [ ] Contract test sur la fixture de statut de la doc Iopole
+- [x] `Jobs/ProcessStatusUpdate`
+- [x] Parsing du payload JSON → `Status` (`code`, `value`, `description`, `dest_type`, `occurred_at`)
+- [x] Rattachement à la facture quand l'ID est connu, `invoice_id` nullable sinon
+- [x] `payload` : JSON + XML bruts conservés
+- [x] Contract test sur la fixture de statut de la doc Iopole
 - [ ] Contract test sur `INVOICE_INBOUND_INVALID`
-- [ ] **DoD** : un statut orphelin ne fait pas échouer le job
+- [x] **DoD** : un statut orphelin ne fait pas échouer le job
 
 ## D12 — Events Laravel exposés
 
@@ -415,3 +415,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | Lot 0 | **levé** | Livraison réelle capturée, signature reproduite à l'octet près |
 | 2026-08-18 | D06 | corrigé | Horodatage en millisecondes : le code rejetait 100 % des livraisons |
 | 2026-08-18 | D08 | fait | Déduplication sur `X-Idempotency-Key` — 11 tests, éprouvé dans le playground |
+| 2026-08-18 | D11 | fait | Job de traitement des statuts sur payload réel — 16 tests, chaîne complète vérifiée |
+| 2026-08-18 | D10 | reporté | Aucune facture entrante multipart reçue : les champs seraient inventés |

@@ -39,8 +39,16 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Contrat `PayloadInterpreter` : les conventions d'en-têtes et de payload restent confinées au
   driver de la plateforme.
 
+- Traitement des statuts de cycle de vie en file d'attente : `ProcessStatusUpdate`, mise en file
+  après validation de la transaction, recul exponentiel entre tentatives, et événement
+  `InvoiceStatusUpdated` à destination de l'application.
+- Un événement dont le destinataire est inconnu n'est pas traité : il reste consigné en `UNROUTED`,
+  rejouable une fois le tenant créé.
+
 ### Corrigé
 
+- La colonne `value` d'un statut est nullable : la plateforme n'envoie parfois que le code, là
+  où sa documentation montre systématiquement un trio code/valeur/description.
 - L'horodatage des webhooks est transmis en millisecondes par la plateforme. Comparé tel quel à
   l'horloge locale, il faisait rejeter toute livraison authentique. Les deux unités sont
   désormais acceptées.
