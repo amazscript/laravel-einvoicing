@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing;
 
+use AmazScript\Einvoicing\Contracts\SignatureVerifier;
 use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
 use AmazScript\Einvoicing\Tenancy\SiretResolver;
+use AmazScript\Einvoicing\Webhook\HmacSignatureVerifier;
+use AmazScript\Einvoicing\Webhook\WebhookController;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -46,6 +50,15 @@ final class EinvoicingServiceProvider extends ServiceProvider
             return $app->make(is_string($configured) ? $configured : SiretResolver::class);
         });
 
+        $this->app->bind(SignatureVerifier::class, function ($app): SignatureVerifier {
+            $webhook = $app->make('config')->get('einvoicing.webhook', []);
+
+            return new HmacSignatureVerifier(
+                is_array($webhook) && is_string($webhook['secret'] ?? null) ? $webhook['secret'] : '',
+                is_array($webhook) && is_numeric($webhook['tolerance'] ?? null) ? (int) $webhook['tolerance'] : 300,
+            );
+        });
+
         $this->app->singleton(Client::class, function ($app): Client {
             return new Client(
                 $app->make(HttpFactory::class),
@@ -55,6 +68,28 @@ final class EinvoicingServiceProvider extends ServiceProvider
                 $this->driverConfig('customer_id'),
             );
         });
+    }
+
+    /**
+     * Déclare l'URL de rappel unique de la plateforme.
+     *
+     * Aucune limitation de débit ne doit être appliquée ici : un 429 renvoyé à
+     * la plateforme déclencherait sa stratégie de retry sans raison.
+     */
+    private function registerWebhookRoute(): void
+    {
+        $config = $this->app->make('config');
+        $path = $config->get('einvoicing.webhook.path');
+
+        if (! is_string($path) || $path === '') {
+            return;
+        }
+
+        $middleware = $config->get('einvoicing.webhook.middleware', ['api']);
+
+        Route::post($path, WebhookController::class)
+            ->middleware(is_array($middleware) ? $middleware : ['api'])
+            ->name('einvoicing.webhook');
     }
 
     /**
@@ -73,6 +108,8 @@ final class EinvoicingServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->registerWebhookRoute();
+
         if (! $this->app->runningInConsole()) {
             return;
         }
