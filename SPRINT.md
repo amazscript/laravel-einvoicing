@@ -267,7 +267,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] `Contracts/TenantResolver`, implémentation `Tenancy/SiretResolver`
 - [x] Ordre de résolution : `idPath` → SIRET → SIREN → tenant unique actif par défaut
 - [x] Fallback « tenant unique » : log niveau `warning` (filet, pas stratégie)
-- [ ] Échec → persistance `status = UNROUTED`, `tenant_id = null`, payload conservé
+- [x] Échec → persistance `status = UNROUTED`, `tenant_id = null`, payload conservé
       — le résolveur signale l'échec, la persistance revient au webhook (D04)
 - [x] Event `TenantResolutionFailed`
 - [ ] Réponse 2xx malgré l'échec, aucune perte de donnée
@@ -280,12 +280,12 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D08 — Déduplication (point critique 5.3)
 
-- [ ] Contrainte unique en base sur `event_id` — pas de vérification applicative seule
-- [ ] Violation de contrainte unique = **succès** (déjà traité), pas une erreur
-- [ ] Insertion de l'événement puis dispatch en `after_commit` (sinon job orphelin sur rollback)
-- [ ] Échec définitif du job → `status = FAILED` + `failed_reason`, jamais silencieux
-- [ ] Test : même `event_id` deux fois → un seul traitement
-- [ ] Test : deux requêtes concurrentes sur le même `event_id` → un seul job
+- [x] Contrainte unique en base sur `event_id` — pas de vérification applicative seule
+- [x] Violation de contrainte unique = **succès** (déjà traité), pas une erreur
+- [~] Insertion de l'événement faite ; le dispatch `after_commit` arrive avec les jobs (D10)
+- [ ] Échec définitif du job → `status = FAILED` + `failed_reason` — dépend des jobs (D10)
+- [x] Test : même `event_id` deux fois → un seul traitement
+- [x] Test : deux requêtes concurrentes sur le même `event_id` → un seul job
 - [ ] **DoD** : un job mort ne rend pas la facture irrécupérable (voir D15 `events:retry`)
 
 ## D09 — Idempotence des factures (point critique 5.4)
@@ -414,3 +414,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D04 | fait | Route webhook, capture du corps, signature — 11 tests, vérifié dans le playground |
 | 2026-08-18 | Lot 0 | **levé** | Livraison réelle capturée, signature reproduite à l'octet près |
 | 2026-08-18 | D06 | corrigé | Horodatage en millisecondes : le code rejetait 100 % des livraisons |
+| 2026-08-18 | D08 | fait | Déduplication sur `X-Idempotency-Key` — 11 tests, éprouvé dans le playground |

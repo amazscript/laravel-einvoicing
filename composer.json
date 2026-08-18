@@ -1,7 +1,14 @@
 {
     "name": "amazscript/laravel-einvoicing",
     "description": "Réception de factures électroniques françaises via une Plateforme Agréée. Webhook signé, routage multi-tenant, déduplication et events Laravel.",
-    "keywords": ["laravel", "facture-electronique", "e-invoicing", "iopole", "dgfip", "factur-x"],
+    "keywords": [
+        "laravel",
+        "facture-electronique",
+        "e-invoicing",
+        "iopole",
+        "dgfip",
+        "factur-x"
+    ],
     "homepage": "https://github.com/amazscript/laravel-einvoicing",
     "license": "MIT",
     "authors": [
@@ -39,7 +46,7 @@
     "scripts": {
         "test": "pest",
         "test:coverage": "pest --coverage --min=85",
-        "analyse": "phpstan analyse",
+        "analyse": "phpstan analyse --memory-limit=512M",
         "format": "pint"
     },
     "config": {

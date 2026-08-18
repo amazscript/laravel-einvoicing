@@ -7,12 +7,24 @@ namespace AmazScript\Einvoicing\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Statut de cycle de vie émis par la Plateforme Agréée.
  *
  * Les codes ne sont pas modélisés en enum : ils dépendent de la plateforme et
  * évoluent sans préavis. Les inventer figerait une liste qui n'est pas la nôtre.
+ *
+ * @property string $id
+ * @property string|null $invoice_id
+ * @property string $provider
+ * @property string $provider_status_id
+ * @property string $code
+ * @property string $value
+ * @property string|null $description
+ * @property string|null $dest_type
+ * @property Carbon|null $occurred_at
+ * @property array<string, mixed>|null $payload
  */
 class Status extends Model
 {
