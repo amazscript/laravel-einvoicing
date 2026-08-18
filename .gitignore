@@ -1,0 +1,15 @@
+/vendor
+/build
+/.phpunit.cache
+composer.lock
+.phpunit.result.cache
+.env
+.env.*
+!.env.example
+.DS_Store
+.idea
+.vscode
+
+# Documentation Iopole récupérée pour référence de développement.
+# Contenu tiers : jamais commité, jamais redistribué.
+/.iopole-docs
