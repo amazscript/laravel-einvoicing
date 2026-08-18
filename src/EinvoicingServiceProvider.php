@@ -6,11 +6,13 @@ namespace AmazScript\Einvoicing;
 
 use AmazScript\Einvoicing\Contracts\PayloadInterpreter;
 use AmazScript\Einvoicing\Contracts\SignatureVerifier;
+use AmazScript\Einvoicing\Contracts\StatusMapper;
 use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\IopolePayloadInterpreter;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
+use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\IopoleStatusMapper;
 use AmazScript\Einvoicing\Tenancy\SiretResolver;
 use AmazScript\Einvoicing\Webhook\HmacSignatureVerifier;
 use AmazScript\Einvoicing\Webhook\WebhookController;
@@ -53,6 +55,7 @@ final class EinvoicingServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(PayloadInterpreter::class, IopolePayloadInterpreter::class);
+        $this->app->bind(StatusMapper::class, IopoleStatusMapper::class);
 
         $this->app->bind(SignatureVerifier::class, function ($app): SignatureVerifier {
             $webhook = $app->make('config')->get('einvoicing.webhook', []);

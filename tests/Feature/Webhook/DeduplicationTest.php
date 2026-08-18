@@ -5,12 +5,17 @@ declare(strict_types=1);
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Models\WebhookEvent;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
 
 const DEDUP_SECRET = 'ac4f8b1e9d2c7a6b5e3f0d8c1a9b7e6d4c2f1a0b9e8d7c6b5a4f3e2d1c0b9a88';
 
 beforeEach(function (): void {
     config()->set('einvoicing.webhook.secret', DEDUP_SECRET);
+
+    // Ce fichier éprouve l'encaissement, pas le traitement : la file est
+    // simulée pour que l'état observé soit bien celui laissé par le contrôleur.
+    Queue::fake();
 });
 
 /**

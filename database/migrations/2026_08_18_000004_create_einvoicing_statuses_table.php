@@ -21,7 +21,10 @@ return new class extends Migration
             $table->string('provider_status_id');
 
             $table->string('code');
-            $table->string('value');
+            // Constaté sur un statut réel : seul `code` est systématiquement présent.
+            // La documentation montre un trio code/value/desc, la plateforme n'en
+            // envoie parfois qu'un tiers.
+            $table->string('value')->nullable();
             $table->text('description')->nullable();
             $table->string('dest_type')->nullable();
 
