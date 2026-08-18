@@ -426,6 +426,10 @@ Premiers constats sur la sandbox réelle, environnement de pré-production.
 | L'authentification OAuth2 `client_credentials` fonctionne sur `auth.preprod.iopole.fr` | La v1.2 est confirmée sur le terrain. L'`access_token` fait environ 1,5 ko. |
 | `GET /v1/config/customer/id` répond en **`text/html`** avec l'identifiant nu | La spécification annonce `application/json`. Le client doit pouvoir lire une réponse non structurée ; tout supposer JSON casserait sur cet endpoint. |
 | `php://input` mesuré à **0 octet** sur une requête multipart | Confirme §8. Le checksum se calcule sur le fichier temporaire uploadé. |
+| Les listes paginées renvoient `{"data": [...], "meta": {"offset", "limit", "count"}}` | L'itérateur paresseux (C5) s'appuie sur `meta.count`, et non sur la taille de la page. |
+| `GET /v1/invoice/notSeen` renvoie un **tableau nu**, sans enveloppe ni pagination | Confirme le point ouvert de la v1.2 : le repli par polling ne peut pas paginer. Il faut consommer la liste puis avancer par `markAsSeen`, sinon les mêmes factures reviennent indéfiniment. |
+| Le secret HMAC est **fourni par l'intégrateur** dans `interopData.endpoints.authentication.hmac.secretKey` | La plateforme ne le génère pas : `einvoicing:secret` doit produire le secret **avant** la déclaration du webhook. |
+| `idPath` existe bel et bien sur les endpoints `invoice` et `status` | La première stratégie de résolution multi-tenant (§9) est disponible. |
 
 Enseignement : la documentation annonce des types de contenu qui ne correspondent pas toujours à
 la réalité. Chaque endpoint doit être observé avant d'être considéré comme acquis.

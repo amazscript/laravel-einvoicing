@@ -167,10 +167,10 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] **Pagination : `limit` vaut 50 par défaut**, `offset` 0. Aucun plafond de 100 n'est
       documenté — l'affirmation du CDC n'était pas vérifiable, corrigée en v1.2. Le maximum réel
       reste à mesurer sur la sandbox avant d'écrire l'itérateur paresseux (D14).
-- [ ] **`GET /v1/invoice/notSeen` n'accepte aucun paramètre de requête** dans la spécification :
-      ni `offset`, ni `limit`. Si l'endpoint ne pagine pas, le repli par polling ne peut pas
-      reposer sur un itérateur paresseux — il faut avancer en marquant les factures comme vues.
-      **Impact D14, conception à revoir.** À confirmer sur la sandbox.
+- [x] **`GET /v1/invoice/notSeen` ne pagine pas** — vérifié sur l'API réelle : il renvoie un
+      tableau nu, sans enveloppe `data`/`meta`. Les listes paginées, elles, renvoient
+      `{"data": [...], "meta": {offset, limit, count}}`. **D14 est à reconcevoir** : on consomme
+      la liste puis on avance par `markAsSeen`, faute de quoi les mêmes factures reviennent.
 - [x] **Quelle URL de base ?** Deux environnements confirmés via leur configuration OpenID :
       pré-production `api.ppd.iopole.fr` avec `auth.preprod.iopole.fr`, production
       `api.iopole.com` avec `auth.iopole.com`. Le playground pointe la pré-production.
@@ -406,3 +406,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D05/D06 | fait | Signature HMAC validée contre l'implémentation de référence — 26 tests |
 | 2026-08-18 | Lot 0 | partiel | Sandbox opérationnelle : auth OAuth2 et appel API vérifiés en réel |
 | 2026-08-18 | D02 | corrigé | `/v1/config/customer/id` répond en text/html — ajout de `Client::raw()` |
+| 2026-08-18 | Lot 0 | avancé | Webhook INBOUND activé vers le tunnel, secret HMAC déclaré |
+| 2026-08-18 | — | constat | Sandbox sans entité enregistrée : rien ne peut encore y être reçu |
