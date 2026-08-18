@@ -14,6 +14,14 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  *
  * Le SIRET et le SIREN sont les clés de routage du webhook : la plateforme
  * n'accepte qu'un seul callbackUrl pour tout le parc.
+ *
+ * @property string $id
+ * @property string $tenantable_type
+ * @property string $tenantable_id
+ * @property string $customer_id
+ * @property string $siren
+ * @property string|null $siret
+ * @property bool $active
  */
 class Tenant extends Model
 {

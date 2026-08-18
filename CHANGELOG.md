@@ -34,6 +34,11 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Route de rappel du webhook, enregistrée automatiquement : authentifie la requête, répond 202,
   et rejette en 401 toute signature invalide sans rien persister.
 
+- Déduplication des livraisons : chaque webhook authentifié est consigné une fois et une seule,
+  routé vers son tenant, ou conservé en `UNROUTED` si le destinataire est inconnu.
+- Contrat `PayloadInterpreter` : les conventions d'en-têtes et de payload restent confinées au
+  driver de la plateforme.
+
 ### Corrigé
 
 - L'horodatage des webhooks est transmis en millisecondes par la plateforme. Comparé tel quel à

@@ -27,6 +27,7 @@ final class WebhookController
 {
     public function __construct(
         private readonly SignatureVerifier $verifier,
+        private readonly InboundEventRecorder $recorder,
         private readonly Dispatcher $events,
         private readonly Config $config,
     ) {}
@@ -55,6 +56,10 @@ final class WebhookController
             // donnée, c'est du bruit, potentiellement hostile.
             return new Response('invalid signature', 401);
         }
+
+        // Déjà reçu : la plateforme livre au moins une fois, un rejeu est normal.
+        // On répond comme pour un succès afin qu'elle cesse de relancer.
+        $this->recorder->record($inbound);
 
         return new Response('', 202);
     }

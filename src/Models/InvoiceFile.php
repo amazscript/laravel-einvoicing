@@ -9,6 +9,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Fichier rattaché à une facture reçue : XML d'origine, PDF lisible ou pièce jointe.
+ *
+ * @property string $id
+ * @property string $invoice_id
+ * @property string|null $provider_file_id
+ * @property InvoiceFileKind $kind
+ * @property string $disk
+ * @property string $path
+ * @property string $checksum
+ */
 class InvoiceFile extends Model
 {
     use HasUuids;
