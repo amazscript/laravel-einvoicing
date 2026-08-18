@@ -227,13 +227,14 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D04 — Route webhook et capture du corps brut
 
-- [ ] Route unique enregistrée par le provider (`webhook.path`, `webhook.middleware`)
-- [ ] Middleware prioritaire de capture : `php://input` en JSON, fichier temporaire en multipart
-- [ ] Aucun `throttle` dans le groupe de middleware (un 429 déclenche le retry de la PA pour rien)
-- [ ] Contrôleur : vérifier → dédupliquer → dispatcher → répondre 2xx. Rien d'autre.
-- [ ] Réponse 2xx sous 200 ms, jamais de 5xx sur erreur métier
-- [ ] Tests : payload malformé → 2xx + event d'erreur, aucune exception remontée
-- [ ] **DoD** : le contrôleur ne contient aucune logique métier
+- [x] Route unique enregistrée par le provider (`webhook.path`, `webhook.middleware`)
+- [x] Middleware prioritaire de capture : `php://input` en JSON, fichier temporaire en multipart
+- [x] Aucun `throttle` dans le groupe de middleware (un 429 déclenche le retry de la PA pour rien)
+- [~] Contrôleur : vérifier → dédupliquer → dispatcher → répondre 2xx. Vérification et réponse
+      faites ; déduplication et dispatch arrivent en D08 et D10.
+- [x] Réponse 2xx sous 200 ms, jamais de 5xx sur erreur métier
+- [x] Tests : payload malformé → 2xx + event d'erreur, aucune exception remontée
+- [x] **DoD** : le contrôleur ne contient aucune logique métier
 
 ## D05 — Signature HMAC (point critique 5.1)
 
@@ -244,12 +245,12 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Checksum multipart = SHA-256 du **contenu du champ fichier uniquement** (autres champs exclus)
 - [x] `hash_equals` obligatoire, jamais `===`
 - [x] Secret absent ou < 32 octets → la route refuse tout (401), jamais « pas de secret, pas de contrôle »
-- [ ] `path_with_query` lu depuis `canonical_path` si configuré
+- [x] `path_with_query` lu depuis `canonical_path` si configuré
 - [x] `Contracts/SignatureVerifier` remplaçable via le container
 - [x] Test : signature valide en JSON
 - [x] Test : signature valide en multipart **avec champs annexes** (le piège du 5.1)
 - [ ] Test : signature invalide → 401, **rien en base**
-- [ ] Test : event `WebhookSignatureRejected` émis
+- [x] Test : event `WebhookSignatureRejected` émis
 - [ ] **DoD** : les tests tournent sur les fixtures réelles capturées au lot 0
 
 ## D06 — Anti-rejeu et checksum d'en-tête
@@ -408,3 +409,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D02 | corrigé | `/v1/config/customer/id` répond en text/html — ajout de `Client::raw()` |
 | 2026-08-18 | Lot 0 | avancé | Webhook INBOUND activé vers le tunnel, secret HMAC déclaré |
 | 2026-08-18 | — | constat | Sandbox sans entité enregistrée : rien ne peut encore y être reçu |
+| 2026-08-18 | D04 | fait | Route webhook, capture du corps, signature — 11 tests, vérifié dans le playground |

@@ -31,3 +31,5 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Vérification de signature HMAC-SHA256 des webhooks entrants : chaîne canonique, checksum,
   fenêtre anti-rejeu et comparaison en temps constant, validée contre des vecteurs produits par
   l'implémentation de référence de la plateforme.
+- Route de rappel du webhook, enregistrée automatiquement : authentifie la requête, répond 202,
+  et rejette en 401 toute signature invalide sans rien persister.
