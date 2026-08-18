@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.1 — 18 août 2026
+**Version** 1.2 — 18 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -90,7 +90,7 @@ Ces contraintes sont **structurantes** et justifient l'existence du package.
 | C2 | Factures en `multipart/form-data`, statuts en `application/json` | Double parsing sur une même route |
 | C3 | Checksum HMAC = corps entier en JSON, **contenu du champ fichier seul** en multipart | Piège majeur, source de bugs |
 | C4 | Livraison **at-least-once** | Déduplication obligatoire par `eventId` |
-| C5 | Pagination `offset`/`limit`, plafond 100 | Itérateur paresseux requis |
+| C5 | Pagination `offset`/`limit`, `limit` par défaut 50, plafond non documenté | Itérateur paresseux requis ; le plafond réel est à mesurer sur la sandbox |
 | C6 | 429 avec backoff exponentiel recommandé | Jobs + rate limiting côté package |
 | C7 | 409 `DUPLICATE_RESOURCE` | Table de mapping ID interne ↔ ID Iopole |
 | C8 | Versions hétérogènes (`/v1` et `/v1.1`) | Version gérée en interne, invisible du consommateur |
@@ -195,7 +195,7 @@ Signature = `hash_hmac('sha256', canonical, $secretKey)`, comparée à `X-Signat
 - Rejeter si `X-Timestamp` dévie de plus de N secondes (défaut : 300) — anti-rejeu.
 - Vérifier `X-Checksum` quand présent, avant la signature.
 - Secret ≥ 32 octets aléatoires, généré par commande dédiée, jamais en clair dans le dépôt.
-- Support alternatif OAuth2 `client_credentials` (les autres flux sont dépréciés côté Iopole).
+- Authentification OAuth2 `client_credentials` : c'est la **seule** méthode documentée. Aucun jeton permanent n'est délivré ; l'`access_token` obtenu est à durée de vie courte et doit être renouvelé.
 
 ## 9. Routage multi-tenant
 
@@ -390,3 +390,22 @@ toutes portent sur des points qui auraient coûté une migration en production.
 Point signalé mais **non tranché** : le CDC vise Laravel 11 et 12 (§13). Laravel 13 est
 désormais la version installée par défaut par `composer create-project`, avec Guzzle 8. En
 l'état, le package ne s'installe pas sur une application Laravel neuve.
+
+### v1.2 — 18 août 2026
+
+Écarts relevés en confrontant le CDC à la documentation publiée sur `docs.iopole.com`.
+
+| § | Correction | Motif |
+|---|---|---|
+| 4, 8, 12 | L'authentification est OAuth2 `client_credentials`, et non un jeton permanent | Aucun bearer statique n'est documenté. Impact sur la configuration et sur la charge du lot « client HTTP ». |
+| 6 (C5) | `limit` vaut 50 par défaut ; le plafond de 100 n'est pas documenté | Affirmation non vérifiable en l'état. À mesurer sur la sandbox avant d'écrire l'itérateur. |
+| 10 | L'annuaire français est `/v1/directory/french` | Le chemin `/v1/directory` employé dans les exemples de pagination de leur doc ne correspond pas à la spécification d'endpoint. |
+
+**Point ouvert, non tranché.** `GET /v1/invoice/notSeen` n'expose aucun paramètre de requête dans
+la spécification : ni `offset`, ni `limit`. Si l'endpoint ne pagine effectivement pas, le repli par
+polling (§4) ne peut pas s'appuyer sur un itérateur paresseux — il faut avancer en marquant les
+factures comme vues. À vérifier sur la sandbox avant d'engager le lot correspondant.
+
+**Environnements.** Le CDC pointe `api.ppd.iopole.fr` ; la page de présentation du Lab annonce
+`api.iopole.com/v1/api`. Vraisemblablement pré-production et production. La valeur exacte de
+`IOPOLE_BASE_URL` sera confirmée par la sandbox.

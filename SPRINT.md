@@ -1,7 +1,7 @@
 # SPRINT — `amazscript/laravel-einvoicing` v0.1
 
 **Périmètre** Réception de factures électroniques, driver Iopole.
-**Référence** `CDC-laravel-einvoicing-v1.0.md` — en cas de contradiction, le CDC fait foi.
+**Référence** `CDC-laravel-einvoicing.md` — en cas de contradiction, le CDC fait foi.
 **Charge estimée** 20 j (CDC §14) — voir « Réalité calendaire » ci-dessous.
 
 Légende : `[ ]` à faire · `[~]` en cours · `[x]` fait et vérifié · `[-]` abandonné / hors périmètre
@@ -160,8 +160,15 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       **ne nomme jamais ce header** — les seuls documentés sont `X-Timestamp`, `X-Signature`,
       `X-Checksum`. **Impact direct sur D08** : la clé de déduplication n'est pas identifiée.
       À lever sur une requête sandbox réelle (lot 0), ou par une question au support Iopole.
-- [ ] **Pagination : `limit` vaut 50 par défaut**, le CDC annonçait un plafond de 100. Vérifier
-      le maximum réel avant d'écrire l'itérateur paresseux (D14).
+- [x] **Pagination : `limit` vaut 50 par défaut**, `offset` 0. Aucun plafond de 100 n'est
+      documenté — l'affirmation du CDC n'était pas vérifiable, corrigée en v1.2. Le maximum réel
+      reste à mesurer sur la sandbox avant d'écrire l'itérateur paresseux (D14).
+- [ ] **`GET /v1/invoice/notSeen` n'accepte aucun paramètre de requête** dans la spécification :
+      ni `offset`, ni `limit`. Si l'endpoint ne pagine pas, le repli par polling ne peut pas
+      reposer sur un itérateur paresseux — il faut avancer en marquant les factures comme vues.
+      **Impact D14, conception à revoir.** À confirmer sur la sandbox.
+- [ ] **Quelle URL de base ?** Le CDC pointe `api.ppd.iopole.fr`, la page du Lab annonce
+      `api.iopole.com/v1/api`. Probablement pré-production et production. La sandbox tranchera.
 
 ### Reste à lire dans `.iopole-docs/`
 
@@ -171,6 +178,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       `getInvoiceFiles`, `downloadReadable`, `getAttachments` (D13, D14)
 - [ ] `apiDescriptions/status/*` (D11)
 - [x] `errors` : format exact des 400 et des 409 (D02)
+- [x] `pagination`, `authentication`, `reference`, `security`
 
 ---
 
@@ -384,3 +392,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D03 | fait | 5 migrations, 5 modèles, 3 enums — 23 tests verts, PHPStan 8 sans erreur |
 | 2026-08-18 | Lot 0 ter | fait | Doc Iopole récupérée (93 pages) — 4 écarts avec le CDC, voir lot 0 ter |
 | 2026-08-18 | D02 | fait | Client OAuth2 + 6 exceptions + 76 endpoints figés — 62 tests verts |
+| 2026-08-18 | — | commits | Dépôt initialisé, 4 commits, une branche par story, `main` vert |
+| 2026-08-18 | Docs | fait | CDC en v1.2, CLAUDE.md et SPRINT alignés — incohérences levées |

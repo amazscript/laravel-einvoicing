@@ -1,7 +1,8 @@
 # CLAUDE.md — `amazscript/laravel-einvoicing`
 
 Package Laravel de **réception** de factures électroniques françaises via une Plateforme Agréée (driver Iopole).
-Référence fonctionnelle : `CDC-laravel-einvoicing-v1.0.md`. En cas de contradiction, le CDC fait foi.
+Référence fonctionnelle : `CDC-laravel-einvoicing.md` (version courante en tête du document).
+Découpage et avancement : `SPRINT.md`. En cas de contradiction, le CDC fait foi.
 
 ---
 
@@ -48,6 +49,7 @@ src/
 ├── Tenancy/            SiretResolver, TenantContext
 ├── Jobs/               ProcessInboundInvoice, ProcessStatusUpdate
 ├── Models/             Tenant, InboundInvoice, InvoiceFile, Status, WebhookEvent
+├── Enums/              InvoiceFormat, InvoiceFileKind, WebhookEventStatus
 ├── Events/
 ├── Exceptions/
 └── Console/            Commandes Artisan
@@ -92,7 +94,7 @@ Un retry ne doit jamais créer de doublon de facture. Toute écriture passe par 
 
 Pour chaque tâche, dans cet ordre :
 
-1. **Confirmer** la story du CDC concernée (D1 à D16). Si aucune ne correspond, demande avant de coder.
+1. **Confirmer** la story concernée dans `SPRINT.md` (D01 à D16). Si aucune ne correspond, demande avant de coder.
 2. **Écrire le test d'abord** quand la tâche touche un des 5 points critiques. Ailleurs, test immédiatement après.
 3. **Implémenter** le minimum qui fait passer le test.
 4. **Vérifier** : `composer test && composer analyse && composer format`.
@@ -131,6 +133,9 @@ chore(ci): add PHP 8.4 to matrix
 
 Règles :
 
+- **Commiter à la fin de chaque story, sans demander.** L'étape 5 du cycle de travail prime ici
+  sur la règle globale « ne commiter que sur demande explicite », qui ne vise que le **push**.
+  Pousser reste soumis à une demande explicite.
 - Un commit = une intention. Jamais de refactor mélangé à une feature.
 - Le corps explique **pourquoi**, pas quoi.
 - Ne jamais commit sans que `composer test` passe.

@@ -25,6 +25,16 @@ php artisan einvoicing:secret
 php artisan migrate
 ```
 
+Puis, dans `.env`, les identifiants fournis par votre Plateforme Agréée :
+
+```dotenv
+IOPOLE_TOKEN_URL=
+IOPOLE_CLIENT_ID=
+IOPOLE_CLIENT_SECRET=
+IOPOLE_CUSTOMER_ID=
+EINVOICING_WEBHOOK_SECRET=
+```
+
 ## Recevoir une facture
 
 ```php
