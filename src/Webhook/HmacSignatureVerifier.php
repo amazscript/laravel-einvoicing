@@ -79,6 +79,22 @@ final class HmacSignatureVerifier implements SignatureVerifier
 
         // Le décalage est pris en valeur absolue : une horloge en avance est
         // aussi suspecte qu'une requête rejouée après coup.
-        return abs(time() - (int) $timestamp) <= $this->toleranceSeconds;
+        return abs(time() - $this->toSeconds((int) $timestamp)) <= $this->toleranceSeconds;
+    }
+
+    /**
+     * Ramène l'horodatage en secondes.
+     *
+     * Constaté sur une livraison réelle : la plateforme envoie des millisecondes,
+     * ce que sa documentation ne mentionne nulle part. Comparé tel quel à time(),
+     * l'écart se compte en milliers d'années et toute livraison authentique est
+     * rejetée. L'unité n'étant pas contractuelle, les deux sont acceptées.
+     *
+     * Le seuil correspond à l'an 5138 en secondes, soit novembre 1973 en
+     * millisecondes : aucune valeur plausible ne peut être classée à tort.
+     */
+    private function toSeconds(int $timestamp): int
+    {
+        return $timestamp > 100_000_000_000 ? intdiv($timestamp, 1000) : $timestamp;
     }
 }

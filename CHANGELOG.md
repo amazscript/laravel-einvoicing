@@ -33,3 +33,9 @@ respecte [SemVer](https://semver.org/lang/fr/).
   l'implémentation de référence de la plateforme.
 - Route de rappel du webhook, enregistrée automatiquement : authentifie la requête, répond 202,
   et rejette en 401 toute signature invalide sans rien persister.
+
+### Corrigé
+
+- L'horodatage des webhooks est transmis en millisecondes par la plateforme. Comparé tel quel à
+  l'horloge locale, il faisait rejeter toute livraison authentique. Les deux unités sont
+  désormais acceptées.
