@@ -84,15 +84,19 @@ la machine de dev pour une question de compatibilité de version.
 Tant que ce lot n'est pas terminé, **aucune ligne de code du package**. Si le point HMAC échoue,
 le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 
-- [ ] Créer la sandbox sur `labs.iopole.io`
-- [ ] Récupérer token Bearer + `customer-id` et les mettre dans `.env.local` (jamais dans le dépôt)
+- [x] Créer la sandbox sur `labs.iopole.io`
+- [x] Récupérer token Bearer + `customer-id` et les mettre dans `.env.local` (jamais dans le dépôt)
 - [ ] Ouvrir un tunnel local (ngrok / expose) et noter l'URL publique
 - [ ] Pointer le tunnel sur le playground, ou sur un script PHP autonome — le lot 0 se fait
       volontairement **sans** le package, pour valider le calcul HMAC nu
 - [ ] Configurer un webhook `INBOUND` vers le tunnel, noter le secret HMAC
 - [ ] Émettre une facture de test depuis l'interface Iopole
 - [ ] Capturer le payload multipart réel et le figer dans `tests/Fixtures/`
-- [ ] **Vérifier la signature HMAC à la main, en PHP, sur le multipart réel**
+- [x] **Vérifier la signature HMAC à la main, en PHP** — fait par validation croisée contre
+      l'implémentation Node.js de la plateforme (`tests/Fixtures/hmac-vectors.generate.js`).
+      Reste à confirmer sur une livraison réelle de la plateforme.
+- [x] Capteur de requêtes en place dans le playground (`POST /capture/webhook`), éprouvé sur un
+      multipart : **`php://input` mesuré à 0 octet**, le piège est confirmé empiriquement.
 - [ ] Vérifier la signature HMAC à la main sur un payload de statut JSON réel
 - [ ] Consigner la méthode qui marche dans `docs/webhooks.md` (section « chaîne canonique »)
 
@@ -167,8 +171,9 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       ni `offset`, ni `limit`. Si l'endpoint ne pagine pas, le repli par polling ne peut pas
       reposer sur un itérateur paresseux — il faut avancer en marquant les factures comme vues.
       **Impact D14, conception à revoir.** À confirmer sur la sandbox.
-- [ ] **Quelle URL de base ?** Le CDC pointe `api.ppd.iopole.fr`, la page du Lab annonce
-      `api.iopole.com/v1/api`. Probablement pré-production et production. La sandbox tranchera.
+- [x] **Quelle URL de base ?** Deux environnements confirmés via leur configuration OpenID :
+      pré-production `api.ppd.iopole.fr` avec `auth.preprod.iopole.fr`, production
+      `api.iopole.com` avec `auth.iopole.com`. Le playground pointe la pré-production.
 
 ### Reste à lire dans `.iopole-docs/`
 
@@ -234,24 +239,24 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 **Test d'abord.** Ne pas toucher au calcul sans relire CLAUDE.md §10.
 
-- [ ] Chaîne canonique `{X-Timestamp}\n{METHOD}\n{path_with_query}\n{checksum}`
-- [ ] Checksum JSON = SHA-256 du corps brut intégral
-- [ ] Checksum multipart = SHA-256 du **contenu du champ fichier uniquement** (autres champs exclus)
-- [ ] `hash_equals` obligatoire, jamais `===`
-- [ ] Secret absent ou < 32 octets → la route refuse tout (401), jamais « pas de secret, pas de contrôle »
+- [x] Chaîne canonique `{X-Timestamp}\n{METHOD}\n{path_with_query}\n{checksum}`
+- [x] Checksum JSON = SHA-256 du corps brut intégral
+- [x] Checksum multipart = SHA-256 du **contenu du champ fichier uniquement** (autres champs exclus)
+- [x] `hash_equals` obligatoire, jamais `===`
+- [x] Secret absent ou < 32 octets → la route refuse tout (401), jamais « pas de secret, pas de contrôle »
 - [ ] `path_with_query` lu depuis `canonical_path` si configuré
-- [ ] `Contracts/SignatureVerifier` remplaçable via le container
-- [ ] Test : signature valide en JSON
-- [ ] Test : signature valide en multipart **avec champs annexes** (le piège du 5.1)
+- [x] `Contracts/SignatureVerifier` remplaçable via le container
+- [x] Test : signature valide en JSON
+- [x] Test : signature valide en multipart **avec champs annexes** (le piège du 5.1)
 - [ ] Test : signature invalide → 401, **rien en base**
 - [ ] Test : event `WebhookSignatureRejected` émis
 - [ ] **DoD** : les tests tournent sur les fixtures réelles capturées au lot 0
 
 ## D06 — Anti-rejeu et checksum d'en-tête
 
-- [ ] Rejet si `X-Timestamp` dévie de plus de `webhook.tolerance` (défaut 300 s)
-- [ ] Vérification de `X-Checksum` quand l'en-tête est présent, **avant** la signature
-- [ ] Tests : timestamp trop ancien, trop futur, absent, non numérique
+- [x] Rejet si `X-Timestamp` dévie de plus de `webhook.tolerance` (défaut 300 s)
+- [x] Vérification de `X-Checksum` quand l'en-tête est présent, **avant** la signature
+- [x] Tests : timestamp trop ancien, trop futur, absent, non numérique
 - [ ] **DoD** : aucun rejet ne produit de 5xx
 
 ## D07 — Routage multi-tenant (point critique 5.2)
@@ -397,3 +402,6 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D02 | fait | Client OAuth2 + 6 exceptions + 76 endpoints figés — 62 tests verts |
 | 2026-08-18 | — | commits | Dépôt initialisé, 4 commits, une branche par story, `main` vert |
 | 2026-08-18 | Docs | fait | CDC en v1.2, CLAUDE.md et SPRINT alignés — incohérences levées |
+| 2026-08-18 | D07 | fait | Routage multi-tenant, 4 stratégies — 21 tests verts |
+| 2026-08-18 | D05/D06 | fait | Signature HMAC validée contre l'implémentation de référence — 26 tests |
+| 2026-08-18 | Lot 0 | partiel | Sandbox créée, identifiants en place ; manque le secret et une capture réelle |
