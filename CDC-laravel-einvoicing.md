@@ -183,6 +183,13 @@ Signature = `hash_hmac('sha256', canonical, $secretKey)`, comparée à `X-Signat
 | `application/json` | corps brut intégral, tel que reçu |
 | `multipart/form-data` | **contenu du champ fichier uniquement** |
 
+Signature et checksum sont encodés en **hexadécimal**.
+
+**Vérifié le 18 août 2026 sur une requête multipart réelle** : `php://input` est vide, le SAPI
+ayant déjà consommé le corps pour peupler `$_POST` et `$_FILES`. Le checksum doit donc être
+calculé par `hash_file('sha256', ...)` sur le fichier temporaire uploadé. Une implémentation
+appliquant littéralement « raw body » aurait haché la chaîne vide et rejeté toutes les factures.
+
 ### Exigences d'implémentation
 
 - Capturer le **raw body avant tout parsing Laravel** (middleware prioritaire, `php://input`)

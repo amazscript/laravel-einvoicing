@@ -28,3 +28,6 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Routage multi-tenant : contrat `TenantResolver`, implémentation `SiretResolver` résolvant par
   identifiant externe, SIRET, SIREN puis tenant unique par défaut, et événement
   `TenantResolutionFailed` en cas d'échec.
+- Vérification de signature HMAC-SHA256 des webhooks entrants : chaîne canonique, checksum,
+  fenêtre anti-rejeu et comparaison en temps constant, validée contre des vecteurs produits par
+  l'implémentation de référence de la plateforme.
