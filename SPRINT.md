@@ -315,20 +315,20 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Rattachement à la facture quand l'ID est connu, `invoice_id` nullable sinon
 - [x] `payload` : JSON + XML bruts conservés
 - [x] Contract test sur la fixture de statut de la doc Iopole
-- [ ] Contract test sur `INVOICE_INBOUND_INVALID`
+- [x] Contract test sur `INVOICE_INBOUND_INVALID`
 - [x] **DoD** : un statut orphelin ne fait pas échouer le job
 
 ## D12 — Events Laravel exposés
 
 - [ ] `InboundInvoiceReceived`
 - [ ] `InvoiceStatusUpdated`
-- [ ] `InboundInvoiceInvalid`
-- [ ] `OutboundInvoiceNotDelivered` (préparation v0.2, non déclenché en v0.1)
+- [x] `InboundInvoiceInvalid`
+- [x] `OutboundInvoiceNotDelivered` (préparation v0.2, non déclenché en v0.1)
 - [ ] `TenantResolutionFailed`
 - [ ] `WebhookSignatureRejected`
-- [ ] Aucun objet Iopole ne fuit dans la charge utile des events (frontière CLAUDE.md §4)
-- [ ] Tests : chaque event émis dans son scénario nominal
-- [ ] **DoD** : palier 1 publiable — un listener sur `InboundInvoiceReceived` reçoit une vraie facture
+- [x] Aucun objet Iopole ne fuit dans la charge utile des events (frontière CLAUDE.md §4)
+- [x] Tests : chaque event émis dans son scénario nominal
+- [x] **DoD** : palier 1 publiable — un listener sur `InboundInvoiceReceived` reçoit une vraie facture
 
 ## D13 — Fichiers et stockage
 
@@ -422,3 +422,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D07/D11 | corrigés | Schéma `0225` et `status.networkCode` : deux ruptures silencieuses |
 | 2026-08-19 | D10 | fait | Traitement des factures entrantes sur payload réel — 8 tests, 5 livraisons rejouées |
 | 2026-08-19 | D13 | fait | Métadonnées comptables et fichiers récupérés puis stockés — 7 tests |
+| 2026-08-19 | D12 | fait | Les six events du CDC sont exposés et émis — palier 1 complet |

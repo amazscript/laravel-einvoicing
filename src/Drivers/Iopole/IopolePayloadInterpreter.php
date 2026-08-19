@@ -48,6 +48,8 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
 
     public function eventType(InboundRequest $request): string
     {
+        // Les événements génériques annoncent eux-mêmes leur type ; les factures
+        // et les statuts, non : on les reconnaît à leur forme.
         $declare = $request->payload['eventType'] ?? null;
 
         if (is_string($declare) && $declare !== '') {

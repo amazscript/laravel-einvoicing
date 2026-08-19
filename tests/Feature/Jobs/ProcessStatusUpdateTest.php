@@ -5,6 +5,7 @@ declare(strict_types=1);
 use AmazScript\Einvoicing\Contracts\StatusMapper;
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Events\InvoiceStatusUpdated;
+use AmazScript\Einvoicing\Events\OutboundInvoiceNotDelivered;
 use AmazScript\Einvoicing\Jobs\ProcessStatusUpdate;
 use AmazScript\Einvoicing\Models\InboundInvoice;
 use AmazScript\Einvoicing\Models\Status;
@@ -167,4 +168,29 @@ it('lit le code réseau sous networkCode', function (): void {
     (new ProcessStatusUpdate($event->id))->handle(app(StatusMapper::class), app('events'));
 
     expect(Status::query()->first()->value)->toBe('202');
+});
+
+it('signale une facture restée en chemin', function (): void {
+    Event::fake([OutboundInvoiceNotDelivered::class]);
+
+    // Cas réel : destinataire absent de l'annuaire.
+    (new ProcessStatusUpdate(evenementRecu()->id))->handle(app(StatusMapper::class), app('events'));
+
+    Event::assertDispatched(
+        OutboundInvoiceNotDelivered::class,
+        fn (OutboundInvoiceNotDelivered $e): bool => $e->reason === 'ROUTING_FAILURE'
+            && str_contains((string) $e->message, 'No route found'),
+    );
+});
+
+it('ne crie pas à l\'échec de remise sur un statut ordinaire', function (): void {
+    Event::fake([OutboundInvoiceNotDelivered::class]);
+
+    $event = evenementRecu([
+        'statusId' => 'sta-ok', 'invoiceId' => 'inv-1',
+        'status' => ['code' => 'RECEIVED', 'networkCode' => '202'],
+    ]);
+    (new ProcessStatusUpdate($event->id))->handle(app(StatusMapper::class), app('events'));
+
+    Event::assertNothingDispatched();
 });
