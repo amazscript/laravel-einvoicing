@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.5 — 19 août 2026
+**Version** 1.6 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -466,3 +466,16 @@ facture entrante en multipart. Chacun contredisait la documentation, et chacun c
 | L'`invoiceId` d'un statut **diffère** de celui de la facture entrante | Le même document porte un identifiant distinct de chaque côté de la chaîne. Un statut émis ne peut donc pas être rattaché à une facture reçue par cet identifiant : le rapprochement demandera une autre clé. |
 | `roleCode` est tantôt une chaîne, tantôt un objet | Toute lecture de ce champ doit accepter les deux formes. |
 | En `OUTBOUND`, `interopData.endpoints` refuse la clé `invoice` | Seuls `status` et `authentication` sont admis. |
+
+### v1.6 — 19 août 2026
+
+Constats de la recette finale, menée sur une application Laravel neuve.
+
+| Constat | Conséquence |
+|---|---|
+| `GET /v1/invoice/{id}` rend une **liste**, pas un objet | La lecture des métadonnées échouait en silence : la facture arrivait sans numéro, sans montant et sans émetteur. |
+| `originalFormat` vaut **`FacturX`**, non `FACTURX` | La conversion en énumération échouait sur la casse, et le format était perdu. |
+
+**Critère de réussite du §3 atteint.** Une application neuve installe le package, se raccorde et
+reçoit une facture réelle complète — fournisseur, numéro, montant, devise, date, format et document —
+en quelques minutes.

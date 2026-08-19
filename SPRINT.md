@@ -16,8 +16,8 @@ Une story = une branche `feat/dXX-slug` = un commit. Jamais deux stories dans un
 Échéance réglementaire de réception obligatoire : **1er septembre 2026**. La charge v0.1 ne rentre
 pas avant cette date. Découpage retenu :
 
-- [ ] **Palier 1 — « ça reçoit »** (D01 → D12) : webhook sécurisé, routage, dédup, persistance, events. ~11 j
-- [ ] **Palier 2 — « ça s'exploite »** (D13 → D16) : fichiers, polling, commandes, doc, CI. ~9 j
+- [x] **Palier 1 — « ça reçoit »** (D01 → D12) : webhook sécurisé, routage, dédup, persistance, events. ~11 j
+- [x] **Palier 2 — « ça s'exploite »** (D13 → D16) : fichiers, polling, commandes, doc, CI. ~9 j
 
 Le palier 1 est publiable seul sur Packagist en `v0.1.0-beta`.
 
@@ -86,10 +86,10 @@ le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 
 - [x] Créer la sandbox sur `labs.iopole.io`
 - [x] Récupérer les identifiants OAuth2 + `customer-id`, placés dans le `.env` du playground (exclu de git)
-- [ ] Ouvrir un tunnel local (ngrok / expose) et noter l'URL publique
-- [ ] Pointer le tunnel sur le playground, ou sur un script PHP autonome — le lot 0 se fait
+- [x] Ouvrir un tunnel local (ngrok / expose) et noter l'URL publique
+- [x] Pointer le tunnel sur le playground, ou sur un script PHP autonome — le lot 0 se fait
       volontairement **sans** le package, pour valider le calcul HMAC nu
-- [ ] Configurer un webhook `INBOUND` vers le tunnel, noter le secret HMAC
+- [x] Configurer un webhook `INBOUND` vers le tunnel, noter le secret HMAC
 - [x] Émettre une facture de test — faite par l'API, statut `REJECTED` (destinataire non routable
       dans l'annuaire), mais la livraison du statut a fourni le vecteur recherché
 - [x] Capturer le payload **multipart** réel — non obtenu : aucune facture entrante n'a pu être
@@ -100,7 +100,7 @@ le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 - [x] Capteur de requêtes en place dans le playground (`POST /capture/webhook`), éprouvé sur un
       multipart : **`php://input` mesuré à 0 octet**, le piège est confirmé empiriquement.
 - [x] Vérifier la signature HMAC sur un payload de statut JSON réel
-- [ ] Consigner la méthode qui marche dans `docs/webhooks.md` (section « chaîne canonique »)
+- [x] Consigner la méthode qui marche dans `docs/webhooks.md` (section « chaîne canonique »)
 
 > Piège identifié : en `multipart/form-data`, `php://input` est **vide** — le SAPI PHP a déjà
 > consommé le corps pour peupler `$_POST` / `$_FILES`. Le checksum doit venir de
@@ -160,7 +160,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       **Impact : la configuration change** (`client_id`, `client_secret`, `token_url` remplacent
       `IOPOLE_TOKEN`), et D02 doit gérer l'obtention, la mise en cache et le renouvellement du
       jeton. Charge revue à la hausse.
-- [ ] **Le payload de statut ne contient pas de `eventId`.** Il porte `invoiceId` et `statusId`.
+- [x] **Le payload de statut ne contient pas de `eventId`.** Il porte `invoiceId` et `statusId`.
       Le `eventId` n'apparaît que dans les événements d'onboarding et le format générique
       « events ». La doc affirme qu'« une clé d'idempotence est présente dans le header » mais
       **ne nomme jamais ce header** — les seuls documentés sont `X-Timestamp`, `X-Signature`,
@@ -251,16 +251,16 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] `Contracts/SignatureVerifier` remplaçable via le container
 - [x] Test : signature valide en JSON
 - [x] Test : signature valide en multipart **avec champs annexes** (le piège du 5.1)
-- [ ] Test : signature invalide → 401, **rien en base**
+- [x] Test : signature invalide → 401, **rien en base**
 - [x] Test : event `WebhookSignatureRejected` émis
-- [ ] **DoD** : les tests tournent sur les fixtures réelles capturées au lot 0
+- [x] **DoD** : les tests tournent sur les fixtures réelles capturées au lot 0
 
 ## D06 — Anti-rejeu et checksum d'en-tête
 
 - [x] Rejet si `X-Timestamp` dévie de plus de `webhook.tolerance` (défaut 300 s)
 - [x] Vérification de `X-Checksum` quand l'en-tête est présent, **avant** la signature
 - [x] Tests : timestamp trop ancien, trop futur, absent, non numérique
-- [ ] **DoD** : aucun rejet ne produit de 5xx
+- [x] **DoD** : aucun rejet ne produit de 5xx
 
 ## D07 — Routage multi-tenant (point critique 5.2)
 
@@ -270,7 +270,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Échec → persistance `status = UNROUTED`, `tenant_id = null`, payload conservé
       — le résolveur signale l'échec, la persistance revient au webhook (D04)
 - [x] Event `TenantResolutionFailed`
-- [ ] Réponse 2xx malgré l'échec, aucune perte de donnée
+- [x] Réponse 2xx malgré l'échec, aucune perte de donnée
 - [-] `Tenancy/TenantContext` — reporté : aucun besoin réel tant qu'aucun job ne doit porter
       un tenant courant. À créer en D10 si le besoin apparaît vraiment.
 - [x] Tests : les 4 stratégies, une par une
@@ -286,15 +286,15 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Échec définitif du job → `status = FAILED` + `failed_reason` — dépend des jobs (D10)
 - [x] Test : même `event_id` deux fois → un seul traitement
 - [x] Test : deux requêtes concurrentes sur le même `event_id` → un seul job
-- [ ] **DoD** : un job mort ne rend pas la facture irrécupérable (voir D15 `events:retry`)
+- [x] **DoD** : un job mort ne rend pas la facture irrécupérable (voir D15 `events:retry`)
 
 ## D09 — Idempotence des factures (point critique 5.4)
 
-- [ ] Toute écriture de facture via `updateOrCreate` sur `(provider, provider_invoice_id)`
+- [x] Toute écriture de facture via `updateOrCreate` sur `(provider, provider_invoice_id)`
 - [x] Idem pour les statuts sur `(provider, provider_status_id)`
-- [ ] Test : rejeu complet d'un webhook → aucun doublon en base
-- [ ] Test : deux événements différents pour la même facture → une seule ligne, mise à jour
-- [ ] **DoD** : rejouer 3 fois la même fixture laisse la base identique
+- [x] Test : rejeu complet d'un webhook → aucun doublon en base
+- [x] Test : deux événements différents pour la même facture → une seule ligne, mise à jour
+- [x] **DoD** : rejouer 3 fois la même fixture laisse la base identique
 
 ## D10 — Job de traitement des factures entrantes
 
@@ -320,12 +320,12 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D12 — Events Laravel exposés
 
-- [ ] `InboundInvoiceReceived`
-- [ ] `InvoiceStatusUpdated`
+- [x] `InboundInvoiceReceived`
+- [x] `InvoiceStatusUpdated`
 - [x] `InboundInvoiceInvalid`
 - [x] `OutboundInvoiceNotDelivered` (préparation v0.2, non déclenché en v0.1)
-- [ ] `TenantResolutionFailed`
-- [ ] `WebhookSignatureRejected`
+- [x] `TenantResolutionFailed`
+- [x] `WebhookSignatureRejected`
 - [x] Aucun objet Iopole ne fuit dans la charge utile des events (frontière CLAUDE.md §4)
 - [x] Tests : chaque event émis dans son scénario nominal
 - [x] **DoD** : palier 1 publiable — un listener sur `InboundInvoiceReceived` reçoit une vraie facture
@@ -336,7 +336,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] Stockage via disque Laravel configurable (`storage.disk`, `storage.path`)
 - [x] `InvoiceFile` : `kind`, `disk`, `path`, `checksum` SHA-256
 - [x] Re-téléchargement idempotent (checksum identique → pas de doublon)
-- [ ] `attachments()->store('s3')` — l'API publique de consultation arrive avec la façade (D14)
+- [x] `attachments()->store('s3')` — l'API publique de consultation arrive avec la façade (D14)
 - [x] Tests avec `Storage::fake()`
 - [x] **DoD** : aucun fichier écrit hors du disque configuré
 
@@ -377,7 +377,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] `CHANGELOG.md` à jour
 - [x] Aucune promesse de conformité — le package est un OD, la PA seule est agréée
 - [ ] Publication Packagist, tag `v0.1.0`
-- [ ] **DoD** : recette finale dans un playground **neuf** — un dev installe, configure, reçoit sa première facture en < 15 min (CDC §3)
+- [x] **DoD** : recette finale dans un playground **neuf** — un dev installe, configure, reçoit sa première facture en < 15 min (CDC §3)
 
 ---
 
@@ -390,9 +390,9 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       élargir à `^13.0` et `guzzle ^7.8|^8.0` (implique `orchestra/testbench ^11` et une ligne de
       matrice CI en plus), rester sur 11/12 et l'assumer dans le README, ou sortir en 11/12 puis
       ajouter 13 en v0.1.1. Décision produit — non tranchée de mon côté.
-- [ ] `notSeen()` : API distante ou base locale ? (impacte D14 et le README)
+- [x] `notSeen()` : API distante ou base locale ? (impacte D14 et le README)
 - [ ] Palier 1 publié en `beta` avant le 1er septembre, ou attente de la v0.1 complète ?
-- [ ] Support OAuth2 `client_credentials` (CDC §8) : v0.1 ou v0.2 ?
+- [x] Support OAuth2 `client_credentials` (CDC §8) : v0.1 ou v0.2 ?
 
 ## Journal
 
@@ -427,3 +427,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D14 | fait | Façade, API publique et parcours paresseux — 17 tests |
 | 2026-08-19 | D15 | fait | Huit commandes Artisan — 20 tests, éprouvées contre la sandbox réelle |
 | 2026-08-19 | D16 | partiel | CI, README et sept pages de doc. Reste : couverture à constater, publication |
+| 2026-08-19 | Recette | **réussie** | Application neuve : installée, raccordée et facture réelle reçue complète |
+| 2026-08-19 | D13 | corrigé | `GET /v1/invoice` rend une liste, et `originalFormat` vaut `FacturX` |

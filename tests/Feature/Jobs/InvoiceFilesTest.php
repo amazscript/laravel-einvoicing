@@ -183,3 +183,28 @@ it('conserve la facture même si la plateforme ne répond pas', function (): voi
         ->and($facture->invoice_number)->toBeNull()
         ->and(InvoiceFile::query()->count())->toBe(0);
 });
+
+it('lit une facture renvoyée dans un tableau', function (): void {
+    // Forme réellement servie par l'API : une liste, pas un objet.
+    Http::fake([
+        API.'/v1/invoice/'.INVOICE_ID => Http::response([reponseFacture()]),
+        API.'/v1/invoice/'.INVOICE_ID.'/files' => Http::response([]),
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+    ]);
+
+    expect(traiterFactureRecue()->invoice_number)->toBe('F-2026-0042');
+});
+
+it('reconnaît le format quelle qu\'en soit la casse', function (string $annonce): void {
+    // La spécification annonce FACTURX ; l'API sert FacturX.
+    $facture = reponseFacture();
+    $facture['originalFormat'] = $annonce;
+
+    Http::fake([
+        API.'/v1/invoice/'.INVOICE_ID => Http::response([$facture]),
+        API.'/v1/invoice/'.INVOICE_ID.'/files' => Http::response([]),
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+    ]);
+
+    expect(traiterFactureRecue()->format)->toBe(InvoiceFormat::Facturx);
+})->with(['tel que documenté' => ['FACTURX'], 'tel que servi' => ['FacturX'], 'minuscules' => ['facturx']]);

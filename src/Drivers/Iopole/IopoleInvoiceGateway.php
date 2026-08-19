@@ -35,6 +35,12 @@ final class IopoleInvoiceGateway implements InvoiceGateway
             return null;
         }
 
+        // L'API répond par une liste, pas par un objet, malgré sa documentation.
+        if (array_is_list($reponse)) {
+            $premiere = $reponse[0] ?? null;
+            $reponse = is_array($premiere) ? $premiere : [];
+        }
+
         $business = $reponse['businessData'] ?? null;
 
         if (! is_array($business)) {
@@ -55,7 +61,9 @@ final class IopoleInvoiceGateway implements InvoiceGateway
                 ?? $this->amount($monetary['invoiceAmount'] ?? null),
             'amount_tax' => $this->amount($monetary['taxTotalAmount'] ?? null),
             'currency' => $this->string($monetary['invoiceCurrency'] ?? null),
-            'format' => $this->string($reponse['originalFormat'] ?? null),
+            // La spécification annonce FACTURX, l'API sert FacturX : on normalise
+            // plutôt que de perdre le format sur une différence de casse.
+            'format' => $this->upper($reponse['originalFormat'] ?? null),
         ];
     }
 
@@ -200,5 +208,12 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     private function string(mixed $valeur): ?string
     {
         return is_string($valeur) && $valeur !== '' ? $valeur : null;
+    }
+
+    private function upper(mixed $valeur): ?string
+    {
+        $texte = $this->string($valeur);
+
+        return $texte === null ? null : strtoupper($texte);
     }
 }

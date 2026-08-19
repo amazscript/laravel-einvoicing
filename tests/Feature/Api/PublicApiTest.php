@@ -137,3 +137,51 @@ it('va chercher le document quand il n\'est pas encore stocké', function (): vo
 
     expect(Einvoicing::for($tenant)->invoice($facture->id)->xml())->toBe('<Invoice>distant</Invoice>');
 });
+
+it('rend les pièces jointes d\'une facture', function (): void {
+    Http::fake(['*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300])]);
+
+    $tenant = tenantDe('111111111', 'cust-1');
+    $facture = factureDe($tenant, 'inv-1');
+    $magasin = app(InvoiceFileStore::class);
+
+    $magasin->store($facture, InvoiceFileKind::Attachment, 'bon de livraison', 'f-1', 'bl.pdf');
+    $magasin->store($facture, InvoiceFileKind::Attachment, 'photo du colis', 'f-2', 'colis.png');
+    $magasin->store($facture, InvoiceFileKind::Xml, '<Invoice/>', 'f-3', 'facture.xml');
+
+    $jointes = Einvoicing::for($tenant)->invoice($facture->id)->attachments();
+
+    // Le document d'origine n'est pas une pièce jointe : il ne doit pas s'y glisser.
+    expect($jointes)->toHaveCount(2)
+        ->and($jointes->pluck('provider_file_id')->sort()->values()->all())->toBe(['f-1', 'f-2']);
+});
+
+it('range une pièce sur le disque demandé par l\'application', function (): void {
+    Storage::fake('archives');
+    Http::fake([
+        BASE.'/v1/invoice/inv-1/download' => Http::response('<Invoice>à archiver</Invoice>'),
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+    ]);
+
+    $tenant = tenantDe('111111111', 'cust-1');
+    $facture = factureDe($tenant, 'inv-1');
+
+    $fichier = Einvoicing::for($tenant)->invoice($facture->id)->store('archives');
+
+    expect($fichier->disk)->toBe('archives');
+    Storage::disk('archives')->assertExists($fichier->path);
+});
+
+it('remonte les statuts que la plateforme n\'a pas vus acquittés', function (): void {
+    Http::fake([
+        BASE.'/v1/invoice/status/notSeen' => Http::response([
+            ['statusId' => 'sta-1', 'status' => ['code' => 'RECEIVED']],
+            ['statusId' => 'sta-2', 'status' => ['code' => 'MADE_AVAILABLE']],
+        ]),
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+    ]);
+
+    $tenant = tenantDe('111111111', 'cust-1');
+
+    expect(Einvoicing::for($tenant)->invoices()->remoteStatusesNotSeen())->toHaveCount(2);
+});
