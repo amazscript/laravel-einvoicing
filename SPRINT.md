@@ -13,8 +13,10 @@ Une story = une branche `feat/dXX-slug` = un commit. Jamais deux stories dans un
 
 ## Réalité calendaire
 
-Échéance réglementaire de réception obligatoire : **1er septembre 2026**. La charge v0.1 ne rentre
-pas avant cette date. Découpage retenu :
+Échéance réglementaire de réception obligatoire : **1er septembre 2026**.
+
+**Les deux paliers ont été livrés le 19 août**, treize jours avant l'échéance. Le découpage prévu
+pour absorber un dépassement n'a pas eu à servir ; il reste consigné tel qu'il avait été décidé.
 
 - [x] **Palier 1 — « ça reçoit »** (D01 → D12) : webhook sécurisé, routage, dédup, persistance, events. ~11 j
 - [x] **Palier 2 — « ça s'exploite »** (D13 → D16) : fichiers, polling, commandes, doc, CI. ~9 j
@@ -386,7 +388,12 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       Guzzle 8 sans modification de code, et le package s'installe sur une application 13 neuve.
       Contraintes élargies, matrice CI portée à six combinaisons.
 - [x] `notSeen()` : API distante ou base locale ? (impacte D14 et le README)
-- [ ] Palier 1 publié en `beta` avant le 1er septembre, ou attente de la v0.1 complète ?
+- [x] **Publication en `v0.1.0`, sans suffixe `beta`, avant le 1er septembre.** La question
+      supposait de devoir choisir entre une partie du périmètre et l'échéance : les deux paliers
+      étant terminés le 19 août, elle n'a plus lieu d'être. Reste le numéro de version, et un
+      suffixe `beta` obligerait chaque utilisateur à contourner `minimum-stability` dès la première
+      commande — friction absurde pour un package qui promet un raccordement en quinze minutes. Le
+      `0.x` de SemVer dit déjà que l'API peut bouger ; la maturité réelle est annoncée dans le README.
 - [x] Support OAuth2 `client_credentials` (CDC §8) : v0.1 ou v0.2 ?
 
 ## Journal
@@ -427,3 +434,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | Packaging | fait | Le CDC ne part plus dans les installations ; `routes/` vide supprimé |
 | 2026-08-19 | Laravel 13 | tranché | Pris en charge, vérifié sur une application neuve |
 | 2026-08-19 | Couverture | **mesurée** | 97,5 % sur les points critiques, 84,5 % au global |
+| 2026-08-19 | Version | tranché | `v0.1.0` sans `beta` ; maturité réelle annoncée dans le README |

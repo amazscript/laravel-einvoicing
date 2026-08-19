@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.7 — 19 août 2026
+**Version** 1.8 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -490,3 +490,17 @@ Ne pas le faire aurait laissé le package **ininstallable sur une application La
 `composer create-project laravel/laravel` sert désormais la 13. Les contraintes passent donc à
 `illuminate/* ^11|^12|^13` et `guzzlehttp/guzzle ^7.8|^8.0`, et la matrice d'intégration continue
 couvre les trois versions.
+
+### v1.8 — 19 août 2026
+
+**Publication en `v0.1.0`, sans suffixe de pré-version.**
+
+Le §16 prévoyait une v0.1 pour l'échéance du 1er septembre : elle est prête le 19 août, périmètre
+complet. La publication en `beta` a été écartée pour une raison pratique — Composer refuse par défaut
+les versions instables, si bien qu'un utilisateur devrait ajuster son `minimum-stability` dès la
+première commande, à rebours du critère des quinze minutes du §3.
+
+Le `0.x` de SemVer signale déjà qu'une API peut évoluer. Ce que ce numéro ne dit pas, le README le
+dit : le package n'a **aucun usage en production connu**, ayant été vérifié contre une sandbox et non
+contre des flux d'entreprise. Cette limite est annoncée plutôt que tue, conformément au §9 — une
+limite connue énoncée d'avance vaut mieux qu'une mauvaise surprise.

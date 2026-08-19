@@ -8,6 +8,13 @@ Recevoir les factures électroniques françaises dans une application Laravel, v
 [![PHP](https://img.shields.io/packagist/php-v/amazscript/laravel-einvoicing.svg)](composer.json)
 [![Licence](https://img.shields.io/packagist/l/amazscript/laravel-einvoicing.svg)](LICENSE)
 
+> **Maturité.** Version `0.1.0` : le package est fonctionnel et couvert par 234 tests, mais il
+> **n'a pas encore d'usage en production connu**. Il a été vérifié contre une sandbox réelle, pas
+> contre des flux de facturation d'entreprise. L'API publique peut évoluer d'ici la `1.0`.
+>
+> Il est publié avant l'échéance du 1er septembre 2026 parce qu'un package disponible et perfectible
+> sert mieux qu'un package parfait et absent. Les remontées d'usage sont les bienvenues.
+
 ## Le problème
 
 Depuis le 1er septembre 2026, toute entreprise assujettie à la TVA doit être capable de **recevoir**
