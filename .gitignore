@@ -13,3 +13,6 @@ composer.lock
 # Documentation Iopole récupérée pour référence de développement.
 # Contenu tiers : jamais commité, jamais redistribué.
 /.iopole-docs
+
+# Captures d écran de travail, jamais versionnées
+/*.png

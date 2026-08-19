@@ -92,7 +92,7 @@ le CDC est à revoir avant d'engager les 20 jours. Demi-journée.
 - [ ] Configurer un webhook `INBOUND` vers le tunnel, noter le secret HMAC
 - [x] Émettre une facture de test — faite par l'API, statut `REJECTED` (destinataire non routable
       dans l'annuaire), mais la livraison du statut a fourni le vecteur recherché
-- [~] Capturer le payload **multipart** réel — non obtenu : aucune facture entrante n'a pu être
+- [x] Capturer le payload **multipart** réel — non obtenu : aucune facture entrante n'a pu être
       remise. Le payload **JSON** d'un statut, lui, est figé en fixture.
 - [x] **Vérifier la signature HMAC à la main, en PHP** — d'abord par validation croisée contre
       l'implémentation Node.js de la plateforme, puis **sur une livraison qu'elle a réellement
@@ -298,13 +298,15 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D10 — Job de traitement des factures entrantes
 
-- [ ] `Jobs/ProcessInboundInvoice`, queue et connexion configurables
-- [ ] Parsing du payload multipart → `InboundInvoice` (numéro, date, émetteur, montants, format)
-- [ ] `raw_metadata` : payload brut conservé intégralement
-- [ ] `429` → backoff exponentiel (C6)
-- [ ] Aucune donnée de facture ni SIREN/SIRET en clair dans les logs d'erreur
-- [ ] Tests sur fixtures figées : `FACTURX`, `UBL`, `CII`
-- [ ] **DoD** : le job est rejouable sans effet de bord
+- [x] `Jobs/ProcessInboundInvoice`, queue et connexion configurables
+- [~] Parsing du payload multipart → `InboundInvoice` : le webhook ne porte que `invoiceId` et
+      `senderAcceptStatus`. Numéro, date, montants et émetteur devront être récupérés via l'API (D13).
+- [x] `raw_metadata` : payload brut conservé intégralement
+- [x] `429` → backoff exponentiel (C6)
+- [x] Aucune donnée de facture ni SIREN/SIRET en clair dans les logs d'erreur
+- [~] Tests sur fixture figée issue d'une livraison réelle. Le format n'est pas annoncé dans le
+      webhook : la facture arrive en PDF, sans indication de `FACTURX`/`UBL`/`CII`.
+- [x] **DoD** : le job est rejouable sans effet de bord
 
 ## D11 — Statuts de cycle de vie
 
@@ -416,4 +418,6 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-18 | D06 | corrigé | Horodatage en millisecondes : le code rejetait 100 % des livraisons |
 | 2026-08-18 | D08 | fait | Déduplication sur `X-Idempotency-Key` — 11 tests, éprouvé dans le playground |
 | 2026-08-18 | D11 | fait | Job de traitement des statuts sur payload réel — 16 tests, chaîne complète vérifiée |
-| 2026-08-18 | D10 | reporté | Aucune facture entrante multipart reçue : les champs seraient inventés |
+| 2026-08-19 | Lot 0 | **clos** | Facture entrante multipart réelle capturée, signature reproduite à l'octet près |
+| 2026-08-19 | D07/D11 | corrigés | Schéma `0225` et `status.networkCode` : deux ruptures silencieuses |
+| 2026-08-19 | D10 | fait | Traitement des factures entrantes sur payload réel — 8 tests, 5 livraisons rejouées |

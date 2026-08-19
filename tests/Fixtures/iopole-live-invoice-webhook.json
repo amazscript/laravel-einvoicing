@@ -1,0 +1,31 @@
+{
+  "_source": "Facture entrante réellement livrée par la plateforme le 2026-08-19. Contenu du fichier remplacé par un contenu court, checksum et signature recalculés ; la correspondance avec la signature d'origine a été vérifiée sur le fichier réel.",
+  "secret": "ac4f8b1e9d2c7a6b5e3f0d8c1a9b7e6d4c2f1a0b9e8d7c6b5a4f3e2d1c0b9a88",
+  "method": "POST",
+  "pathWithQuery": "/einvoicing/webhook",
+  "headers": {
+    "x-timestamp": "1787126086438",
+    "x-signature": "7f7f953cb693feda6f0d179676660bc4fa262dc6c65e8ac706cdff96566be386",
+    "x-checksum": "ad0bd202e04d478487b4fc9e53840a32cdea8c47a8e5c87839749475ce519678",
+    "x-idempotency-key": "01a01903-fae5-73b6-8887-f9864011e65b",
+    "x-target-electronic-address": "0225:111111111",
+    "content-type": "multipart/form-data; boundary=--------------------------c8bb521054c18c05c68be8ab"
+  },
+  "formFields": {
+    "invoiceId": "01a01903-f969-7795-b349-fea674bbf0b6",
+    "senderAcceptStatus": "true"
+  },
+  "file": {
+    "field": "file",
+    "originalName": "01a01903-d1a8-7789-9ce5-626c4a64ce7a.pdf",
+    "mimeType": "application/pdf",
+    "realSize": 139342,
+    "content": "%PDF-1.4 facture de test\n"
+  },
+  "notes": {
+    "checksumSource": "contenu du fichier seul — vérifié sur la livraison réelle",
+    "rawBody": "vide : le SAPI a consommé le corps pour peupler ",
+    "fileType": "la facture arrive en PDF, pas en XML",
+    "formFields": "invoiceId et senderAcceptStatus accompagnent le fichier"
+  }
+}
