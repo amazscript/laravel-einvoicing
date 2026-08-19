@@ -45,8 +45,14 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Un événement dont le destinataire est inconnu n'est pas traité : il reste consigné en `UNROUTED`,
   rejouable une fois le tenant créé.
 
+- Traitement des factures entrantes : `ProcessInboundInvoice`, rattachement des statuts arrivés
+  avant leur facture, et événement `InboundInvoiceReceived`.
+
 ### Corrigé
 
+- Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par
+  la plateforme n'était pas pris en charge, et l'en-tête de routage était ignoré.
+- Le code réseau d'un statut est lu sous `networkCode`, nom réellement employé.
 - La colonne `value` d'un statut est nullable : la plateforme n'envoie parfois que le code, là
   où sa documentation montre systématiquement un trio code/valeur/description.
 - L'horodatage des webhooks est transmis en millisecondes par la plateforme. Comparé tel quel à

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Webhook;
 
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
+use AmazScript\Einvoicing\Jobs\ProcessInboundInvoice;
 use AmazScript\Einvoicing\Jobs\ProcessStatusUpdate;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 use Illuminate\Contracts\Config\Repository as Config;
@@ -34,6 +35,7 @@ final class InboundEventDispatcher
 
         $job = match ($event->event_type) {
             'INVOICE_STATUS' => new ProcessStatusUpdate($event->id),
+            'INVOICE_INBOUND' => new ProcessInboundInvoice($event->id),
             default => null,
         };
 

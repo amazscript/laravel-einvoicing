@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.4 — 18 août 2026
+**Version** 1.5 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -450,3 +450,19 @@ Ces points ne figurent dans aucune page de sa documentation.
 
 **Le risque technique du §18 est levé.** L'algorithme de signature du package reproduit exactement
 celui de la plateforme, vérifié sur une signature qu'elle a réellement émise.
+
+### v1.5 — 19 août 2026
+
+Constats issus de **cinq livraisons réelles** déclenchées depuis le simulateur du Lab, dont une
+facture entrante en multipart. Chacun contredisait la documentation, et chacun cassait en silence.
+
+| Constat | Conséquence |
+|---|---|
+| Le checksum multipart porte bien sur le **contenu du fichier seul** | §8 vérifié sur une livraison authentique : la signature est reproduite à l'octet près, les champs annexes exclus du calcul. Le risque majeur du projet est levé pour de bon. |
+| Les destinataires sont adressés en **`0225:<siren>`** | Ni `0002` ni `0009` comme supposé. Le schéma `0225` désigne les adresses électroniques françaises et porte un SIREN ou un SIRET, distingués par leur longueur. |
+| Le code réseau arrive sous **`status.networkCode`**, pas `status.value` | Lu sous le nom documenté, il valait toujours null — et la contrainte de la base rejetait alors le statut entier. |
+| Une facture entrante arrive en **PDF**, avec les champs `invoiceId` et `senderAcceptStatus` | Le webhook ne transporte ni numéro, ni date, ni montant, ni émetteur : ces métadonnées se récupèrent auprès de l'API. |
+| Le cycle de vie observé est `SUBMITTED → ISSUED → RECEIVED → MADE_AVAILABLE` | Codes réels, à documenter pour le consommateur. |
+| L'`invoiceId` d'un statut **diffère** de celui de la facture entrante | Le même document porte un identifiant distinct de chaque côté de la chaîne. Un statut émis ne peut donc pas être rattaché à une facture reçue par cet identifiant : le rapprochement demandera une autre clé. |
+| `roleCode` est tantôt une chaîne, tantôt un objet | Toute lecture de ce champ doit accepter les deux formes. |
+| En `OUTBOUND`, `interopData.endpoints` refuse la clé `invoice` | Seuls `status` et `authentication` sont admis. |
