@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.6 — 19 août 2026
+**Version** 1.7 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -312,7 +312,7 @@ return [
 - **Unitaires** : chaîne canonique, checksum JSON vs multipart, tolérance de timestamp, résolution de tenant sur les 4 stratégies.
 - **Fonctionnels** : rejeu du même `eventId` → un seul traitement ; signature invalide → 401 + event ; multipart avec champs annexes → signature valide.
 - **Contract tests** : fixtures figées issues de la doc Iopole (payload statut, payload onboarding, `INVOICE_INBOUND_INVALID`).
-- **Matrice CI** : PHP 8.3 / 8.4, Laravel 11 / 12.
+- **Matrice CI** : PHP 8.3 / 8.4, Laravel 11 / 12 / 13.
 - **Cible** : couverture ≥ 85 % sur les namespaces `Webhook` et `Tenancy`.
 
 ## 14. Charge estimée
@@ -479,3 +479,14 @@ Constats de la recette finale, menée sur une application Laravel neuve.
 **Critère de réussite du §3 atteint.** Une application neuve installe le package, se raccorde et
 reçoit une facture réelle complète — fournisseur, numéro, montant, devise, date, format et document —
 en quelques minutes.
+
+### v1.7 — 19 août 2026
+
+**Laravel 13 est pris en charge.** La question restée ouverte depuis la v1.2 est tranchée par les
+faits : les 234 tests passent sur Laravel 13 avec Guzzle 8 sans qu'une ligne de code ait changé, et
+le package s'installe et fonctionne sur une application 13 neuve.
+
+Ne pas le faire aurait laissé le package **ininstallable sur une application Laravel neuve**, puisque
+`composer create-project laravel/laravel` sert désormais la 13. Les contraintes passent donc à
+`illuminate/* ^11|^12|^13` et `guzzlehttp/guzzle ^7.8|^8.0`, et la matrice d'intégration continue
+couvre les trois versions.
