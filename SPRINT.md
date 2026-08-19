@@ -275,8 +275,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       un tenant courant. À créer en D10 si le besoin apparaît vraiment.
 - [x] Tests : les 4 stratégies, une par une
 - [x] Test : tenant introuvable → event émis (le `UNROUTED` + 2xx se testent en D04)
-- [~] **DoD** : couverture ≥ 85 % sur `Tenancy/` — la CI l'impose désormais (D16). Non mesurable
-      sur cette machine, PCOV n'y étant pas installé.
+- [x] **DoD** : couverture ≥ 85 % sur `Tenancy/` — mesurée à 100 %.
 
 ## D08 — Déduplication (point critique 5.3)
 
@@ -367,8 +366,8 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D16 — Tests, documentation, CI, publication
 
-- [~] Couverture ≥ 85 % sur `Webhook/` et `Tenancy/`, ≥ 70 % ailleurs — mesurée par la CI
-      (`composer test:critical` et `test:coverage`), **jamais localement** faute de PCOV.
+- [x] Couverture ≥ 85 % sur `Webhook/` et `Tenancy/`, ≥ 70 % ailleurs — **mesurée** : 97,5 % sur
+      les points critiques, 84,5 % au global.
 - [x] CI GitHub Actions : matrice PHP 8.3 / 8.4 × Laravel 11 / 12, lint + tests + analyse
 - [x] `README.md` dans l'ordre imposé (CLAUDE.md §9) — installation visible sans scroller
 - [x] Chaque bloc de code du README copiable et fonctionnel tel quel
@@ -427,3 +426,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D13 | corrigé | `GET /v1/invoice` rend une liste, et `originalFormat` vaut `FacturX` |
 | 2026-08-19 | Packaging | fait | Le CDC ne part plus dans les installations ; `routes/` vide supprimé |
 | 2026-08-19 | Laravel 13 | tranché | Pris en charge, vérifié sur une application neuve |
+| 2026-08-19 | Couverture | **mesurée** | 97,5 % sur les points critiques, 84,5 % au global |
