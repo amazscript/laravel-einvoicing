@@ -48,6 +48,11 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Traitement des factures entrantes : `ProcessInboundInvoice`, rattachement des statuts arrivés
   avant leur facture, et événement `InboundInvoiceReceived`.
 
+- Complétion des factures : numéro, date, montants, émetteur et format d'origine sont récupérés
+  auprès de la plateforme, le webhook ne les transportant pas.
+- Téléchargement et stockage des fichiers d'une facture sur le disque Laravel configuré, avec
+  empreinte SHA-256 et re-téléchargement sans doublon.
+
 ### Corrigé
 
 - Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par

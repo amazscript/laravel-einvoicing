@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Jobs;
 
+use AmazScript\Einvoicing\Contracts\InvoiceGateway;
+use AmazScript\Einvoicing\Enums\InvoiceFileKind;
+use AmazScript\Einvoicing\Enums\InvoiceFormat;
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Events\InboundInvoiceReceived;
 use AmazScript\Einvoicing\Models\InboundInvoice;
+use AmazScript\Einvoicing\Models\InvoiceFile;
 use AmazScript\Einvoicing\Models\Status;
 use AmazScript\Einvoicing\Models\WebhookEvent;
+use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -49,7 +54,7 @@ final class ProcessInboundInvoice implements ShouldQueue
         return [10, 60, 300, 900];
     }
 
-    public function handle(Dispatcher $events): void
+    public function handle(Dispatcher $events, InvoiceGateway $gateway, InvoiceFileStore $store): void
     {
         $event = WebhookEvent::query()->find($this->webhookEventId);
 
@@ -79,6 +84,11 @@ final class ProcessInboundInvoice implements ShouldQueue
             ],
         );
 
+        // Le webhook ne porte aucune métadonnée comptable : on va les chercher.
+        // Leur absence n'est pas bloquante, la facture existe déjà.
+        $this->completeFrom($gateway, $invoice, $providerInvoiceId);
+        $this->downloadFiles($gateway, $store, $invoice, $providerInvoiceId);
+
         $this->attachOrphanStatuses($invoice, $providerInvoiceId);
 
         $event->forceFill([
@@ -88,6 +98,60 @@ final class ProcessInboundInvoice implements ShouldQueue
         ])->save();
 
         $events->dispatch(new InboundInvoiceReceived($invoice));
+    }
+
+    /**
+     * Complète la facture avec ce que la plateforme sait d'elle : numéro, date,
+     * montants, émetteur, format d'origine.
+     */
+    private function completeFrom(InvoiceGateway $gateway, InboundInvoice $invoice, string $providerInvoiceId): void
+    {
+        $metadonnees = $gateway->metadata($providerInvoiceId);
+
+        if ($metadonnees === null) {
+            return;
+        }
+
+        $format = $metadonnees['format'];
+        $metadonnees['format'] = is_string($format) ? InvoiceFormat::tryFrom($format) : null;
+
+        $invoice->forceFill(array_filter(
+            $metadonnees,
+            static fn (mixed $valeur): bool => $valeur !== null,
+        ))->save();
+    }
+
+    /**
+     * Télécharge et range les fichiers. Un fichier déjà stocké, reconnu à son
+     * empreinte, n'est pas retéléchargé ; l'échec de l'un n'empêche pas les
+     * autres, la facture restant exploitable sans ses pièces.
+     */
+    private function downloadFiles(
+        InvoiceGateway $gateway,
+        InvoiceFileStore $store,
+        InboundInvoice $invoice,
+        string $providerInvoiceId,
+    ): void {
+        foreach ($gateway->files($providerInvoiceId) as $descripteur) {
+            $kind = InvoiceFileKind::tryFrom($descripteur['kind']) ?? InvoiceFileKind::Attachment;
+
+            $dejaStocke = $descripteur['checksum'] !== null && InvoiceFile::query()
+                ->where('invoice_id', $invoice->id)
+                ->where('provider_file_id', $descripteur['id'])
+                ->exists();
+
+            if ($dejaStocke) {
+                continue;
+            }
+
+            $store->store(
+                $invoice,
+                $kind,
+                $gateway->download($descripteur['id']),
+                $descripteur['id'],
+                $descripteur['filename'],
+            );
+        }
     }
 
     /**
