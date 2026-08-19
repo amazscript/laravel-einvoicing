@@ -77,6 +77,10 @@ Première version : réception des factures électroniques via une Plateforme Ag
   l'horloge locale, il faisait rejeter toute livraison authentique. Les deux unités sont
   désormais acceptées.
 
+### Compatibilité
+
+- Laravel 11, 12 et 13 ; Guzzle 7 et 8 ; PHP 8.3 et 8.4.
+
 ### Documentation
 
 - README, et sept pages d'usage : installation, configuration, webhooks, multi-tenant, events,

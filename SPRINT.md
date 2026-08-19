@@ -383,13 +383,9 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## Décisions en attente
 
-- [ ] **Support de Laravel 13 ?** `composer create-project laravel/laravel` installe aujourd'hui
-      Laravel **13.26** avec **Guzzle 8**. Le CDC (§13) cible 11/12 et le package contraint
-      `illuminate/* ^11.0|^12.0` + `guzzlehttp/guzzle ^7.8` : il est donc **ininstallable sur une
-      app Laravel 13 neuve**, c'est-à-dire sur l'app par défaut d'un nouveau projet. Trois issues :
-      élargir à `^13.0` et `guzzle ^7.8|^8.0` (implique `orchestra/testbench ^11` et une ligne de
-      matrice CI en plus), rester sur 11/12 et l'assumer dans le README, ou sortir en 11/12 puis
-      ajouter 13 en v0.1.1. Décision produit — non tranchée de mon côté.
+- [x] **Support de Laravel 13** — tranché par les faits : les 234 tests passent sur Laravel 13 avec
+      Guzzle 8 sans modification de code, et le package s'installe sur une application 13 neuve.
+      Contraintes élargies, matrice CI portée à six combinaisons.
 - [x] `notSeen()` : API distante ou base locale ? (impacte D14 et le README)
 - [ ] Palier 1 publié en `beta` avant le 1er septembre, ou attente de la v0.1 complète ?
 - [x] Support OAuth2 `client_credentials` (CDC §8) : v0.1 ou v0.2 ?
@@ -429,3 +425,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D16 | partiel | CI, README et sept pages de doc. Reste : couverture à constater, publication |
 | 2026-08-19 | Recette | **réussie** | Application neuve : installée, raccordée et facture réelle reçue complète |
 | 2026-08-19 | D13 | corrigé | `GET /v1/invoice` rend une liste, et `originalFormat` vaut `FacturX` |
+| 2026-08-19 | Packaging | fait | Le CDC ne part plus dans les installations ; `routes/` vide supprimé |
+| 2026-08-19 | Laravel 13 | tranché | Pris en charge, vérifié sur une application neuve |
