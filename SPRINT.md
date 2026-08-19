@@ -181,7 +181,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 - [ ] `apiDescriptions/webhook/*` : création et mise à jour du webhook, `subscribedEvents`
 - [ ] `apiDescriptions/webhook/retryStrategy/*` : stratégie de retry (D15)
-- [ ] `apiDescriptions/invoice/*` : `searchInvoiceNotseen`, `markInvoiceAsSeen`, `InvoiceObject`,
+- [x] `apiDescriptions/invoice/*` : `searchInvoiceNotseen`, `markInvoiceAsSeen`, `InvoiceObject`,
       `getInvoiceFiles`, `downloadReadable`, `getAttachments` (D13, D14)
 - [ ] `apiDescriptions/status/*` (D11)
 - [x] `errors` : format exact des 400 et des 409 (D02)
@@ -299,12 +299,12 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 ## D10 — Job de traitement des factures entrantes
 
 - [x] `Jobs/ProcessInboundInvoice`, queue et connexion configurables
-- [~] Parsing du payload multipart → `InboundInvoice` : le webhook ne porte que `invoiceId` et
+- [x] Parsing du payload multipart → `InboundInvoice` : le webhook ne porte que `invoiceId` et
       `senderAcceptStatus`. Numéro, date, montants et émetteur devront être récupérés via l'API (D13).
 - [x] `raw_metadata` : payload brut conservé intégralement
 - [x] `429` → backoff exponentiel (C6)
 - [x] Aucune donnée de facture ni SIREN/SIRET en clair dans les logs d'erreur
-- [~] Tests sur fixture figée issue d'une livraison réelle. Le format n'est pas annoncé dans le
+- [x] Tests sur fixture figée issue d'une livraison réelle. Le format n'est pas annoncé dans le
       webhook : la facture arrive en PDF, sans indication de `FACTURX`/`UBL`/`CII`.
 - [x] **DoD** : le job est rejouable sans effet de bord
 
@@ -332,13 +332,13 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D13 — Fichiers et stockage
 
-- [ ] Téléchargement XML, PDF lisible, pièces jointes
-- [ ] Stockage via disque Laravel configurable (`storage.disk`, `storage.path`)
-- [ ] `InvoiceFile` : `kind`, `disk`, `path`, `checksum` SHA-256
-- [ ] Re-téléchargement idempotent (checksum identique → pas de doublon)
-- [ ] `attachments()->store('s3')`
-- [ ] Tests avec `Storage::fake()`
-- [ ] **DoD** : aucun fichier écrit hors du disque configuré
+- [x] Téléchargement XML, PDF lisible, pièces jointes
+- [x] Stockage via disque Laravel configurable (`storage.disk`, `storage.path`)
+- [x] `InvoiceFile` : `kind`, `disk`, `path`, `checksum` SHA-256
+- [x] Re-téléchargement idempotent (checksum identique → pas de doublon)
+- [ ] `attachments()->store('s3')` — l'API publique de consultation arrive avec la façade (D14)
+- [x] Tests avec `Storage::fake()`
+- [x] **DoD** : aucun fichier écrit hors du disque configuré
 
 ## D14 — Polling de repli
 
@@ -421,3 +421,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | Lot 0 | **clos** | Facture entrante multipart réelle capturée, signature reproduite à l'octet près |
 | 2026-08-19 | D07/D11 | corrigés | Schéma `0225` et `status.networkCode` : deux ruptures silencieuses |
 | 2026-08-19 | D10 | fait | Traitement des factures entrantes sur payload réel — 8 tests, 5 livraisons rejouées |
+| 2026-08-19 | D13 | fait | Métadonnées comptables et fichiers récupérés puis stockés — 7 tests |

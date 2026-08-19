@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing;
 
+use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Contracts\PayloadInterpreter;
 use AmazScript\Einvoicing\Contracts\SignatureVerifier;
 use AmazScript\Einvoicing\Contracts\StatusMapper;
 use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
+use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\IopolePayloadInterpreter;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\IopoleStatusMapper;
@@ -54,6 +56,7 @@ final class EinvoicingServiceProvider extends ServiceProvider
             return $app->make(is_string($configured) ? $configured : SiretResolver::class);
         });
 
+        $this->app->bind(InvoiceGateway::class, IopoleInvoiceGateway::class);
         $this->app->bind(PayloadInterpreter::class, IopolePayloadInterpreter::class);
         $this->app->bind(StatusMapper::class, IopoleStatusMapper::class);
 
