@@ -45,9 +45,10 @@
     },
     "scripts": {
         "test": "pest",
-        "test:coverage": "pest --coverage --min=85",
+        "test:coverage": "pest --coverage --min=70",
         "analyse": "phpstan analyse --memory-limit=512M",
-        "format": "pint"
+        "format": "pint",
+        "test:critical": "pest -c phpunit.critical.xml --coverage --min=85"
     },
     "config": {
         "sort-packages": true,

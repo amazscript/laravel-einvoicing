@@ -1,0 +1,60 @@
+name: Qualité
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  static-analysis:
+    runs-on: ubuntu-latest
+    name: Analyse statique
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - run: composer update --prefer-dist --no-interaction --no-progress
+      - run: composer analyse
+
+  code-style:
+    runs-on: ubuntu-latest
+    name: Style
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - run: composer update --prefer-dist --no-interaction --no-progress
+      - run: vendor/bin/pint --test
+
+  coverage:
+    runs-on: ubuntu-latest
+    name: Couverture
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, pdo_sqlite, sqlite3
+          coverage: pcov
+
+      - run: composer update --prefer-dist --no-interaction --no-progress
+
+      # Le webhook et la tenancy portent les points critiques : une régression y
+      # coûte une facture perdue ou mal routée. Le seuil y est plus élevé.
+      - name: Couverture des points critiques
+        run: composer test:critical
+
+      - name: Couverture globale
+        run: composer test:coverage
