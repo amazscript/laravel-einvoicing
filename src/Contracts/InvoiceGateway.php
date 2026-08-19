@@ -78,6 +78,18 @@ interface InvoiceGateway
     public function downloadReadable(string $providerInvoiceId): string;
 
     /**
+     * Recherche de factures selon la syntaxe de filtres de la plateforme,
+     * par exemple : invoice.direction:"INBOUND" AND invoice.state:"NOT_DELIVERED".
+     *
+     * Chaque résultat porte un objet `metadata`. `expand` demande des sections
+     * supplémentaires dans la même réponse, évitant un appel par facture.
+     *
+     * @param  list<string>  $expand
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function searchInvoices(string $query, array $expand = []): LazyCollection;
+
+    /**
      * Recherche dans l'annuaire des entreprises joignables.
      *
      * @return LazyCollection<int, array<mixed>>

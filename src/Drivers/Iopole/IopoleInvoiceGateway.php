@@ -147,6 +147,18 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     }
 
     /**
+     * @param  list<string>  $expand
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function searchInvoices(string $query, array $expand = []): LazyCollection
+    {
+        return $this->client->paginate(Endpoints::searchInvoices(), array_filter([
+            'q' => $query,
+            'expand' => $expand === [] ? null : implode(',', $expand),
+        ], static fn (mixed $v): bool => $v !== null));
+    }
+
+    /**
      * @return LazyCollection<int, array<mixed>>
      */
     public function searchDirectory(string $query): LazyCollection

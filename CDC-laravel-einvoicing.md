@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.9 — 19 août 2026
+**Version** 1.10 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -527,3 +527,27 @@ facture arrivant après ses statuts les raccroche. C'est le cas courant, les sta
 précédant généralement la livraison de la facture.
 
 Vérifié sur les livraisons réelles : les quatre statuts du cycle observé sont rattachés à la facture.
+
+### v1.10 — 19 août 2026
+
+**La recherche de factures du §10 est réalisable, contrairement à ce qui avait été conclu.**
+
+Une première lecture de la spécification n'avait relevé aucun endpoint de recherche, et la
+fonctionnalité avait été déclarée impossible. L'erreur venait de l'extraction : le motif employé
+excluait le point dans « v1.1 », si bien que les endpoints de cette version passaient à la trappe.
+
+`GET /v1.1/invoice/search` existe, avec pagination et une syntaxe de filtres :
+
+```
+invoice.direction:"INBOUND" AND invoice.state:"NOT_DELIVERED"
+```
+
+C'est l'illustration exacte de la contrainte C6 (§6, C8) : deux versions cohabitent, et la classe
+`Endpoints` est là pour que le consommateur ne le sache jamais.
+
+Chaque résultat porte un objet `metadata` (`invoiceId`, `state`, `direction`, `createDate`). Le
+paramètre `expand` accepte `businessData` et `lastStatusData`, ce qui évite un appel par facture.
+
+Les valeurs assemblées en requête voient leurs guillemets **retirés**, non échappés : la syntaxe
+d'échappement du moteur n'est pas documentée, et un échappement mal interprété laisserait une valeur
+extérieure réécrire le sens de la recherche.
