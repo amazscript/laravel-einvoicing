@@ -1,14 +1,18 @@
 * text=auto eol=lf
 
-/.github          export-ignore
-/tests            export-ignore
-/docs             export-ignore
-/.gitattributes   export-ignore
-/.gitignore       export-ignore
-/.editorconfig    export-ignore
-/phpstan.neon     export-ignore
-/pint.json        export-ignore
-/phpunit.xml      export-ignore
-/SPRINT.md        export-ignore
-/CLAUDE.md        export-ignore
-/CDC-laravel-einvoicing-v1.0.md export-ignore
+# Ce qui n'a pas à voyager jusqu'à l'application qui installe le package.
+# La documentation d'usage se lit sur le dépôt ; le cahier des charges et le
+# suivi de sprint sont des documents de travail internes.
+/.github              export-ignore
+/tests                export-ignore
+/docs                 export-ignore
+/.gitattributes       export-ignore
+/.gitignore           export-ignore
+/.editorconfig        export-ignore
+/phpstan.neon         export-ignore
+/pint.json            export-ignore
+/phpunit.xml          export-ignore
+/phpunit.critical.xml export-ignore
+/SPRINT.md            export-ignore
+/CLAUDE.md            export-ignore
+/CDC-laravel-einvoicing.md export-ignore
