@@ -68,6 +68,10 @@ Première version : réception des factures électroniques via une Plateforme Ag
 
 ### Corrigé
 
+- Les statuts de cycle de vie sont désormais rattachés à la facture reçue, dans les deux sens
+  d'arrivée. Le rapprochement s'appuie sur le numéro attribué par l'émetteur et son SIREN, les
+  identifiants techniques différant de chaque côté de la chaîne.
+
 - Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par
   la plateforme n'était pas pris en charge, et l'en-tête de routage était ignoré.
 - Le code réseau d'un statut est lu sous `networkCode`, nom réellement employé.

@@ -32,7 +32,11 @@ $event->status->invoice_id;  // null si la facture est inconnue du package
 ```
 
 Un statut peut précéder sa facture, ou porter sur un document jamais reçu. Il est alors conservé
-sans rattachement.
+sans rattachement, puis raccroché dès que la facture arrive.
+
+Le rapprochement s'appuie sur le numéro attribué par l'émetteur et son SIREN : les identifiants
+techniques diffèrent de chaque côté de la chaîne, celui du statut désignant la facture émise. Les
+deux critères sont exigés ensemble — deux fournisseurs peuvent numéroter à l'identique.
 
 ### `InboundInvoiceInvalid`
 
