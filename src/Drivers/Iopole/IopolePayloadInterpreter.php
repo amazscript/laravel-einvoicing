@@ -75,10 +75,17 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
 
         if (is_string($adresse) && str_contains($adresse, ':')) {
             [$scheme, $valeur] = explode(':', $adresse, 2);
+            $chiffres = preg_replace('/\D/', '', $valeur) ?? '';
 
-            match ($scheme) {
-                '0002' => $siren = $valeur,
-                '0009' => $siret = $valeur,
+            // 0002 désigne le répertoire SIRENE, 0009 le SIRET, et 0225 les
+            // adresses électroniques françaises — celui que la plateforme emploie
+            // réellement. Ce dernier accepte les deux longueurs, seule la valeur
+            // dit s'il s'agit d'une entreprise ou d'un établissement.
+            match (true) {
+                $scheme === '0002' && strlen($chiffres) === 9 => $siren = $chiffres,
+                $scheme === '0009' && strlen($chiffres) === 14 => $siret = $chiffres,
+                $scheme === '0225' && strlen($chiffres) === 9 => $siren = $chiffres,
+                $scheme === '0225' && strlen($chiffres) === 14 => $siret = $chiffres,
                 default => null,
             };
         }
