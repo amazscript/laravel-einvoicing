@@ -155,3 +155,16 @@ it('recule de plus en plus entre deux tentatives', function (): void {
     expect($job->backoff())->toBe([10, 60, 300, 900])
         ->and($job->tries)->toBe(5);
 });
+
+it('lit le code réseau sous networkCode', function (): void {
+    // Forme réellement observée : { code: RECEIVED, networkCode: "202" }.
+    $event = evenementRecu([
+        'statusId' => 'sta-network', 'invoiceId' => 'inv-1',
+        'status' => ['code' => 'RECEIVED', 'networkCode' => '202'],
+        'date' => '2026-08-19T07:54:46.000Z',
+    ]);
+
+    (new ProcessStatusUpdate($event->id))->handle(app(StatusMapper::class), app('events'));
+
+    expect(Status::query()->first()->value)->toBe('202');
+});

@@ -14,9 +14,9 @@ use AmazScript\Einvoicing\Contracts\StatusMapper;
  *     { invoiceId, statusId, date, destType, status: { code, value?, desc? },
  *       xml, json: { identification, responses[], recipients[], … } }
  *
- * Seul `status.code` s'est révélé systématiquement présent ; `value` et `desc`
- * manquent parfois, alors que la documentation les montre toujours. On ne les
- * exige donc pas.
+ * Seul `status.code` s'est révélé systématiquement présent. Le code réseau
+ * arrive sous `networkCode` et non sous `value` comme l'annonce la
+ * documentation, et `desc` manque souvent : rien de tout cela n'est exigé.
  */
 final class IopoleStatusMapper implements StatusMapper
 {
@@ -41,7 +41,10 @@ final class IopoleStatusMapper implements StatusMapper
             'provider_status_id' => $statusId,
             'provider_invoice_id' => $this->string($payload['invoiceId'] ?? null),
             'code' => $code,
-            'value' => $this->string($status['value'] ?? null),
+            // Le code réseau — « 202 » pour RECEIVED — arrive sous networkCode.
+            // La documentation le nomme value ; les livraisons réelles, non.
+            'value' => $this->string($status['networkCode'] ?? null)
+                ?? $this->string($status['value'] ?? null),
             'description' => $this->string($status['desc'] ?? null) ?? $this->rejectionMessage($payload),
             'dest_type' => $this->string($payload['destType'] ?? null),
             'occurred_at' => $this->string($payload['date'] ?? null),
