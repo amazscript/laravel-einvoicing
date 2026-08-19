@@ -53,6 +53,11 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Téléchargement et stockage des fichiers d'une facture sur le disque Laravel configuré, avec
   empreinte SHA-256 et re-téléchargement sans doublon.
 
+- Événement `InboundInvoiceInvalid` lorsqu'une facture entrante est refusée par la plateforme,
+  avec le détail des erreurs de validation.
+- Événement `OutboundInvoiceNotDelivered` lorsqu'un statut de rejet signale qu'une facture n'a pas
+  atteint son destinataire.
+
 ### Corrigé
 
 - Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par

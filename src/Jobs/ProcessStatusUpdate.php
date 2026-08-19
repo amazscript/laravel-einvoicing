@@ -7,6 +7,7 @@ namespace AmazScript\Einvoicing\Jobs;
 use AmazScript\Einvoicing\Contracts\StatusMapper;
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Events\InvoiceStatusUpdated;
+use AmazScript\Einvoicing\Events\OutboundInvoiceNotDelivered;
 use AmazScript\Einvoicing\Models\InboundInvoice;
 use AmazScript\Einvoicing\Models\Status;
 use AmazScript\Einvoicing\Models\WebhookEvent;
@@ -91,6 +92,53 @@ final class ProcessStatusUpdate implements ShouldQueue
         ])->save();
 
         $events->dispatch(new InvoiceStatusUpdated($status));
+
+        $this->announceDeliveryFailure($events, $event, $attributs);
+    }
+
+    /**
+     * Un statut de rejet signale que la facture n'a pas atteint son destinataire.
+     *
+     * Observé en conditions réelles : un destinataire absent de l'annuaire produit
+     * un REJECTED portant `rejectionDetail.reason = ROUTING_FAILURE`. C'est un
+     * incident à traiter — la facture est restée en chemin — d'où un événement
+     * distinct de la simple mise à jour de statut.
+     *
+     * @param  array{provider_status_id: string, provider_invoice_id: string|null, code: string, value: string|null, description: string|null, dest_type: string|null, occurred_at: string|null, payload: array<string, mixed>}  $attributs
+     */
+    private function announceDeliveryFailure(Dispatcher $events, WebhookEvent $event, array $attributs): void
+    {
+        if ($attributs['code'] !== 'REJECTED') {
+            return;
+        }
+
+        $detail = $this->rejectionDetail($attributs['payload']);
+
+        $events->dispatch(new OutboundInvoiceNotDelivered(
+            $event,
+            $attributs['provider_invoice_id'],
+            is_string($detail['reason'] ?? null) ? $detail['reason'] : null,
+            is_string($detail['message'] ?? null) ? $detail['message'] : null,
+        ));
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function rejectionDetail(array $payload): array
+    {
+        $json = $payload['json'] ?? null;
+        $responses = is_array($json) ? ($json['responses'] ?? null) : null;
+
+        if (! is_array($responses) || $responses === []) {
+            return [];
+        }
+
+        $premiere = reset($responses);
+        $detail = is_array($premiere) ? ($premiere['rejectionDetail'] ?? null) : null;
+
+        return is_array($detail) ? $detail : [];
     }
 
     /**
