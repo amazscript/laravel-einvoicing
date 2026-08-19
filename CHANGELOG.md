@@ -60,6 +60,8 @@ Première version : réception des factures électroniques via une Plateforme Ag
 - Événement `OutboundInvoiceNotDelivered` lorsqu'un statut de rejet signale qu'une facture n'a pas
   atteint son destinataire.
 
+- Recherche de factures auprès de la plateforme, parcourue paresseusement, avec assemblage des
+  critères et enrichissement optionnel des résultats.
 - API publique et façade `Einvoicing` : consultation des factures d'un dossier, acquittement
   auprès de la plateforme, accès aux documents et recherche paresseuse dans l'annuaire.
 

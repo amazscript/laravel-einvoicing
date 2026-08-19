@@ -85,6 +85,28 @@ téléchargement des documents ont déjà eu lieu.
 Les montants sont des chaînes, pas des flottants : un centime perdu dans un arrondi binaire est une
 écriture fausse. Pour les calculer, employez `bcsub()` ou une bibliothèque décimale.
 
+## Consulter les factures
+
+```php
+use AmazScript\Einvoicing\Facades\Einvoicing;
+
+// Ce que le package détient
+Einvoicing::for($tenant)->invoices()->local()->get();
+
+// Ce que la plateforme n'a pas vu acquitté
+Einvoicing::for($tenant)->invoices()->remoteNotSeen();
+
+// Recherche, parcourue paresseusement
+Einvoicing::for($tenant)->invoices()
+    ->search(['invoice.direction' => 'INBOUND', 'invoice.state' => 'NOT_DELIVERED'])
+    ->take(20);
+
+// Une facture précise
+Einvoicing::for($tenant)->invoice($id)->markAsSeen();
+Einvoicing::for($tenant)->invoice($id)->readablePdf();
+Einvoicing::for($tenant)->invoice($id)->attachments();
+```
+
 ## Events
 
 | Event | Déclencheur |

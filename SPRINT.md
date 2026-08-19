@@ -345,7 +345,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 - [x] `notSeen()` et `markAsSeen()`
 - [x] Itérateur paresseux sur pagination `offset` / `limit`, plafond 100 (C5)
-- [ ] `Einvoicing::for($tenant)->invoices()->search([...])->lazy()`
+- [x] `Einvoicing::for($tenant)->invoices()->search([...])` — sur `/v1.1/invoice/search`
 - [x] Trancher : `notSeen()` interroge la PA ou la base locale ? Nommage explicite décidé et documenté
 - [x] `Einvoicing::directory()->search('IOPOLE')`
 - [x] Facade `Einvoicing` — seule API statique autorisée
@@ -435,3 +435,5 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | Laravel 13 | tranché | Pris en charge, vérifié sur une application neuve |
 | 2026-08-19 | Couverture | **mesurée** | 97,5 % sur les points critiques, 84,5 % au global |
 | 2026-08-19 | Version | tranché | `v0.1.0` sans `beta` ; maturité réelle annoncée dans le README |
+| 2026-08-19 | Statuts | corrigé | Rattachement à la facture par le numéro de l'émetteur — 4/4 en réel |
+| 2026-08-19 | D14 | complété | Recherche de factures sur `/v1.1/invoice/search`, vérifiée en réel |

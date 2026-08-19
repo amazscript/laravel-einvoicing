@@ -35,6 +35,15 @@ final class Endpoints
         return '/v1/config/retry/strategy';
     }
 
+    /**
+     * Recherche de factures. Cet endpoint vit en v1.1 quand le reste est en v1 :
+     * c'est précisément ce que cette classe existe pour masquer.
+     */
+    public static function searchInvoices(): string
+    {
+        return '/v1.1/invoice/search';
+    }
+
     public static function invoicesNotSeen(): string
     {
         return '/v1/invoice/notSeen';
