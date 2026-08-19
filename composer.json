@@ -59,7 +59,10 @@
         "laravel": {
             "providers": [
                 "AmazScript\\Einvoicing\\EinvoicingServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "Einvoicing": "AmazScript\\Einvoicing\\Facades\\Einvoicing"
+            }
         }
     },
     "minimum-stability": "stable",

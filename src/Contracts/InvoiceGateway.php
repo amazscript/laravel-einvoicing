@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Contracts;
 
+use Illuminate\Support\LazyCollection;
+
 /**
  * Accès aux données d'une facture détenues par la plateforme.
  *
@@ -40,4 +42,45 @@ interface InvoiceGateway
      * Contenu binaire d'un fichier.
      */
     public function download(string $fileId): string;
+
+    /**
+     * Factures reçues que le package n'a pas encore acquittées.
+     *
+     * Sert de filet quand un webhook s'est perdu. L'endpoint ne pagine pas : il
+     * rend l'ensemble des factures non vues, que l'on consomme puis acquitte.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function notSeen(): array;
+
+    /**
+     * Statuts non encore acquittés, même principe.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function statusesNotSeen(): array;
+
+    /**
+     * Acquitte une facture auprès de la plateforme : elle sortira de notSeen.
+     */
+    public function markInvoiceAsSeen(string $providerInvoiceId): void;
+
+    public function markStatusAsSeen(string $providerStatusId): void;
+
+    /**
+     * Document d'origine, tel qu'émis par le fournisseur.
+     */
+    public function downloadInvoice(string $providerInvoiceId): string;
+
+    /**
+     * Version lisible par un humain.
+     */
+    public function downloadReadable(string $providerInvoiceId): string;
+
+    /**
+     * Recherche dans l'annuaire des entreprises joignables.
+     *
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function searchDirectory(string $query): LazyCollection;
 }

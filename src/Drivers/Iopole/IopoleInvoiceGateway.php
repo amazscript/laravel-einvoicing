@@ -7,6 +7,7 @@ namespace AmazScript\Einvoicing\Drivers\Iopole;
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Enums\InvoiceFileKind;
 use AmazScript\Einvoicing\Exceptions\EinvoicingException;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Lecture des factures telles que la plateforme Iopole les expose.
@@ -99,6 +100,69 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     public function download(string $fileId): string
     {
         return $this->client->raw(Endpoints::downloadFile($fileId));
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function notSeen(): array
+    {
+        return $this->listOf(Endpoints::invoicesNotSeen());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function statusesNotSeen(): array
+    {
+        return $this->listOf(Endpoints::statusesNotSeen());
+    }
+
+    public function markInvoiceAsSeen(string $providerInvoiceId): void
+    {
+        $this->client->put(Endpoints::markInvoiceAsSeen($providerInvoiceId));
+    }
+
+    public function markStatusAsSeen(string $providerStatusId): void
+    {
+        $this->client->put(Endpoints::markStatusAsSeen($providerStatusId));
+    }
+
+    public function downloadInvoice(string $providerInvoiceId): string
+    {
+        return $this->client->raw(Endpoints::downloadInvoice($providerInvoiceId));
+    }
+
+    public function downloadReadable(string $providerInvoiceId): string
+    {
+        return $this->client->raw(Endpoints::downloadReadableInvoice($providerInvoiceId));
+    }
+
+    /**
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function searchDirectory(string $query): LazyCollection
+    {
+        return $this->client->paginate(Endpoints::directoryFrenchSearch(), ['q' => $query]);
+    }
+
+    /**
+     * Les endpoints « non vus » répondent par un tableau nu, sans enveloppe ni
+     * pagination — constaté sur l'API réelle.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function listOf(string $path): array
+    {
+        $lignes = [];
+
+        foreach ($this->client->get($path) as $ligne) {
+            if (is_array($ligne)) {
+                $lignes[] = $ligne;
+            }
+        }
+
+        return $lignes;
     }
 
     /**

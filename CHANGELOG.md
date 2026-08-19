@@ -58,6 +58,9 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Événement `OutboundInvoiceNotDelivered` lorsqu'un statut de rejet signale qu'une facture n'a pas
   atteint son destinataire.
 
+- API publique et façade `Einvoicing` : consultation des factures d'un dossier, acquittement
+  auprès de la plateforme, accès aux documents et recherche paresseuse dans l'annuaire.
+
 ### Corrigé
 
 - Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par
