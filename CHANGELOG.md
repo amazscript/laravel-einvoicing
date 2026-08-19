@@ -61,6 +61,9 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - API publique et façade `Einvoicing` : consultation des factures d'un dossier, acquittement
   auprès de la plateforme, accès aux documents et recherche paresseuse dans l'annuaire.
 
+- Huit commandes Artisan : `install`, `secret`, `doctor`, `poll`, `webhooks:sync`, `retry:sync`,
+  `events:prune` et `events:retry`.
+
 ### Corrigé
 
 - Les destinataires adressés en `0225:<siren>` sont désormais reconnus : le schéma employé par

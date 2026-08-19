@@ -34,6 +34,14 @@ final class InboundEventDispatcher
             return;
         }
 
+        // Un événement remis en file sans tenant retombe en UNROUTED : le
+        // rejeu doit le constater plutôt que de croire l'avoir traité.
+        if ($event->tenant_id === null) {
+            $event->forceFill(['status' => WebhookEventStatus::Unrouted])->save();
+
+            return;
+        }
+
         $job = match ($event->event_type) {
             'INVOICE_STATUS' => new ProcessStatusUpdate($event->id),
             'INVOICE_INBOUND' => new ProcessInboundInvoice($event->id),

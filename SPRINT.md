@@ -179,11 +179,11 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ### Reste à lire dans `.iopole-docs/`
 
-- [ ] `apiDescriptions/webhook/*` : création et mise à jour du webhook, `subscribedEvents`
-- [ ] `apiDescriptions/webhook/retryStrategy/*` : stratégie de retry (D15)
+- [x] `apiDescriptions/webhook/*` : création et mise à jour du webhook, `subscribedEvents`
+- [x] `apiDescriptions/webhook/retryStrategy/*` : stratégie de retry (D15)
 - [x] `apiDescriptions/invoice/*` : `searchInvoiceNotseen`, `markInvoiceAsSeen`, `InvoiceObject`,
       `getInvoiceFiles`, `downloadReadable`, `getAttachments` (D13, D14)
-- [ ] `apiDescriptions/status/*` (D11)
+- [x] `apiDescriptions/status/*` (D11)
 - [x] `errors` : format exact des 400 et des 409 (D02)
 - [x] `pagination`, `authentication`, `reference`, `security`
 
@@ -353,17 +353,17 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D15 — Commandes Artisan
 
-- [ ] `einvoicing:install`
-- [ ] `einvoicing:secret` (≥ 32 octets aléatoires)
-- [ ] `einvoicing:webhooks:sync`
-- [ ] `einvoicing:retry:sync`
-- [ ] `einvoicing:poll {--tenant=}`
-- [ ] `einvoicing:events:prune`
-- [ ] `einvoicing:events:retry` — rejeu des événements `FAILED` / `UNROUTED` (ajout, cf. lot 0 bis)
-- [ ] `einvoicing:doctor` : token, `customer-id`, souscription webhook, accessibilité de l'URL,
+- [x] `einvoicing:install`
+- [x] `einvoicing:secret` (≥ 32 octets aléatoires)
+- [x] `einvoicing:webhooks:sync`
+- [x] `einvoicing:retry:sync`
+- [x] `einvoicing:poll {--tenant=}`
+- [x] `einvoicing:events:prune`
+- [x] `einvoicing:events:retry` — rejeu des événements `FAILED` / `UNROUTED` (ajout, cf. lot 0 bis)
+- [x] `einvoicing:doctor` : token, `customer-id`, souscription webhook, accessibilité de l'URL,
       cohérence du `canonical_path`, présence d'un throttle sur la route, secret configuré
-- [ ] Tests : chaque commande, cas nominal **et** cas d'erreur
-- [ ] **DoD** : `doctor` diagnostique une config cassée sans exposer le moindre secret
+- [x] Tests : chaque commande, cas nominal **et** cas d'erreur
+- [x] **DoD** : `doctor` diagnostique une config cassée sans exposer le moindre secret
 
 ## D16 — Tests, documentation, CI, publication
 
@@ -424,3 +424,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D13 | fait | Métadonnées comptables et fichiers récupérés puis stockés — 7 tests |
 | 2026-08-19 | D12 | fait | Les six events du CDC sont exposés et émis — palier 1 complet |
 | 2026-08-19 | D14 | fait | Façade, API publique et parcours paresseux — 17 tests |
+| 2026-08-19 | D15 | fait | Huit commandes Artisan — 20 tests, éprouvées contre la sandbox réelle |

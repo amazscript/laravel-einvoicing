@@ -92,6 +92,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Rétention des événements
+    |--------------------------------------------------------------------------
+    |
+    | Durée au-delà de laquelle un événement webhook déjà traité peut être purgé
+    | par einvoicing:events:prune. Les événements non routés ou en échec ne sont
+    | jamais purgés : ils portent une donnée qui n'a pas encore été exploitée.
+    |
+    */
+
+    'events' => [
+        'retention_days' => 90,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Résolution du tenant
     |--------------------------------------------------------------------------
     |
