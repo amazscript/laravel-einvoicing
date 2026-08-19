@@ -275,8 +275,8 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
       un tenant courant. À créer en D10 si le besoin apparaît vraiment.
 - [x] Tests : les 4 stratégies, une par une
 - [x] Test : tenant introuvable → event émis (le `UNROUTED` + 2xx se testent en D04)
-- [ ] **DoD** : couverture ≥ 85 % sur `Tenancy/` — **non mesurée** : ni Xdebug ni PCOV installés
-      sur la machine de dev. À vérifier par la CI (D16), qui doit installer PCOV.
+- [~] **DoD** : couverture ≥ 85 % sur `Tenancy/` — la CI l'impose désormais (D16). Non mesurable
+      sur cette machine, PCOV n'y étant pas installé.
 
 ## D08 — Déduplication (point critique 5.3)
 
@@ -367,14 +367,15 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D16 — Tests, documentation, CI, publication
 
-- [ ] Couverture ≥ 85 % sur `Webhook/` et `Tenancy/`, ≥ 70 % ailleurs
-- [ ] CI GitHub Actions : matrice PHP 8.3 / 8.4 × Laravel 11 / 12, lint + tests + analyse
-- [ ] `README.md` dans l'ordre imposé (CLAUDE.md §9) — installation visible sans scroller
-- [ ] Chaque bloc de code du README copiable et fonctionnel tel quel
-- [ ] `docs/` : installation, configuration, webhooks, multi-tenant, events, commandes, dépannage
-- [ ] `docs/depannage.md` : signature invalide, 403, tenant introuvable, 429, job en échec
-- [ ] `CHANGELOG.md` à jour
-- [ ] Aucune promesse de conformité — le package est un OD, la PA seule est agréée
+- [~] Couverture ≥ 85 % sur `Webhook/` et `Tenancy/`, ≥ 70 % ailleurs — mesurée par la CI
+      (`composer test:critical` et `test:coverage`), **jamais localement** faute de PCOV.
+- [x] CI GitHub Actions : matrice PHP 8.3 / 8.4 × Laravel 11 / 12, lint + tests + analyse
+- [x] `README.md` dans l'ordre imposé (CLAUDE.md §9) — installation visible sans scroller
+- [x] Chaque bloc de code du README copiable et fonctionnel tel quel
+- [x] `docs/` : installation, configuration, webhooks, multi-tenant, events, commandes, dépannage
+- [x] `docs/depannage.md` : signature invalide, 403, tenant introuvable, 429, job en échec
+- [x] `CHANGELOG.md` à jour
+- [x] Aucune promesse de conformité — le package est un OD, la PA seule est agréée
 - [ ] Publication Packagist, tag `v0.1.0`
 - [ ] **DoD** : recette finale dans un playground **neuf** — un dev installe, configure, reçoit sa première facture en < 15 min (CDC §3)
 
@@ -425,3 +426,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D12 | fait | Les six events du CDC sont exposés et émis — palier 1 complet |
 | 2026-08-19 | D14 | fait | Façade, API publique et parcours paresseux — 17 tests |
 | 2026-08-19 | D15 | fait | Huit commandes Artisan — 20 tests, éprouvées contre la sandbox réelle |
+| 2026-08-19 | D16 | partiel | CI, README et sept pages de doc. Reste : couverture à constater, publication |

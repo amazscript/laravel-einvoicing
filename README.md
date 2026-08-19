@@ -2,17 +2,21 @@
 
 Recevoir les factures électroniques françaises dans une application Laravel, via une Plateforme Agréée.
 
-> **État : en développement.** La v0.1 n'est pas publiée. Le squelette est en place, la réception
-> ne l'est pas encore. Voir `SPRINT.md` pour l'avancement.
-
-<!-- badges : version, tests, licence, PHP — à ajouter à la publication (D16) -->
+[![Tests](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml)
+[![Qualité](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml)
+[![Packagist](https://img.shields.io/packagist/v/amazscript/laravel-einvoicing.svg)](https://packagist.org/packages/amazscript/laravel-einvoicing)
+[![PHP](https://img.shields.io/packagist/php-v/amazscript/laravel-einvoicing.svg)](composer.json)
+[![Licence](https://img.shields.io/packagist/l/amazscript/laravel-einvoicing.svg)](LICENSE)
 
 ## Le problème
 
 Depuis le 1er septembre 2026, toute entreprise assujettie à la TVA doit être capable de **recevoir**
-des factures électroniques. Le PPF n'étant plus une plateforme d'échange, tout flux passe par une
-Plateforme Agréée. Se raccorder suppose d'écrire soi-même la plomberie : webhook signé en HMAC,
-routage vers le bon dossier client, déduplication des livraisons répétées, stockage des fichiers.
+des factures électroniques. Le PPF n'étant plus une plateforme d'échange, tout flux transite par une
+Plateforme Agréée.
+
+Se raccorder suppose d'écrire la plomberie : un webhook signé en HMAC dont le calcul diffère selon le
+type de contenu, le routage vers le bon dossier client alors qu'une seule URL de rappel dessert tout
+le parc, la déduplication de livraisons répétées par conception, le stockage des documents.
 
 Ce package écrit cette plomberie une fois pour toutes.
 
@@ -21,63 +25,116 @@ Ce package écrit cette plomberie une fois pour toutes.
 ```bash
 composer require amazscript/laravel-einvoicing
 php artisan einvoicing:install
-php artisan einvoicing:secret
 php artisan migrate
+php artisan einvoicing:secret
 ```
 
 Puis, dans `.env`, les identifiants fournis par votre Plateforme Agréée :
 
 ```dotenv
-IOPOLE_TOKEN_URL=
+IOPOLE_BASE_URL=https://api.ppd.iopole.fr
+IOPOLE_TOKEN_URL=https://auth.preprod.iopole.fr/realms/iopole/protocol/openid-connect/token
 IOPOLE_CLIENT_ID=
 IOPOLE_CLIENT_SECRET=
 IOPOLE_CUSTOMER_ID=
 EINVOICING_WEBHOOK_SECRET=
 ```
 
+Enfin, vérifiez le raccordement :
+
+```bash
+php artisan einvoicing:doctor
+```
+
 ## Recevoir une facture
 
 ```php
-// app/Listeners/StoreSupplierInvoice.php
+namespace App\Listeners;
 
 use AmazScript\Einvoicing\Events\InboundInvoiceReceived;
 
-final class StoreSupplierInvoice
+final class EnregistrerFactureFournisseur
 {
     public function handle(InboundInvoiceReceived $event): void
     {
-        $invoice = $event->invoice;
+        $facture = $event->invoice;
 
-        // $invoice->invoice_number, $invoice->amount_total, $invoice->sender_siret...
+        Achat::create([
+            'fournisseur' => $facture->sender_name,
+            'siren'       => $facture->sender_siren,
+            'numero'      => $facture->invoice_number,
+            'date'        => $facture->invoice_date,
+            'montant_ttc' => $facture->amount_total,
+            'montant_tva' => $facture->amount_tax,
+            'devise'      => $facture->currency,
+        ]);
     }
 }
 ```
+
+C'est tout. Le webhook, la vérification de signature, le routage multi-tenant, la déduplication et le
+téléchargement des documents ont déjà eu lieu.
+
+Les montants sont des chaînes, pas des flottants : un centime perdu dans un arrondi binaire est une
+écriture fausse. Pour les calculer, employez `bcsub()` ou une bibliothèque décimale.
 
 ## Events
 
 | Event | Déclencheur |
 |---|---|
-| `InboundInvoiceReceived` | facture entrante traitée et stockée |
-| `InvoiceStatusUpdated` | statut de cycle de vie reçu |
-| `InboundInvoiceInvalid` | facture entrante rejetée par la plateforme |
-| `OutboundInvoiceNotDelivered` | échec de remise |
-| `TenantResolutionFailed` | routage impossible, événement conservé |
-| `WebhookSignatureRejected` | signature invalide — à surveiller |
+| `InboundInvoiceReceived` | une facture fournisseur est arrivée et a été consignée |
+| `InvoiceStatusUpdated` | un statut de cycle de vie a été reçu |
+| `InboundInvoiceInvalid` | une facture entrante a été refusée par la plateforme |
+| `OutboundInvoiceNotDelivered` | une facture émise n'a pas atteint son destinataire |
+| `TenantResolutionFailed` | aucun dossier ne correspond au destinataire — à surveiller |
+| `WebhookSignatureRejected` | signature invalide — à surveiller de près |
 
 ## Ce que le package ne fait pas
 
 - Il ne génère aucun format de facture : ni Factur-X, ni UBL, ni CII, ni PDF/A-3.
 - Il n'exécute aucune validation Schematron.
 - Il ne remplace pas un compte chez une Plateforme Agréée : il en consomme l'API.
-- Il n'émet pas de factures en v0.1.
+- Il n'émet pas de factures.
 
-Le package est un Opérateur de Dématérialisation. Il ne certifie rien et n'apporte aucune garantie
+Le package est un **Opérateur de Dématérialisation**. Il ne certifie rien et n'apporte aucune garantie
 de conformité : seule la Plateforme Agréée est agréée.
 
 ## Configuration
 
-Documentation d'usage dans `docs/`.
+Le fichier `config/einvoicing.php` couvre le driver, le webhook, le stockage, la file d'attente, la
+rétention des événements et le résolveur de tenant. Voir [docs/configuration.md](docs/configuration.md).
+
+## Commandes
+
+| Commande | Rôle |
+|---|---|
+| `einvoicing:doctor` | diagnostique la configuration et le raccordement |
+| `einvoicing:install` | publie la configuration et les migrations |
+| `einvoicing:secret` | génère un secret HMAC |
+| `einvoicing:poll` | récupère ce qu'un webhook aurait manqué |
+| `einvoicing:webhooks:sync` | compare la déclaration du webhook à la configuration locale |
+| `einvoicing:retry:sync` | affiche la stratégie de relance de la plateforme |
+| `einvoicing:events:prune` | purge les événements déjà traités |
+| `einvoicing:events:retry` | rejoue les événements non routés ou en échec |
+
+## Sécurité
+
+Le secret du webhook doit faire au moins 32 octets et n'apparaître que dans le `.env`. Une signature
+invalide, un horodatage hors tolérance ou un secret absent font répondre `401` sans rien écrire.
+
+Le `customer-id` est chiffré au repos. Ni les jetons, ni les secrets, ni les identifiants d'entreprise
+n'apparaissent dans les messages d'erreur ou les journaux.
+
+Pour signaler une vulnérabilité : [contact@amazscript.com](mailto:contact@amazscript.com).
+
+## Documentation
+
+[Installation](docs/installation.md) · [Configuration](docs/configuration.md) ·
+[Webhooks](docs/webhooks.md) · [Multi-tenant](docs/multi-tenant.md) ·
+[Events](docs/events.md) · [Commandes](docs/commandes.md) · [Dépannage](docs/depannage.md)
 
 ## Licence
 
-MIT. Voir `LICENSE`.
+MIT. Voir [LICENSE](LICENSE).
+
+Support commercial et accompagnement à l'intégration : [contact@amazscript.com](mailto:contact@amazscript.com).

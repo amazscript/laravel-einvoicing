@@ -5,7 +5,9 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.1.0] — non publiée
+
+Première version : réception des factures électroniques via une Plateforme Agréée.
 
 ### Ajouté
 
@@ -74,3 +76,10 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - L'horodatage des webhooks est transmis en millisecondes par la plateforme. Comparé tel quel à
   l'horloge locale, il faisait rejeter toute livraison authentique. Les deux unités sont
   désormais acceptées.
+
+### Documentation
+
+- README, et sept pages d'usage : installation, configuration, webhooks, multi-tenant, events,
+  commandes et dépannage.
+- Intégration continue : tests sur PHP 8.3 et 8.4 croisés avec Laravel 11 et 12, analyse statique,
+  style, et couverture avec un seuil relevé sur les points critiques.
