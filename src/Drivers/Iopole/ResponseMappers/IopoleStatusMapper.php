@@ -22,7 +22,7 @@ final class IopoleStatusMapper implements StatusMapper
 {
     /**
      * @param  array<string, mixed>  $payload
-     * @return array{provider_status_id: string, provider_invoice_id: string|null, code: string, value: string|null, description: string|null, dest_type: string|null, occurred_at: string|null, payload: array<string, mixed>}|null
+     * @return array{provider_status_id: string, provider_invoice_id: string|null, code: string, value: string|null, description: string|null, dest_type: string|null, occurred_at: string|null, issuer_invoice_number: string|null, issuer_siren: string|null, payload: array<string, mixed>}|null
      */
     public function map(array $payload): ?array
     {
@@ -48,9 +48,42 @@ final class IopoleStatusMapper implements StatusMapper
             'description' => $this->string($status['desc'] ?? null) ?? $this->rejectionMessage($payload),
             'dest_type' => $this->string($payload['destType'] ?? null),
             'occurred_at' => $this->string($payload['date'] ?? null),
+            // Référence commune avec la facture reçue : le numéro que l'émetteur
+            // lui a donné, qualifié par son SIREN.
+            'issuer_invoice_number' => $this->string($this->documentReference($payload)['issuerAssignedId'] ?? null),
+            'issuer_siren' => $this->issuerSiren($payload),
             // JSON et XML bruts conservés : c'est la pièce justificative du statut.
             'payload' => $payload,
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function documentReference(array $payload): array
+    {
+        $json = $payload['json'] ?? null;
+        $responses = is_array($json) ? ($json['responses'] ?? null) : null;
+
+        if (! is_array($responses) || $responses === []) {
+            return [];
+        }
+
+        $premiere = reset($responses);
+        $reference = is_array($premiere) ? ($premiere['documentReference'] ?? null) : null;
+
+        return is_array($reference) ? $reference : [];
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function issuerSiren(array $payload): ?string
+    {
+        $issuer = $this->documentReference($payload)['issuer'] ?? null;
+
+        return is_array($issuer) ? $this->string($issuer['siren'] ?? null) : null;
     }
 
     /**

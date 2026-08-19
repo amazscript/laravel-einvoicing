@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.8 — 19 août 2026
+**Version** 1.9 — 19 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -463,7 +463,7 @@ facture entrante en multipart. Chacun contredisait la documentation, et chacun c
 | Le code réseau arrive sous **`status.networkCode`**, pas `status.value` | Lu sous le nom documenté, il valait toujours null — et la contrainte de la base rejetait alors le statut entier. |
 | Une facture entrante arrive en **PDF**, avec les champs `invoiceId` et `senderAcceptStatus` | Le webhook ne transporte ni numéro, ni date, ni montant, ni émetteur : ces métadonnées se récupèrent auprès de l'API. |
 | Le cycle de vie observé est `SUBMITTED → ISSUED → RECEIVED → MADE_AVAILABLE` | Codes réels, à documenter pour le consommateur. |
-| L'`invoiceId` d'un statut **diffère** de celui de la facture entrante | Le même document porte un identifiant distinct de chaque côté de la chaîne. Un statut émis ne peut donc pas être rattaché à une facture reçue par cet identifiant : le rapprochement demandera une autre clé. |
+| L'`invoiceId` d'un statut **diffère** de celui de la facture entrante | Le même document porte un identifiant distinct de chaque côté de la chaîne. La clé de rapprochement a été trouvée depuis : voir v1.9. |
 | `roleCode` est tantôt une chaîne, tantôt un objet | Toute lecture de ce champ doit accepter les deux formes. |
 | En `OUTBOUND`, `interopData.endpoints` refuse la clé `invoice` | Seuls `status` et `authentication` sont admis. |
 
@@ -504,3 +504,26 @@ Le `0.x` de SemVer signale déjà qu'une API peut évoluer. Ce que ce numéro ne
 dit : le package n'a **aucun usage en production connu**, ayant été vérifié contre une sandbox et non
 contre des flux d'entreprise. Cette limite est annoncée plutôt que tue, conformément au §9 — une
 limite connue énoncée d'avance vaut mieux qu'une mauvaise surprise.
+
+### v1.9 — 19 août 2026
+
+**Le rapprochement statut ↔ facture reçue est résolu.**
+
+Le point restait ouvert depuis la v1.5 : les identifiants techniques diffèrent de chaque côté de la
+chaîne, celui du statut désignant la facture émise. La référence commune est le **numéro que
+l'émetteur a attribué à sa facture** :
+
+| | Dans un statut | Dans la facture reçue |
+|---|---|---|
+| numéro | `json.responses[].documentReference.issuerAssignedId` | `businessData.invoiceId` |
+| émetteur | `documentReference.issuer.siren` | `seller.siren` |
+
+Les deux critères sont exigés **ensemble** : deux fournisseurs peuvent employer la même
+numérotation, et un rapprochement sur le seul numéro mélangerait leurs statuts. Conformément au
+principe du §9, mieux vaut ne rien rattacher que rattacher à tort.
+
+Le rapprochement joue dans les deux sens : un statut arrivant après sa facture la trouve, et une
+facture arrivant après ses statuts les raccroche. C'est le cas courant, les statuts de cycle de vie
+précédant généralement la livraison de la facture.
+
+Vérifié sur les livraisons réelles : les quatre statuts du cycle observé sont rattachés à la facture.

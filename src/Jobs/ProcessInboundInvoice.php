@@ -155,8 +155,12 @@ final class ProcessInboundInvoice implements ShouldQueue
     }
 
     /**
-     * Un statut arrive parfois avant la facture qu'il concerne : il a alors été
+     * Un statut arrive souvent avant la facture qu'il concerne : il a alors été
      * conservé sans rattachement. On le raccroche maintenant.
+     *
+     * Le rapprochement se fait sur le numéro attribué par l'émetteur, qualifié
+     * par son SIREN. L'identifiant technique du statut ne convient pas : il
+     * désigne la facture émise, pas celle qui a été reçue.
      */
     private function attachOrphanStatuses(InboundInvoice $invoice, string $providerInvoiceId): void
     {
@@ -168,12 +172,54 @@ final class ProcessInboundInvoice implements ShouldQueue
             ->get();
 
         foreach ($orphelins as $status) {
-            $payload = $status->payload ?? [];
-
-            if (($payload['invoiceId'] ?? null) === $providerInvoiceId) {
+            if ($this->concerns($status, $invoice, $providerInvoiceId)) {
                 $status->forceFill(['invoice_id' => $invoice->id])->save();
             }
         }
+    }
+
+    /**
+     * Le numéro seul ne suffirait pas : deux fournisseurs peuvent employer la
+     * même numérotation.
+     */
+    private function concerns(Status $status, InboundInvoice $invoice, string $providerInvoiceId): bool
+    {
+        $payload = $status->payload ?? [];
+
+        if (($payload['invoiceId'] ?? null) === $providerInvoiceId) {
+            return true;
+        }
+
+        if ($invoice->invoice_number === null || $invoice->sender_siren === null) {
+            return false;
+        }
+
+        $reference = $this->documentReference($payload);
+
+        $issuer = $reference['issuer'] ?? null;
+        $siren = is_array($issuer) ? ($issuer['siren'] ?? null) : null;
+
+        return ($reference['issuerAssignedId'] ?? null) === $invoice->invoice_number
+            && $siren === $invoice->sender_siren;
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function documentReference(array $payload): array
+    {
+        $json = $payload['json'] ?? null;
+        $responses = is_array($json) ? ($json['responses'] ?? null) : null;
+
+        if (! is_array($responses) || $responses === []) {
+            return [];
+        }
+
+        $premiere = reset($responses);
+        $reference = is_array($premiere) ? ($premiere['documentReference'] ?? null) : null;
+
+        return is_array($reference) ? $reference : [];
     }
 
     public function failed(Throwable $e): void

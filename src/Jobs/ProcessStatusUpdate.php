@@ -75,7 +75,7 @@ final class ProcessStatusUpdate implements ShouldQueue
                 'provider_status_id' => $attributs['provider_status_id'],
             ],
             [
-                'invoice_id' => $this->linkedInvoiceId($attributs['provider_invoice_id']),
+                'invoice_id' => $this->linkedInvoiceId($attributs),
                 'code' => $attributs['code'],
                 'value' => $attributs['value'],
                 'description' => $attributs['description'],
@@ -142,21 +142,52 @@ final class ProcessStatusUpdate implements ShouldQueue
     }
 
     /**
-     * Un statut peut concerner une facture que le package ne connaît pas — reçue
-     * avant elle, ou émise par un tiers. Il est conservé sans rattachement.
+     * Retrouve la facture concernée par un statut.
+     *
+     * L'identifiant technique est tenté d'abord, mais il ne suffit pas : un même
+     * document porte un identifiant distinct de chaque côté de la chaîne, celui
+     * du statut désignant la facture émise et non celle qui a été reçue. On se
+     * rabat donc sur le numéro attribué par l'émetteur, qualifié par son SIREN —
+     * sans lui, deux fournisseurs numérotant pareil verraient leurs statuts
+     * mélangés, ce qui vaudrait mieux ne pas rattacher du tout.
+     *
+     * @param  array{provider_invoice_id: string|null, issuer_invoice_number: string|null, issuer_siren: string|null, ...}  $attributs
      */
-    private function linkedInvoiceId(?string $providerInvoiceId): ?string
+    private function linkedInvoiceId(array $attributs): ?string
     {
-        if ($providerInvoiceId === null) {
+        $providerInvoiceId = $attributs['provider_invoice_id'];
+
+        if ($providerInvoiceId !== null) {
+            $invoice = InboundInvoice::query()
+                ->where('provider', $this->provider)
+                ->where('provider_invoice_id', $providerInvoiceId)
+                ->first();
+
+            if ($invoice instanceof InboundInvoice) {
+                return $invoice->id;
+            }
+        }
+
+        return $this->byIssuerReference(
+            $attributs['issuer_invoice_number'],
+            $attributs['issuer_siren'],
+        )?->id;
+    }
+
+    /**
+     * Les deux critères sont exigés ensemble : un numéro seul n'identifie rien.
+     */
+    private function byIssuerReference(?string $numero, ?string $siren): ?InboundInvoice
+    {
+        if ($numero === null || $siren === null) {
             return null;
         }
 
-        $invoice = InboundInvoice::query()
+        return InboundInvoice::query()
             ->where('provider', $this->provider)
-            ->where('provider_invoice_id', $providerInvoiceId)
+            ->where('invoice_number', $numero)
+            ->where('sender_siren', $siren)
             ->first();
-
-        return $invoice?->id;
     }
 
     /**
