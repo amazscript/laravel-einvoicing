@@ -30,9 +30,10 @@ final class InvoiceFileStore
         string $contents,
         ?string $providerFileId = null,
         ?string $filename = null,
+        ?string $disk = null,
     ): InvoiceFile {
         $checksum = hash('sha256', $contents);
-        $disque = $this->disk();
+        $disque = $disk ?? $this->disk();
 
         $existant = InvoiceFile::query()
             ->where('invoice_id', $invoice->id)
@@ -55,6 +56,18 @@ final class InvoiceFileStore
             'path' => $chemin,
             'checksum' => $checksum,
         ]);
+    }
+
+    /**
+     * Relit un fichier depuis le disque où il a été rangé.
+     *
+     * Le disque est celui enregistré avec le fichier, pas celui configuré
+     * aujourd'hui : une facture rangée hier reste lisible si la configuration a
+     * changé depuis.
+     */
+    public function contents(InvoiceFile $file): string
+    {
+        return (string) $this->filesystems->disk($file->disk)->get($file->path);
     }
 
     private function disk(): string

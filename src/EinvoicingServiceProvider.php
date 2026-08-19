@@ -15,6 +15,7 @@ use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\IopolePayloadInterpreter;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\IopoleStatusMapper;
+use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 use AmazScript\Einvoicing\Tenancy\SiretResolver;
 use AmazScript\Einvoicing\Webhook\HmacSignatureVerifier;
 use AmazScript\Einvoicing\Webhook\WebhookController;
@@ -57,6 +58,14 @@ final class EinvoicingServiceProvider extends ServiceProvider
         });
 
         $this->app->bind(InvoiceGateway::class, IopoleInvoiceGateway::class);
+
+        $this->app->singleton(Einvoicing::class, function ($app): Einvoicing {
+            return new Einvoicing(
+                $app->make(Client::class),
+                $app->make(InvoiceGateway::class),
+                $app->make(InvoiceFileStore::class),
+            );
+        });
         $this->app->bind(PayloadInterpreter::class, IopolePayloadInterpreter::class);
         $this->app->bind(StatusMapper::class, IopoleStatusMapper::class);
 

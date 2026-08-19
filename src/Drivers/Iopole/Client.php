@@ -6,10 +6,12 @@ namespace AmazScript\Einvoicing\Drivers\Iopole;
 
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
 use AmazScript\Einvoicing\Exceptions\EinvoicingServerException;
+use Generator;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\LazyCollection;
 
 /**
  * Client HTTP de la plateforme Iopole.
@@ -71,6 +73,43 @@ final class Client
     public function delete(string $path): array
     {
         return $this->decode($this->send('delete', $path, []));
+    }
+
+    /**
+     * Parcourt un endpoint paginé sans jamais tout charger en mémoire.
+     *
+     * Les listes paginées répondent `{ data: [...], meta: { offset, limit, count } }`,
+     * `count` donnant le total. On avance page par page, et l'itération s'arrête
+     * dès qu'une page revient vide — une garantie contre la boucle infinie si le
+     * total annoncé ne correspond pas à ce qui est servi.
+     *
+     * @param  array<string, mixed>  $query
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function paginate(string $path, array $query = [], int $perPage = 50): LazyCollection
+    {
+        return LazyCollection::make(function () use ($path, $query, $perPage): Generator {
+            $offset = 0;
+
+            do {
+                $reponse = $this->get($path, array_merge($query, [
+                    'offset' => $offset,
+                    'limit' => $perPage,
+                ]));
+
+                $lignes = is_array($reponse['data'] ?? null) ? $reponse['data'] : [];
+                $meta = is_array($reponse['meta'] ?? null) ? $reponse['meta'] : [];
+                $total = is_numeric($meta['count'] ?? null) ? (int) $meta['count'] : null;
+
+                foreach ($lignes as $ligne) {
+                    if (is_array($ligne)) {
+                        yield $ligne;
+                    }
+                }
+
+                $offset += $perPage;
+            } while ($lignes !== [] && ($total === null || $offset < $total));
+        });
     }
 
     /**

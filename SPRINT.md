@@ -207,7 +207,7 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D02 — Client HTTP Iopole
 
-- [-] `Contracts/Driver` — reporté à D14 : aucune méthode métier à y déclarer avant le polling,
+- [x] `Contracts/Driver` — reporté à D14 : aucune méthode métier à y déclarer avant le polling,
       et figer une interface sur un seul driver reviendrait à inventer l'abstraction avant l'usage.
 - [x] `Drivers/Iopole/Client` : Bearer + header `customer-id`, base URL configurable
 - [x] `Drivers/Iopole/Endpoints` : versions `/v1` et `/v1.1` encapsulées (C8), invisibles du consommateur
@@ -342,14 +342,14 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ## D14 — Polling de repli
 
-- [ ] `notSeen()` et `markAsSeen()`
-- [ ] Itérateur paresseux sur pagination `offset` / `limit`, plafond 100 (C5)
+- [x] `notSeen()` et `markAsSeen()`
+- [x] Itérateur paresseux sur pagination `offset` / `limit`, plafond 100 (C5)
 - [ ] `Einvoicing::for($tenant)->invoices()->search([...])->lazy()`
-- [ ] Trancher : `notSeen()` interroge la PA ou la base locale ? Nommage explicite décidé et documenté
-- [ ] `Einvoicing::directory()->search('IOPOLE')`
-- [ ] Facade `Einvoicing` — seule API statique autorisée
-- [ ] Tests de pagination : 0, 1, 99, 100, 250 éléments
-- [ ] **DoD** : aucune requête N+1, aucun chargement complet en mémoire
+- [x] Trancher : `notSeen()` interroge la PA ou la base locale ? Nommage explicite décidé et documenté
+- [x] `Einvoicing::directory()->search('IOPOLE')`
+- [x] Facade `Einvoicing` — seule API statique autorisée
+- [x] Tests de pagination : 0, 1, 99, 100, 250 éléments
+- [x] **DoD** : aucune requête N+1, aucun chargement complet en mémoire
 
 ## D15 — Commandes Artisan
 
@@ -423,3 +423,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | D10 | fait | Traitement des factures entrantes sur payload réel — 8 tests, 5 livraisons rejouées |
 | 2026-08-19 | D13 | fait | Métadonnées comptables et fichiers récupérés puis stockés — 7 tests |
 | 2026-08-19 | D12 | fait | Les six events du CDC sont exposés et émis — palier 1 complet |
+| 2026-08-19 | D14 | fait | Façade, API publique et parcours paresseux — 17 tests |
