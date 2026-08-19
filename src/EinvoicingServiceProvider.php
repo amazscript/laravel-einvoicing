@@ -140,5 +140,16 @@ final class EinvoicingServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations' => $this->app->databasePath('migrations'),
         ], 'einvoicing-migrations');
+
+        $this->commands([
+            Console\DoctorCommand::class,
+            Console\InstallCommand::class,
+            Console\PollCommand::class,
+            Console\PruneEventsCommand::class,
+            Console\RetryEventsCommand::class,
+            Console\SecretCommand::class,
+            Console\SyncRetryStrategyCommand::class,
+            Console\SyncWebhooksCommand::class,
+        ]);
     }
 }
