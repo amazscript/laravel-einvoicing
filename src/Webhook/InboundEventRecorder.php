@@ -12,13 +12,13 @@ use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 
 /**
- * Consigne une livraison authentifiée, une fois et une seule.
+ * Records an authenticated delivery, once and only once.
  *
- * La livraison est garantie « au moins une fois » : la même chose peut arriver
- * plusieurs fois. L'unicité est portée par la base, jamais par une lecture
- * préalable — entre le SELECT et l'INSERT, une seconde livraison a le temps de
- * passer. Une violation de contrainte signifie donc « déjà reçu », ce qui est un
- * succès et non une erreur.
+ * Delivery is at-least-once: the same thing may arrive several times. Uniqueness
+ * is enforced by the database, never by reading beforehand — between a SELECT
+ * and an INSERT a second delivery has all the time it needs. A constraint
+ * violation therefore means "already received", which is a success and not an
+ * error.
  */
 final class InboundEventRecorder
 {
@@ -28,7 +28,7 @@ final class InboundEventRecorder
     ) {}
 
     /**
-     * Retourne l'événement consigné, ou null si cette livraison était déjà connue.
+     * Returns the recorded event, or null when the delivery was already known.
      */
     public function record(InboundRequest $request): ?WebhookEvent
     {
@@ -40,7 +40,7 @@ final class InboundEventRecorder
                 'event_id' => $cle,
                 'event_type' => $this->interpreter->eventType($request),
                 'tenant_id' => $tenant?->id,
-                // Un événement non routé n'est pas perdu : il reste rejouable.
+                // An unrouted event is not lost: it stays replayable.
                 'status' => $tenant === null ? WebhookEventStatus::Unrouted : WebhookEventStatus::Received,
                 'payload' => $this->payloadToStore($request),
                 'received_at' => Carbon::now(),
@@ -55,8 +55,8 @@ final class InboundEventRecorder
     }
 
     /**
-     * Le payload est conservé intégralement : c'est la seule matière disponible
-     * pour rejouer un événement dont le traitement a échoué.
+     * The payload is kept in full: it is the only material available to replay
+     * an event whose processing failed.
      *
      * @return array<string, mixed>
      */
@@ -66,7 +66,7 @@ final class InboundEventRecorder
             return $request->payload;
         }
 
-        // Corps illisible : on garde tout de même de quoi enquêter.
+        // Unreadable body: enough is kept to investigate anyway.
         return [
             'raw' => $request->rawBody,
             'multipart' => $request->isMultipart,
@@ -75,8 +75,8 @@ final class InboundEventRecorder
 
     private function isDuplicate(QueryException $e): bool
     {
-        // 23000 et 23505 couvrent la violation de contrainte unique sur MySQL,
-        // PostgreSQL et SQLite.
+        // 23000 and 23505 cover unique constraint violations on MySQL,
+        // PostgreSQL and SQLite.
         return in_array($e->getCode(), ['23000', '23505'], true);
     }
 }

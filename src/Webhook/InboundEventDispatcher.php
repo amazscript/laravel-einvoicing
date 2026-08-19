@@ -12,11 +12,11 @@ use AmazScript\Einvoicing\Models\WebhookEvent;
 use Illuminate\Contracts\Config\Repository as Config;
 
 /**
- * Met en file le traitement d'un événement encaissé.
+ * Queues the processing of a banked event.
  *
- * Le contrôleur ne traite rien lui-même : il doit rendre la main sous quelques
- * dizaines de millisecondes, sans quoi la plateforme considère la livraison en
- * échec et la rejoue.
+ * The controller processes nothing itself: it has to return within a few tens of
+ * milliseconds, otherwise the platform treats the delivery as failed and
+ * replays it.
  */
 final class InboundEventDispatcher
 {
@@ -26,16 +26,15 @@ final class InboundEventDispatcher
 
     public function dispatch(WebhookEvent $event): void
     {
-        // Un événement non routé n'est pas traitable : on ignore à qui il
-        // appartient. Il reste en base, en attente que le tenant soit créé,
-        // puis sera rejoué. Le traiter maintenant produirait une donnée
-        // rattachée à personne.
+        // An unrouted event cannot be processed: we do not know whose it is. It
+        // stays in the database until the tenant exists, then gets replayed.
+        // Processing it now would produce data attached to nobody.
         if ($event->status !== WebhookEventStatus::Received) {
             return;
         }
 
-        // Un événement remis en file sans tenant retombe en UNROUTED : le
-        // rejeu doit le constater plutôt que de croire l'avoir traité.
+        // An event requeued without a tenant falls back to UNROUTED: the retry
+        // must observe that rather than believe it handled it.
         if ($event->tenant_id === null) {
             $event->forceFill(['status' => WebhookEventStatus::Unrouted])->save();
 
@@ -60,8 +59,8 @@ final class InboundEventDispatcher
             ->onConnection(is_string($connexion) && $connexion !== '' ? $connexion : null)
             ->onQueue(is_string($file) && $file !== '' ? $file : null);
 
-        // La mise en file attend la validation de la transaction : sans cela, un
-        // rollback laisserait un job courir après une ligne qui n'existe pas.
+        // Queueing waits for the transaction to commit: otherwise a rollback
+        // would leave a job chasing a row that does not exist.
         $pending->afterCommit();
     }
 }

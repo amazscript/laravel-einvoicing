@@ -7,11 +7,10 @@ namespace AmazScript\Einvoicing\Console;
 use Illuminate\Console\Command;
 
 /**
- * Produit le secret partagé avec la plateforme.
+ * Produces the secret shared with the platform.
  *
- * C'est l'intégrateur qui fournit ce secret lors de la déclaration du webhook,
- * la plateforme ne le génère pas. Il faut donc l'obtenir avant de déclarer quoi
- * que ce soit.
+ * The integrator supplies this secret when declaring the webhook; the platform
+ * does not generate it. It therefore has to exist before anything is declared.
  */
 final class SecretCommand extends Command
 {
@@ -21,8 +20,8 @@ final class SecretCommand extends Command
 
     public function handle(): int
     {
-        // 32 octets aléatoires rendus en hexadécimal : la plateforme recommande
-        // au moins cette longueur.
+        // 32 random bytes rendered in hexadecimal: the platform recommends at
+        // least that length.
         $secret = bin2hex(random_bytes(32));
 
         $this->newLine();

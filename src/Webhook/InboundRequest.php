@@ -8,17 +8,17 @@ use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 
 /**
- * Vue d'une requête entrante, réduite à ce qui sert à l'authentifier.
+ * A view of an inbound request, reduced to what authenticating it requires.
  *
- * Toute la subtilité tient dans la source du checksum :
+ * The subtlety lies entirely in the checksum source:
  *
- *   - en `application/json`, c'est le corps brut intégral ;
- *   - en `multipart/form-data`, c'est le contenu du champ fichier **seul**.
+ *   - for `application/json`, the whole raw body;
+ *   - for `multipart/form-data`, the file field content **alone**.
  *
- * Et surtout, en multipart le corps brut n'est plus lisible : PHP l'a déjà
- * consommé pour peupler $_POST et $_FILES, si bien que php://input renvoie une
- * chaîne vide. Vérifié sur une requête réelle. On passe donc par le fichier
- * temporaire, ce qui donne exactement la source attendue.
+ * More importantly, in multipart the raw body is no longer readable: PHP has
+ * already consumed it to populate $_POST and $_FILES, so php://input returns an
+ * empty string. Verified on a real request. The uploaded temporary file is read
+ * instead, which yields exactly the expected source.
  */
 final class InboundRequest
 {
@@ -38,9 +38,9 @@ final class InboundRequest
     {
         $file = self::firstUploadedFile($request);
 
-        // On ne se fie pas au seul en-tête Content-Type : derrière un proxy, ou
-        // selon la façon dont la requête est reconstruite, il peut manquer. La
-        // présence d'un fichier uploadé est le signe le plus fiable.
+        // The Content-Type header alone is not trusted: behind a proxy, or
+        // depending on how the request is rebuilt, it may be missing. The
+        // presence of an uploaded file is the more reliable signal.
         $multipart = $file instanceof UploadedFile
             || str_contains($request->headers->get('Content-Type') ?? '', 'multipart/form-data');
 
@@ -84,8 +84,9 @@ final class InboundRequest
 
     private static function firstUploadedFile(Request $request): ?UploadedFile
     {
-        // La plateforme transmet la facture dans un champ nommé « file ». On le
-        // privilégie, sans exclure un autre nom : le corps signé reste le fichier.
+        // The platform sends the invoice in a field named "file". That one is
+        // preferred, without excluding another name: the signed body is still
+        // the file.
         $files = $request->allFiles();
         $candidat = $files['file'] ?? (count($files) > 0 ? reset($files) : null);
 

@@ -7,16 +7,16 @@ namespace AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers;
 use AmazScript\Einvoicing\Contracts\StatusMapper;
 
 /**
- * Lecture d'un statut de cycle de vie tel que la plateforme l'envoie.
+ * Reads a lifecycle status as the platform actually sends it.
  *
- * Structure observée sur une livraison réelle :
+ * Shape observed on a real delivery:
  *
  *     { invoiceId, statusId, date, destType, status: { code, value?, desc? },
  *       xml, json: { identification, responses[], recipients[], … } }
  *
- * Seul `status.code` s'est révélé systématiquement présent. Le code réseau
- * arrive sous `networkCode` et non sous `value` comme l'annonce la
- * documentation, et `desc` manque souvent : rien de tout cela n'est exigé.
+ * Only `status.code` proved to be always present. The network code arrives under
+ * `networkCode` rather than `value` as the documentation announces, and `desc`
+ * is often missing: none of it is required here.
  */
 final class IopoleStatusMapper implements StatusMapper
 {
@@ -32,7 +32,7 @@ final class IopoleStatusMapper implements StatusMapper
 
         $code = $this->string($status['code'] ?? null);
 
-        // Sans identifiant ni code, il n'y a pas de statut à consigner.
+        // Without an identifier and a code there is no status to record.
         if ($statusId === null || $code === null) {
             return null;
         }
@@ -41,18 +41,18 @@ final class IopoleStatusMapper implements StatusMapper
             'provider_status_id' => $statusId,
             'provider_invoice_id' => $this->string($payload['invoiceId'] ?? null),
             'code' => $code,
-            // Le code réseau — « 202 » pour RECEIVED — arrive sous networkCode.
-            // La documentation le nomme value ; les livraisons réelles, non.
+            // The network code — "202" for RECEIVED — arrives under networkCode.
+            // The documentation calls it value; real deliveries do not.
             'value' => $this->string($status['networkCode'] ?? null)
                 ?? $this->string($status['value'] ?? null),
             'description' => $this->string($status['desc'] ?? null) ?? $this->rejectionMessage($payload),
             'dest_type' => $this->string($payload['destType'] ?? null),
             'occurred_at' => $this->string($payload['date'] ?? null),
-            // Référence commune avec la facture reçue : le numéro que l'émetteur
-            // lui a donné, qualifié par son SIREN.
+            // Shared reference with the received invoice: the number its issuer
+            // gave it, qualified by their SIREN.
             'issuer_invoice_number' => $this->string($this->documentReference($payload)['issuerAssignedId'] ?? null),
             'issuer_siren' => $this->issuerSiren($payload),
-            // JSON et XML bruts conservés : c'est la pièce justificative du statut.
+            // Raw JSON and XML kept: they are the status's supporting evidence.
             'payload' => $payload,
         ];
     }
@@ -87,8 +87,8 @@ final class IopoleStatusMapper implements StatusMapper
     }
 
     /**
-     * Un rejet porte sa raison dans la réponse ; elle vaut mieux qu'une
-     * description vide pour comprendre ce qui s'est passé.
+     * A rejection carries its reason in the response; that beats an empty
+     * description when trying to understand what happened.
      *
      * @param  array<string, mixed>  $payload
      */

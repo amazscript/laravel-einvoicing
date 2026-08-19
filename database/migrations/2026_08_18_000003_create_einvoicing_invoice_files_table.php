@@ -23,7 +23,7 @@ return new class extends Migration
 
             $table->timestamps();
 
-            // Un re-téléchargement du même contenu ne doit pas créer un second fichier.
+            // Downloading the same content again must not create a second file.
             $table->unique(['invoice_id', 'kind', 'checksum']);
 
             $table->foreign('invoice_id')

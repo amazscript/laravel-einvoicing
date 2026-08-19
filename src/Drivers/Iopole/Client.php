@@ -14,12 +14,12 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\LazyCollection;
 
 /**
- * Client HTTP de la plateforme Iopole.
+ * HTTP client for the Iopole platform.
  *
- * Il ne fait que transporter : authentifier la requête, l'envoyer, et traduire
- * une réponse d'erreur en exception. Aucune décision métier ici — notamment,
- * un 409 DUPLICATE_RESOURCE est signalé, pas interprété : c'est à l'appelant
- * de décider qu'un doublon est un succès.
+ * It only carries: authenticate the request, send it, and turn an error response
+ * into an exception. No business decision here — a 409 DUPLICATE_RESOURCE is
+ * reported, not interpreted: deciding that a duplicate is a success belongs to
+ * the caller.
  */
 final class Client
 {
@@ -32,8 +32,8 @@ final class Client
     ) {}
 
     /**
-     * Retourne un client identique agissant pour le compte d'un autre customer-id.
-     * Le parc étant multi-tenant, chaque appel doit porter celui du bon dossier.
+     * Returns an identical client acting under another customer-id. The estate
+     * being multi-tenant, every call must carry the right one.
      */
     public function forCustomer(string $customerId): self
     {
@@ -76,12 +76,12 @@ final class Client
     }
 
     /**
-     * Parcourt un endpoint paginé sans jamais tout charger en mémoire.
+     * Walks a paginated endpoint without ever loading everything into memory.
      *
-     * Les listes paginées répondent `{ data: [...], meta: { offset, limit, count } }`,
-     * `count` donnant le total. On avance page par page, et l'itération s'arrête
-     * dès qu'une page revient vide — une garantie contre la boucle infinie si le
-     * total annoncé ne correspond pas à ce qui est servi.
+     * Paginated lists answer `{ data: [...], meta: { offset, limit, count } }`,
+     * where `count` is the total. Pages are fetched one at a time, and iteration
+     * stops as soon as a page comes back empty — a guard against looping forever
+     * should the announced total disagree with what is served.
      *
      * @param  array<string, mixed>  $query
      * @return LazyCollection<int, array<mixed>>
@@ -113,12 +113,11 @@ final class Client
     }
 
     /**
-     * Récupère un corps sans tenter de le décoder.
+     * Fetches a body without attempting to decode it.
      *
-     * Nécessaire pour les fichiers (XML, PDF, pièces jointes) mais aussi pour
-     * certains endpoints qui renvoient une valeur nue : /v1/config/customer/id
-     * répond en text/html avec l'identifiant seul, malgré une documentation qui
-     * annonce de l'application/json.
+     * Needed for files (XML, PDF, attachments) but also for endpoints returning a
+     * bare value: /v1/config/customer/id answers in text/html with the identifier
+     * alone, despite documentation announcing application/json.
      */
     public function raw(string $path): string
     {
@@ -132,8 +131,8 @@ final class Client
     {
         $response = $this->dispatch($method, $path, $data);
 
-        // Un 401 peut simplement signifier que le jeton mémorisé a été révoqué :
-        // on le jette et on retente une fois, avec un jeton neuf.
+        // A 401 may simply mean the cached token was revoked: it is discarded
+        // and the call retried once, with a fresh one.
         if ($response->status() === 401) {
             $this->tokens->forget();
             $response = $this->dispatch($method, $path, $data);
@@ -154,7 +153,7 @@ final class Client
         try {
             return $this->request()->{$method}($path, $data);
         } catch (ConnectionException $e) {
-            throw new EinvoicingServerException('Plateforme injoignable : '.$e->getMessage());
+            throw new EinvoicingServerException('Platform unreachable: '.$e->getMessage());
         }
     }
 
@@ -183,7 +182,7 @@ final class Client
         $decoded = $response->json();
 
         if (! is_array($decoded)) {
-            throw new EinvoicingServerException('Réponse de la plateforme illisible : JSON attendu.');
+            throw new EinvoicingServerException('Unreadable platform response: JSON expected.');
         }
 
         return $decoded;

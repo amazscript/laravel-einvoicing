@@ -7,19 +7,19 @@ namespace AmazScript\Einvoicing\Webhook;
 use AmazScript\Einvoicing\Contracts\SignatureVerifier;
 
 /**
- * Vérification HMAC-SHA256 des requêtes entrantes de la plateforme.
+ * HMAC-SHA256 verification of the platform's inbound requests.
  *
- * Chaîne canonique :
+ * Canonical string:
  *
- *     {X-Timestamp}\n{MÉTHODE}\n{chemin_avec_query}\n{checksum}
+ *     {X-Timestamp}\n{METHOD}\n{path_with_query}\n{checksum}
  *
- * Le checksum porte sur le corps brut intégral en `application/json`, mais
- * uniquement sur le contenu du champ fichier en `multipart/form-data` — les
- * autres champs du formulaire en sont exclus. C'est la source d'erreur
- * principale de cette intégration, et c'est à l'appelant de fournir la bonne
- * source : cette classe ne devine pas le type de contenu.
+ * The checksum covers the whole raw body for `application/json`, but only the
+ * file field content for `multipart/form-data` — the other form fields are
+ * excluded. This is the main source of error in the integration, and supplying
+ * the right source is the caller's job: this class does not guess the content
+ * type.
  *
- * Signature et checksum sont en hexadécimal.
+ * Signature and checksum are hexadecimal.
  */
 final class HmacSignatureVerifier implements SignatureVerifier
 {
@@ -37,7 +37,7 @@ final class HmacSignatureVerifier implements SignatureVerifier
         string $pathWithQuery,
         string $checksumSource,
     ): bool {
-        // Un secret absent ne doit jamais valoir absence de contrôle.
+        // A missing secret must never amount to skipping verification.
         if ($this->secret === '') {
             return false;
         }
@@ -55,8 +55,8 @@ final class HmacSignatureVerifier implements SignatureVerifier
 
         $checksum = hash('sha256', $checksumSource);
 
-        // L'en-tête de checksum est optionnel, mais s'il est fourni il doit
-        // concorder : on le vérifie avant la signature, comme le veut la doc.
+        // The checksum header is optional, but when present it has to match:
+        // it is checked before the signature, as the documentation requires.
         $received = $headers['x-checksum'] ?? null;
 
         if (is_string($received) && $received !== '' && ! hash_equals($checksum, $received)) {
@@ -66,8 +66,8 @@ final class HmacSignatureVerifier implements SignatureVerifier
         $canonical = $timestamp."\n".strtoupper($method)."\n".$pathWithQuery."\n".$checksum;
         $expected = hash_hmac('sha256', $canonical, $this->secret);
 
-        // Comparaison en temps constant : une comparaison naïve laisserait fuiter
-        // la signature attendue, octet par octet, par mesure du temps de réponse.
+        // Constant-time comparison: a naive one would leak the expected
+        // signature byte by byte, through response timing.
         return hash_equals($expected, $signature);
     }
 
@@ -77,21 +77,21 @@ final class HmacSignatureVerifier implements SignatureVerifier
             return false;
         }
 
-        // Le décalage est pris en valeur absolue : une horloge en avance est
-        // aussi suspecte qu'une requête rejouée après coup.
+        // The drift is taken in absolute value: a clock running ahead is as
+        // suspect as a request replayed after the fact.
         return abs(time() - $this->toSeconds((int) $timestamp)) <= $this->toleranceSeconds;
     }
 
     /**
-     * Ramène l'horodatage en secondes.
+     * Brings the timestamp back to seconds.
      *
-     * Constaté sur une livraison réelle : la plateforme envoie des millisecondes,
-     * ce que sa documentation ne mentionne nulle part. Comparé tel quel à time(),
-     * l'écart se compte en milliers d'années et toute livraison authentique est
-     * rejetée. L'unité n'étant pas contractuelle, les deux sont acceptées.
+     * Observed on a real delivery: the platform sends milliseconds, which no
+     * page of its documentation mentions. Compared to time() as-is, the drift is
+     * measured in thousands of years and every genuine delivery is rejected. The
+     * unit is not contractual, so both are accepted.
      *
-     * Le seuil correspond à l'an 5138 en secondes, soit novembre 1973 en
-     * millisecondes : aucune valeur plausible ne peut être classée à tort.
+     * The threshold reads as year 5138 in seconds and November 1973 in
+     * milliseconds: no plausible value can be misclassified.
      */
     private function toSeconds(int $timestamp): int
     {

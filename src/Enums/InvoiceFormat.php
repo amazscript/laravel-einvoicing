@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Enums;
 
 /**
- * Format d'origine de la facture reçue.
+ * Source format of a received invoice.
  *
- * Le package ne produit aucun de ces formats : il constate celui que la
- * Plateforme Agréée annonce.
+ * The package produces none of these: it records whichever one the accredited
+ * platform reports.
  */
 enum InvoiceFormat: string
 {

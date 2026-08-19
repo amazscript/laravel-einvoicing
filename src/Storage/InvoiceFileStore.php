@@ -11,11 +11,11 @@ use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 
 /**
- * Écrit les fichiers d'une facture sur le disque configuré par l'application.
+ * Writes an invoice's files to the disk configured by the application.
  *
- * Le stockage est idempotent : un contenu déjà présent, reconnu à son empreinte,
- * n'est ni réécrit ni dupliqué. Rejouer un téléchargement ne coûte donc rien et
- * ne laisse pas de fichiers orphelins.
+ * Storage is idempotent by content: material already on record, recognised by
+ * its digest, is neither rewritten nor duplicated. Replaying a download
+ * therefore costs nothing and leaves no orphan files.
  */
 final class InvoiceFileStore
 {
@@ -59,11 +59,11 @@ final class InvoiceFileStore
     }
 
     /**
-     * Relit un fichier depuis le disque où il a été rangé.
+     * Reads a file back from the disk it was written to.
      *
-     * Le disque est celui enregistré avec le fichier, pas celui configuré
-     * aujourd'hui : une facture rangée hier reste lisible si la configuration a
-     * changé depuis.
+     * That disk is the one recorded with the file, not the one configured today:
+     * an invoice stored yesterday stays readable if the configuration has
+     * changed since.
      */
     public function contents(InvoiceFile $file): string
     {
@@ -78,9 +78,9 @@ final class InvoiceFileStore
     }
 
     /**
-     * Le chemin est dérivé de l'identifiant de facture et de l'empreinte, jamais
-     * du nom d'origine : celui-ci vient de l'extérieur et pourrait remonter
-     * l'arborescence. Seule l'extension en est reprise, et filtrée.
+     * The path derives from the invoice id and the digest, never from the
+     * transmitted filename: that name comes from outside and could climb the
+     * tree. Only its extension is reused, after filtering.
      */
     private function path(InboundInvoice $invoice, InvoiceFileKind $kind, string $checksum, ?string $filename): string
     {

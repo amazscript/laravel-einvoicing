@@ -12,16 +12,16 @@ use Illuminate\Database\Eloquent\Builder;
 use Psr\Log\LoggerInterface;
 
 /**
- * Résolution du destinataire, par ordre de fiabilité décroissante.
+ * Resolves the recipient, from the most reliable key to the least.
  *
- *   1. identifiant externe renvoyé par la plateforme (idPath)
- *   2. SIRET du destinataire — désigne un établissement précis
- *   3. SIREN du destinataire — désigne l'entreprise
- *   4. tenant par défaut, si le parc n'en compte qu'un seul actif
+ *   1. external identifier echoed back by the platform (idPath)
+ *   2. recipient SIRET — designates one specific establishment
+ *   3. recipient SIREN — designates the company
+ *   4. default tenant, when only one is active in the whole estate
  *
- * Principe : mal router est pire que ne pas router. Dès qu'une étape laisse
- * plusieurs candidats possibles, on renonce plutôt que de trancher au hasard —
- * l'événement part alors en UNROUTED, où il reste rejouable.
+ * Guiding rule: misrouting is worse than not routing. As soon as a step leaves
+ * more than one candidate, resolution gives up rather than picking arbitrarily —
+ * the delivery then lands in UNROUTED, where it stays replayable.
  */
 final class SiretResolver implements TenantResolver
 {
@@ -41,10 +41,10 @@ final class SiretResolver implements TenantResolver
         }
 
         if ($this->isAmbiguousSiren($keys)) {
-            return $this->fail($keys, 'plusieurs tenants actifs partagent ce SIREN');
+            return $this->fail($keys, 'several active tenants share this SIREN');
         }
 
-        return $this->defaultTenant($keys) ?? $this->fail($keys, 'aucune clé de routage exploitable');
+        return $this->defaultTenant($keys) ?? $this->fail($keys, 'no usable routing key');
     }
 
     private function byExternalId(RoutingKeys $keys): ?Tenant
@@ -64,8 +64,8 @@ final class SiretResolver implements TenantResolver
     }
 
     /**
-     * Le SIREN transmis prime ; à défaut, celui déduit du SIRET permet de router
-     * une facture adressée à un établissement inconnu du package.
+     * The transmitted SIREN wins; failing that, the one derived from the SIRET
+     * routes an invoice addressed to an establishment unknown to the package.
      */
     private function bySiren(RoutingKeys $keys): ?Tenant
     {
@@ -77,7 +77,7 @@ final class SiretResolver implements TenantResolver
 
         $candidats = $this->activeTenants()->where('siren', $siren);
 
-        // Un seul candidat, sinon on renonce : voir isAmbiguousSiren().
+        // Exactly one candidate, or we give up: see isAmbiguousSiren().
         return $candidats->count() === 1 ? $candidats->first() : null;
     }
 
@@ -89,8 +89,8 @@ final class SiretResolver implements TenantResolver
     }
 
     /**
-     * Dernier recours, réservé au parc mono-tenant. C'est un filet, pas une
-     * stratégie : l'avertissement doit rester visible en exploitation.
+     * Last resort, for single-tenant estates only. A safety net rather than a
+     * strategy, hence the warning that must stay visible in operation.
      */
     private function defaultTenant(RoutingKeys $keys): ?Tenant
     {
@@ -101,7 +101,7 @@ final class SiretResolver implements TenantResolver
         }
 
         $this->logger->warning(
-            'einvoicing: routage sur le tenant unique par défaut, aucune clé ne correspondait',
+            'einvoicing: routed to the single default tenant, no key matched',
             ['siret' => $this->mask($keys->normalizedSiret()), 'siren' => $this->mask($keys->normalizedSiren())],
         );
 
@@ -124,8 +124,8 @@ final class SiretResolver implements TenantResolver
     }
 
     /**
-     * Un identifiant d'entreprise ne doit pas apparaître en clair dans les
-     * journaux ; les quatre derniers chiffres suffisent au diagnostic.
+     * A company identifier must not appear in clear in the logs; the last four
+     * digits are enough to diagnose.
      */
     private function mask(?string $value): ?string
     {

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Events;
 
 /**
- * Une requête s'est présentée sur l'URL de rappel avec une signature invalide.
+ * A request reached the callback endpoint with an invalid signature.
  *
- * À surveiller de près : en régime normal cet événement ne se produit jamais.
- * Une série soudaine signale soit une rotation de secret mal propagée, soit une
- * tentative d'injection de fausses factures.
+ * Worth watching closely: under normal operation this never happens. A sudden
+ * run of them means either a secret rotation that did not propagate, or an
+ * attempt to inject forged invoices.
  */
 final class WebhookSignatureRejected
 {

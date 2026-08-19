@@ -15,12 +15,12 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
- * Repêche ce que les webhooks auraient manqué.
+ * Picks up whatever the webhooks missed.
  *
- * Un webhook peut se perdre : coupure réseau, application arrêtée, tunnel fermé.
- * Cette commande demande à la plateforme ce qu'elle n'a pas vu acquitté et
- * réinjecte le manquant dans le même circuit que les livraisons, déduplication
- * comprise — une facture déjà reçue par webhook ne sera donc pas traitée deux fois.
+ * A webhook can go missing: a network cut, a stopped application, a closed
+ * tunnel. This command asks the platform what it has not seen acknowledged and
+ * feeds the difference back through the same path as deliveries, deduplication
+ * included — an invoice already received by webhook is not handled twice.
  */
 final class PollCommand extends Command
 {
@@ -101,7 +101,7 @@ final class PollCommand extends Command
                     'received_at' => Carbon::now(),
                 ]);
             } catch (QueryException) {
-                // Déjà reçu par webhook : c'est précisément le but de la clé.
+                // Already received by webhook: precisely what the key is for.
                 continue;
             }
 
@@ -113,16 +113,15 @@ final class PollCommand extends Command
     }
 
     /**
-     * Un objet déjà reçu par webhook ne doit pas être réintroduit par le repli.
+     * Something already received by webhook must not be reintroduced by the poll.
      *
-     * La difficulté : un webhook se déduplique sur la clé d'idempotence fournie
-     * par la plateforme, tandis que le repli ne dispose que de l'identifiant
-     * métier. Les deux clés diffèrent pour un même objet. On regarde donc aussi
-     * dans le payload conservé.
+     * The difficulty: a webhook keys itself on the idempotency key the platform
+     * supplies, while the poll only knows the business identifier. The two keys
+     * differ for the same object, so stored payloads are inspected as well.
      *
-     * Cette vérification est applicative, contrairement à celle du webhook qui
-     * s'appuie sur la base : c'est acceptable ici, le repli étant une commande
-     * qu'on ne lance pas en parallèle d'elle-même.
+     * This check is application-level, unlike the webhook's which relies on the
+     * database. That is acceptable here: the poll is a command nobody runs
+     * against itself.
      *
      * @param  array<string, mixed>  $element
      */
@@ -143,8 +142,8 @@ final class PollCommand extends Command
     }
 
     /**
-     * La clé doit coïncider avec celle d'un webhook portant le même objet, sans
-     * quoi le repli créerait des doublons de ce qui est déjà arrivé.
+     * The key must coincide with the one a webhook carrying the same object would
+     * produce, otherwise the poll would duplicate what already arrived.
      *
      * @param  array<string, mixed>  $element
      */

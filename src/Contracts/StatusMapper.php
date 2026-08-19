@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Contracts;
 
 /**
- * Traduit le payload de statut d'une plateforme en attributs du modèle Status.
+ * Translates a platform's status payload into Status model attributes.
  *
- * Le job de traitement ne connaît donc aucune structure propre à un fournisseur.
+ * The processing job therefore knows no vendor-specific structure.
  */
 interface StatusMapper
 {
@@ -24,11 +24,11 @@ interface StatusMapper
      *     issuer_invoice_number: string|null,
      *     issuer_siren: string|null,
      *     payload: array<string, mixed>
-     * }|null  null si le payload ne décrit pas un statut exploitable
+     * }|null  null when the payload describes no usable status
      *
-     * issuer_invoice_number et issuer_siren désignent la facture telle que son
-     * émetteur l'a numérotée. C'est la seule référence commune entre un statut
-     * et la facture reçue, dont les identifiants techniques diffèrent.
+     * issuer_invoice_number and issuer_siren identify the invoice as its issuer
+     * numbered it. That is the only reference shared between a status and the
+     * received invoice, whose technical identifiers differ.
      */
     public function map(array $payload): ?array;
 }

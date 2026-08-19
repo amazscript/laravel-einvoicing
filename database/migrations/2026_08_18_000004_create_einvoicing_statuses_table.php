@@ -13,17 +13,17 @@ return new class extends Migration
         Schema::create('einvoicing_statuses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // Nullable : un statut peut arriver avant la facture qu'il concerne, ou porter
-            // sur une facture que le package ne connaît pas. Il est conservé quand même.
+            // Nullable: a status may arrive before the invoice it concerns, or
+            // refer to one the package does not know. It is kept regardless.
             $table->uuid('invoice_id')->nullable();
 
             $table->string('provider');
             $table->string('provider_status_id');
 
             $table->string('code');
-            // Constaté sur un statut réel : seul `code` est systématiquement présent.
-            // La documentation montre un trio code/value/desc, la plateforme n'en
-            // envoie parfois qu'un tiers.
+            // Observed on a real status: only `code` is always present. The
+            // documentation shows a code/value/desc triple, of which the platform
+            // sometimes sends a third.
             $table->string('value')->nullable();
             $table->text('description')->nullable();
             $table->string('dest_type')->nullable();

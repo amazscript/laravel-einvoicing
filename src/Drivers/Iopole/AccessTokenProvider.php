@@ -10,19 +10,19 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 
 /**
- * Obtient et conserve le jeton d'accès OAuth2 de la plateforme.
+ * Obtains and keeps the platform's OAuth2 access token.
  *
- * Le flux est client_credentials : on échange un identifiant et un secret contre
- * un access_token à durée de vie courte. Le jeton est mis en cache jusqu'à peu
- * avant son expiration pour éviter un aller-retour à chaque appel d'API.
+ * The flow is client_credentials: an id and a secret are exchanged for a
+ * short-lived access token. The token is cached until shortly before it expires,
+ * so that not every API call costs a round trip.
  *
- * Ni le secret ni le jeton n'apparaissent dans un message d'exception.
+ * Neither the secret nor the token appears in any exception message.
  */
 final class AccessTokenProvider
 {
     /**
-     * Marge de sécurité retirée à la durée de vie annoncée, pour ne jamais
-     * présenter un jeton qui expirerait pendant le trajet réseau.
+     * Safety margin subtracted from the announced lifetime, so that a token
+     * never expires mid-flight.
      */
     private const EXPIRY_MARGIN_SECONDS = 60;
 
@@ -46,8 +46,8 @@ final class AccessTokenProvider
     }
 
     /**
-     * Oublie le jeton mémorisé. À appeler sur un 401 pour forcer un renouvellement
-     * plutôt que de rejouer indéfiniment un jeton révoqué.
+     * Forgets the cached token. Called on a 401 to force a renewal rather than
+     * replaying a revoked token indefinitely.
      */
     public function forget(): void
     {
@@ -58,7 +58,7 @@ final class AccessTokenProvider
     {
         if ($this->clientId === '' || $this->clientSecret === '' || $this->tokenUrl === '') {
             throw new EinvoicingAuthException(
-                'Identifiants OAuth2 absents : renseignez IOPOLE_TOKEN_URL, IOPOLE_CLIENT_ID et IOPOLE_CLIENT_SECRET.'
+                'Missing OAuth2 credentials: set IOPOLE_TOKEN_URL, IOPOLE_CLIENT_ID and IOPOLE_CLIENT_SECRET.'
             );
         }
 
@@ -71,13 +71,13 @@ final class AccessTokenProvider
                     'client_secret' => $this->clientSecret,
                 ]);
         } catch (ConnectionException $e) {
-            throw new EinvoicingAuthException('Serveur d\'authentification injoignable.');
+            throw new EinvoicingAuthException('Authentication server unreachable.');
         }
 
         if ($response->failed()) {
-            // Le corps de la réponse n'est pas repris : il peut contenir l'identifiant client.
+            // The response body is not quoted: it may carry the client id.
             throw new EinvoicingAuthException(
-                'Authentification refusée par la plateforme.',
+                'Authentication refused by the platform.',
                 $response->status()
             );
         }
@@ -85,7 +85,7 @@ final class AccessTokenProvider
         $payload = $response->json();
 
         if (! is_array($payload) || ! isset($payload['access_token']) || ! is_string($payload['access_token'])) {
-            throw new EinvoicingAuthException('Réponse d\'authentification inexploitable : access_token absent.');
+            throw new EinvoicingAuthException('Unusable authentication response: access_token missing.');
         }
 
         $token = $payload['access_token'];
@@ -103,8 +103,8 @@ final class AccessTokenProvider
     }
 
     /**
-     * La clé est dérivée par hachage : l'identifiant client ne doit pas se
-     * retrouver en clair dans le magasin de cache ni dans ses logs.
+     * The key is derived by hashing: the client id must not end up in clear in
+     * the cache store or its logs.
      */
     private function cacheKey(): string
     {

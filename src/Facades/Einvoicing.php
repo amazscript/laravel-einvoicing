@@ -10,10 +10,10 @@ use AmazScript\Einvoicing\Models\Tenant;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * Façade de l'API publique.
+ * Facade over the public API.
  *
- * Seule façade du package : le code interne reçoit ses dépendances par
- * constructeur, ce qui le laisse testable sans conteneur.
+ * The package's only facade: internal code receives its dependencies through
+ * constructors, which keeps it testable without a container.
  *
  * @method static TenantScope for(Tenant $tenant)
  * @method static TenantScope operator()

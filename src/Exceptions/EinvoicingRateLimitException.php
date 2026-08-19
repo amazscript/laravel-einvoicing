@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Exceptions;
 
 /**
- * 429 : quota dépassé. La plateforme recommande un backoff exponentiel,
- * appliqué côté job et non côté client HTTP.
+ * 429: quota exceeded. The platform recommends exponential backoff, which is
+ * applied by the queued job rather than by the HTTP client.
  */
 final class EinvoicingRateLimitException extends EinvoicingException
 {
@@ -18,8 +18,7 @@ final class EinvoicingRateLimitException extends EinvoicingException
     }
 
     /**
-     * Délai conseillé avant nouvelle tentative, en secondes, si la plateforme
-     * l'a communiqué.
+     * Seconds to wait before retrying, when the platform states it.
      */
     public function retryAfter(): ?int
     {

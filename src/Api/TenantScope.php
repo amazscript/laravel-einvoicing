@@ -11,10 +11,10 @@ use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 use RuntimeException;
 
 /**
- * Tout ce qui se fait au nom d'un dossier.
+ * Everything done on behalf of one tenant.
  *
- * Chaque appel à la plateforme porte le customer-id du tenant : dans un parc
- * multi-tenant, se tromper d'en-tête reviendrait à lire les factures d'un autre.
+ * Every call to the platform carries that tenant's customer-id: in a
+ * multi-tenant estate, the wrong header reads someone else's invoices.
  */
 final class TenantScope
 {
@@ -30,7 +30,7 @@ final class TenantScope
     }
 
     /**
-     * @param  string  $id  identifiant du package, ou identifiant côté plateforme
+     * @param  string  $id  the package's own identifier, or the platform's
      */
     public function invoice(string $id): InvoiceHandle
     {
@@ -38,13 +38,13 @@ final class TenantScope
             ?? InboundInvoice::query()->where('provider_invoice_id', $id)->first();
 
         if (! $invoice instanceof InboundInvoice) {
-            throw new RuntimeException("Facture inconnue : {$id}");
+            throw new RuntimeException("Unknown invoice: {$id}");
         }
 
         if ($this->tenant instanceof Tenant && $invoice->tenant_id !== $this->tenant->id) {
-            // Barrière de cloisonnement : une facture appartient à un dossier,
-            // et un dossier ne lit jamais celles d'un autre.
-            throw new RuntimeException("La facture {$id} n'appartient pas à ce tenant.");
+            // Isolation barrier: an invoice belongs to one tenant, and a tenant
+            // never reads another's.
+            throw new RuntimeException("Invoice {$id} does not belong to this tenant.");
         }
 
         return new InvoiceHandle($invoice, $this->gateway, $this->store);

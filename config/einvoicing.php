@@ -8,11 +8,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Plateforme Agréée par défaut
+    | Default accredited platform
     |--------------------------------------------------------------------------
     |
-    | Le package est un Opérateur de Dématérialisation : il consomme l'API
-    | d'une Plateforme Agréée, il ne transmet ni ne certifie rien lui-même.
+    | The package acts as a dematerialisation operator: it consumes an accredited
+    | platform's API, and neither transmits nor certifies anything itself.
     |
     */
 
@@ -23,15 +23,15 @@ return [
         'iopole' => [
             'base_url' => env('IOPOLE_BASE_URL', 'https://api.ppd.iopole.fr'),
 
-            // Authentification OAuth2 client_credentials : la plateforme ne délivre
-            // pas de jeton permanent. On échange l'identifiant et le secret contre
-            // un access_token à durée de vie courte, renouvelé automatiquement.
+            // OAuth2 client_credentials authentication: the platform issues no
+            // permanent token. The id and secret are exchanged for a short-lived
+            // access token, renewed automatically.
             'token_url' => env('IOPOLE_TOKEN_URL'),
             'client_id' => env('IOPOLE_CLIENT_ID'),
             'client_secret' => env('IOPOLE_CLIENT_SECRET'),
 
-            // Customer-id de l'opérateur, envoyé en en-tête. En multi-tenant, celui
-            // du tenant concerné prime sur cette valeur par défaut.
+            // The operator's customer-id, sent as a header. In a multi-tenant
+            // estate, the tenant's own value takes precedence over this default.
             'customer_id' => env('IOPOLE_CUSTOMER_ID'),
         ],
 
@@ -39,19 +39,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Webhook entrant
+    | Inbound webhook
     |--------------------------------------------------------------------------
     |
-    | La Plateforme Agréée n'accepte qu'un seul callbackUrl par direction pour
-    | tout le parc : le routage vers le bon tenant est à la charge du package.
+    | The platform accepts a single callbackUrl per direction for the whole
+    | estate: routing to the right tenant is therefore up to the package.
     |
-    | canonical_path : chemin utilisé pour reconstruire la chaîne canonique de
-    | signature. À renseigner uniquement si un proxy ou un tunnel réécrit l'URI
-    | reçue, auquel cas la signature calculée localement ne correspondrait plus
-    | à celle produite par la plateforme. Null = on utilise l'URI de la requête.
+    | Apply no rate limiting to this route. A 429 returned to the platform would
+    | make it retry the delivery for nothing.
     |
-    | tolerance : écart maximal toléré, en secondes, entre X-Timestamp et
-    | l'horloge locale. Protection anti-rejeu.
+    | canonical_path: the path used to rebuild the signature's canonical string.
+    | Set it only when a proxy or a tunnel rewrites the incoming URI, in which
+    | case the locally computed signature would no longer match the one the
+    | platform produced over the public path. Null uses the request's own URI.
+    |
+    | tolerance: the largest accepted gap, in seconds, between X-Timestamp and
+    | the local clock. Replay protection.
     |
     */
 
@@ -66,8 +69,13 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Stockage des fichiers de facture
+    | Invoice file storage
     |--------------------------------------------------------------------------
+    |
+    | Files are stored under {path}/{invoice id}/. A file is read back from the
+    | disk recorded with it, not from the one configured today, so changing disk
+    | does not make past invoices unreadable.
+    |
     */
 
     'storage' => [
@@ -77,11 +85,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | File d'attente
+    | Queue
     |--------------------------------------------------------------------------
     |
-    | Le contrôleur webhook n'exécute aucun traitement métier : il vérifie,
-    | déduplique, dispatche et répond 2xx. Tout le reste passe en queue.
+    | The webhook controller performs no business processing: it verifies,
+    | deduplicates, dispatches and answers. Everything else goes to the queue,
+    | so a worker must be running or invoices are received but never used.
     |
     */
 
@@ -92,12 +101,12 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Rétention des événements
+    | Event retention
     |--------------------------------------------------------------------------
     |
-    | Durée au-delà de laquelle un événement webhook déjà traité peut être purgé
-    | par einvoicing:events:prune. Les événements non routés ou en échec ne sont
-    | jamais purgés : ils portent une donnée qui n'a pas encore été exploitée.
+    | How long an already-processed webhook event is kept before
+    | einvoicing:events:prune may remove it. Unrouted and failed events are never
+    | pruned: they hold data nobody has acted upon yet.
     |
     */
 
@@ -107,11 +116,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Résolution du tenant
+    | Tenant resolution
     |--------------------------------------------------------------------------
     |
-    | Remplaçable par toute classe implémentant le contrat TenantResolver.
-    | Implémentation fournie à partir de D07.
+    | Replaceable by any class implementing the TenantResolver contract.
     |
     */
 

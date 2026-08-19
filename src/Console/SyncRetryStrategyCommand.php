@@ -10,11 +10,10 @@ use AmazScript\Einvoicing\Exceptions\EinvoicingException;
 use Illuminate\Console\Command;
 
 /**
- * Affiche la stratégie de relance appliquée par la plateforme.
+ * Shows the retry strategy the platform applies.
  *
- * Elle détermine combien de fois une livraison sera retentée si l'application
- * est indisponible : c'est la marge dont on dispose pour redémarrer avant de
- * perdre une facture.
+ * It determines how many times a delivery is retried while the application is
+ * unavailable: that is the margin available to restart before losing an invoice.
  */
 final class SyncRetryStrategyCommand extends Command
 {

@@ -12,16 +12,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 /**
- * Point d'entrée des livraisons de la plateforme.
+ * Entry point for the platform's deliveries.
  *
- * Ne fait que trois choses : authentifier, encaisser, répondre. Aucun traitement
- * métier ici — il part en file d'attente.
+ * Does three things only: authenticate, bank, answer. No business processing
+ * here — that goes to the queue.
  *
- * Règle absolue sur les codes de retour : une erreur métier ne doit jamais
- * produire un 5xx. La plateforme le prendrait pour une panne et relancerait sa
- * stratégie de retry pour rien. Un payload incompréhensible est donc encaissé et
- * répondu en 2xx ; seule une signature invalide vaut un 401, car là il n'y a
- * rien à conserver.
+ * An absolute rule about return codes: a business error must never produce a
+ * 5xx. The platform would read it as an outage and start retrying for nothing.
+ * An unintelligible payload is therefore banked and answered in the 2xx range;
+ * only an invalid signature earns a 401, since there is nothing worth keeping.
  */
 final class WebhookController
 {
@@ -53,13 +52,13 @@ final class WebhookController
                 (string) $request->ip(),
             ));
 
-            // Rien n'est persisté : une requête non authentifiée n'est pas une
-            // donnée, c'est du bruit, potentiellement hostile.
+            // Nothing is persisted: an unauthenticated request is not data but
+            // noise, potentially hostile.
             return new Response('invalid signature', 401);
         }
 
-        // Déjà reçu : la plateforme livre au moins une fois, un rejeu est normal.
-        // On répond comme pour un succès afin qu'elle cesse de relancer.
+        // Already received: delivery is at-least-once, so a replay is normal.
+        // We answer as for a success so the platform stops retrying.
         $event = $this->recorder->record($inbound);
 
         if ($event !== null) {

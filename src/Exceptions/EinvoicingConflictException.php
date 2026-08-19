@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Exceptions;
 
 /**
- * 409 : conflit avec l'état du serveur.
+ * 409: conflict with the current state of the server.
  *
- * Le cas DUPLICATE_RESOURCE signale que la ressource existe déjà. C'est le
- * résultat attendu d'un rejeu : l'appelant doit le traiter comme un succès,
- * ce que permet isDuplicateResource(). Le client, lui, ne décide pas à sa place.
+ * DUPLICATE_RESOURCE means the resource already exists. That is the expected
+ * outcome of a replay, and the caller should treat it as a success — which
+ * isDuplicateResource() allows. The client does not decide on its behalf.
  */
 final class EinvoicingConflictException extends EinvoicingException
 {
     public function __construct(
         string $message,
-        // Nommée errorCode et non code : Exception possède déjà une propriété $code.
+        // Named errorCode rather than code: Exception already owns a $code property.
         private readonly ?string $errorCode = null,
     ) {
         parent::__construct($message, 409);

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Drivers\Iopole;
 
 /**
- * Chemins de l'API Iopole utilisés par la réception (v0.1).
+ * The Iopole API paths used for receiving invoices (v0.1).
  *
- * La version d'API est encapsulée ici et nulle part ailleurs : le consommateur
- * du package n'a jamais à savoir qu'un endpoint est en /v1 et un autre en /v1.1.
+ * The API version is encapsulated here and nowhere else: a consumer of the
+ * package never has to know that one endpoint lives in /v1 and another in /v1.1.
  *
- * Seuls les chemins du périmètre de réception figurent ici. L'émission, l'e-reporting
- * et l'onboarding sont hors v0.1.
+ * Only receiving-side paths appear here. Issuing, e-reporting and onboarding are
+ * outside v0.1.
  */
 final class Endpoints
 {
@@ -36,8 +36,8 @@ final class Endpoints
     }
 
     /**
-     * Recherche de factures. Cet endpoint vit en v1.1 quand le reste est en v1 :
-     * c'est précisément ce que cette classe existe pour masquer.
+     * Invoice search. This endpoint lives in v1.1 while the rest is in v1 —
+     * precisely what this class exists to hide.
      */
     public static function searchInvoices(): string
     {

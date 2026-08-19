@@ -9,23 +9,23 @@ use AmazScript\Einvoicing\Tenancy\RoutingKeys;
 use AmazScript\Einvoicing\Webhook\InboundRequest;
 
 /**
- * Conventions de livraison de la plateforme Iopole, relevées sur des livraisons
- * réelles autant que dans sa documentation.
+ * The Iopole platform's delivery conventions, taken from real deliveries as much
+ * as from its documentation.
  */
 final class IopolePayloadInterpreter implements PayloadInterpreter
 {
     /**
-     * Ordre de préférence pour identifier une livraison :
+     * Order of preference for identifying a delivery:
      *
-     *   1. l'en-tête X-Idempotency-Key, que la plateforme fournit et qui reste
-     *      constant d'une nouvelle tentative à l'autre ;
-     *   2. à défaut, l'identifiant métier de l'objet livré — statusId pour un
-     *      statut, invoiceId pour une facture, eventId pour un événement ;
-     *   3. en dernier recours, une empreinte du contenu, pour qu'une même
-     *      livraison répétée reste reconnue même sans identifiant.
+     *   1. the X-Idempotency-Key header, supplied by the platform and constant
+     *      across retries;
+     *   2. failing that, the business identifier of whatever was delivered —
+     *      statusId for a status, invoiceId for an invoice, eventId for an event;
+     *   3. as a last resort, a digest of the content, so that the same delivery
+     *      repeated stays recognisable even without an identifier.
      *
-     * Le préfixe évite qu'un identifiant de statut et une empreinte se
-     * ressemblent par accident.
+     * The prefix keeps a status identifier and a digest from resembling each
+     * other by accident.
      */
     public function idempotencyKey(InboundRequest $request): string
     {
@@ -48,8 +48,8 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
 
     public function eventType(InboundRequest $request): string
     {
-        // Les événements génériques annoncent eux-mêmes leur type ; les factures
-        // et les statuts, non : on les reconnaît à leur forme.
+        // Generic events announce their own type; invoices and statuses do not,
+        // and are recognised by their shape.
         $declare = $request->payload['eventType'] ?? null;
 
         if (is_string($declare) && $declare !== '') {
@@ -64,9 +64,8 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
     }
 
     /**
-     * Le destinataire arrive dans un en-tête dédié, sous la forme
-     * `scheme:valeur` — le schéma 0002 désignant un SIREN. Quand il manque, on
-     * se rabat sur les destinataires portés par le payload.
+     * The recipient arrives in a dedicated header, shaped `scheme:value`. When
+     * it is missing, the recipients carried by the payload are used instead.
      */
     public function routingKeys(InboundRequest $request): RoutingKeys
     {
@@ -79,10 +78,10 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
             [$scheme, $valeur] = explode(':', $adresse, 2);
             $chiffres = preg_replace('/\D/', '', $valeur) ?? '';
 
-            // 0002 désigne le répertoire SIRENE, 0009 le SIRET, et 0225 les
-            // adresses électroniques françaises — celui que la plateforme emploie
-            // réellement. Ce dernier accepte les deux longueurs, seule la valeur
-            // dit s'il s'agit d'une entreprise ou d'un établissement.
+            // 0002 is the SIRENE registry, 0009 the SIRET, and 0225 French
+            // electronic addresses — the one the platform actually uses. That
+            // last one takes both lengths; only the value tells a company from
+            // an establishment.
             match (true) {
                 $scheme === '0002' && strlen($chiffres) === 9 => $siren = $chiffres,
                 $scheme === '0009' && strlen($chiffres) === 14 => $siret = $chiffres,

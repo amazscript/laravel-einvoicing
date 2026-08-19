@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
- * Rattache un dossier de l'application hôte à un compte de la Plateforme Agréée.
+ * Links a record of the host application to an accredited platform account.
  *
- * Le SIRET et le SIREN sont les clés de routage du webhook : la plateforme
- * n'accepte qu'un seul callbackUrl pour tout le parc.
+ * SIRET and SIREN are the webhook's routing keys: the platform accepts a single
+ * callback URL for the whole estate.
  *
  * @property string $id
  * @property string $tenantable_type

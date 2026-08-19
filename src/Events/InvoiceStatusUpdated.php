@@ -7,11 +7,11 @@ namespace AmazScript\Einvoicing\Events;
 use AmazScript\Einvoicing\Models\Status;
 
 /**
- * Un statut de cycle de vie a été reçu et consigné.
+ * A lifecycle status has been received and recorded.
  *
- * La facture concernée peut être inconnue du package : un statut arrive parfois
- * avant elle, ou porte sur un document qu'il n'a jamais vu. Le statut est alors
- * conservé sans rattachement.
+ * The invoice it refers to may be unknown to the package: a status sometimes
+ * arrives before its invoice, or concerns a document the package never saw. It
+ * is then kept unlinked.
  */
 final class InvoiceStatusUpdated
 {

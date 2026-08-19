@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Exceptions;
 
 /**
- * 400 : la requête a été refusée par la validation de schéma de la plateforme.
+ * 400: the request was rejected by the platform's schema validation.
  *
- * Le corps renvoyé suit le format Zod : chaque erreur porte un chemin de champ,
- * un code et un message. On les expose tels quels plutôt que de les reformuler :
- * ce sont eux qui permettent de corriger l'appel.
+ * The body follows a Zod shape: each error carries a field path, a code and a
+ * message. They are exposed as-is rather than reworded — they are what lets a
+ * developer fix the call.
  */
 final class EinvoicingValidationException extends EinvoicingException
 {

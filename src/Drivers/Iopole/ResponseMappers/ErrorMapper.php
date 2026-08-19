@@ -13,10 +13,10 @@ use AmazScript\Einvoicing\Exceptions\EinvoicingValidationException;
 use Illuminate\Http\Client\Response;
 
 /**
- * Traduit une réponse d'erreur de la plateforme en exception du package.
+ * Turns a platform error response into a package exception.
  *
- * Les messages produits ne reprennent jamais les en-têtes de la requête : ceux-ci
- * portent le jeton et le customer-id.
+ * The messages produced never quote the request headers: those carry the token
+ * and the customer-id.
  */
 final class ErrorMapper
 {
@@ -28,7 +28,7 @@ final class ErrorMapper
 
         $message = isset($body['statusMessage']) && is_string($body['statusMessage'])
             ? $body['statusMessage']
-            : 'La plateforme a renvoyé une erreur '.$status.'.';
+            : 'The platform returned a '.$status.' error.';
 
         return match (true) {
             $status === 400 => new EinvoicingValidationException($message, $this->validationErrors($body)),
@@ -44,8 +44,8 @@ final class ErrorMapper
     }
 
     /**
-     * Le corps d'un 400 suit le format Zod. Le champ `details` porte tantôt une
-     * erreur unique, tantôt une liste : les deux formes sont normalisées ici.
+     * The body of a 400 follows a Zod shape. Its `details` field carries either a
+     * single error or a list: both forms are normalised here.
      *
      * @param  array<mixed>  $body
      * @return list<array{path: string, code: string|null, message: string|null}>

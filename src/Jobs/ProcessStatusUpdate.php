@@ -21,11 +21,11 @@ use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
- * Transforme un événement encaissé en statut exploitable.
+ * Turns a banked event into a usable lifecycle status.
  *
- * Rejouable sans effet de bord : l'écriture passe par updateOrCreate sur le
- * couple (provider, provider_status_id), si bien qu'une seconde exécution met à
- * jour la même ligne au lieu d'en créer une seconde.
+ * Replayable without side effects: writing goes through updateOrCreate on the
+ * (provider, provider_status_id) pair, so a second run updates the same row
+ * instead of adding another.
  */
 final class ProcessStatusUpdate implements ShouldQueue
 {
@@ -42,8 +42,8 @@ final class ProcessStatusUpdate implements ShouldQueue
     ) {}
 
     /**
-     * Délais entre tentatives, en secondes : la plateforme recommande un recul
-     * exponentiel, notamment après un 429.
+     * Delays between attempts, in seconds: the platform recommends exponential
+     * backoff, in particular after a 429.
      *
      * @return list<int>
      */
@@ -63,8 +63,8 @@ final class ProcessStatusUpdate implements ShouldQueue
         $attributs = $mapper->map($event->payload ?? []);
 
         if ($attributs === null) {
-            // Rien d'exploitable : on le dit plutôt que de faire semblant.
-            $this->markFailed($event, 'payload sans statut exploitable');
+            // Nothing usable: say so rather than pretend otherwise.
+            $this->markFailed($event, 'payload carries no usable status');
 
             return;
         }
@@ -97,12 +97,12 @@ final class ProcessStatusUpdate implements ShouldQueue
     }
 
     /**
-     * Un statut de rejet signale que la facture n'a pas atteint son destinataire.
+     * A rejection status means the invoice never reached its recipient.
      *
-     * Observé en conditions réelles : un destinataire absent de l'annuaire produit
-     * un REJECTED portant `rejectionDetail.reason = ROUTING_FAILURE`. C'est un
-     * incident à traiter — la facture est restée en chemin — d'où un événement
-     * distinct de la simple mise à jour de statut.
+     * Observed in real conditions: a recipient missing from the directory yields
+     * a REJECTED carrying `rejectionDetail.reason = ROUTING_FAILURE`. That is an
+     * incident to act on — the invoice is stuck in transit — hence an event
+     * distinct from a plain status update.
      *
      * @param  array{provider_status_id: string, provider_invoice_id: string|null, code: string, value: string|null, description: string|null, dest_type: string|null, occurred_at: string|null, payload: array<string, mixed>}  $attributs
      */
@@ -142,14 +142,14 @@ final class ProcessStatusUpdate implements ShouldQueue
     }
 
     /**
-     * Retrouve la facture concernée par un statut.
+     * Finds the invoice a status concerns.
      *
-     * L'identifiant technique est tenté d'abord, mais il ne suffit pas : un même
-     * document porte un identifiant distinct de chaque côté de la chaîne, celui
-     * du statut désignant la facture émise et non celle qui a été reçue. On se
-     * rabat donc sur le numéro attribué par l'émetteur, qualifié par son SIREN —
-     * sans lui, deux fournisseurs numérotant pareil verraient leurs statuts
-     * mélangés, ce qui vaudrait mieux ne pas rattacher du tout.
+     * The technical identifier is tried first but does not suffice: the same
+     * document carries a different identifier on each side of the chain, the one
+     * in a status designating the invoice as issued rather than as received. The
+     * fallback is the number the issuer assigned, qualified by their SIREN —
+     * without which two suppliers numbering alike would see their statuses mixed,
+     * which would be worse than not linking at all.
      *
      * @param  array{provider_invoice_id: string|null, issuer_invoice_number: string|null, issuer_siren: string|null, ...}  $attributs
      */
@@ -175,7 +175,7 @@ final class ProcessStatusUpdate implements ShouldQueue
     }
 
     /**
-     * Les deux critères sont exigés ensemble : un numéro seul n'identifie rien.
+     * Both criteria are required together: a number alone identifies nothing.
      */
     private function byIssuerReference(?string $numero, ?string $siren): ?InboundInvoice
     {
@@ -191,8 +191,8 @@ final class ProcessStatusUpdate implements ShouldQueue
     }
 
     /**
-     * Échec définitif : l'événement reste en base, marqué et rejouable. Le perdre
-     * silencieusement serait pire que l'échec lui-même.
+     * Terminal failure: the event stays in the database, marked and replayable.
+     * Losing it silently would be worse than the failure itself.
      */
     public function failed(Throwable $e): void
     {
@@ -205,8 +205,8 @@ final class ProcessStatusUpdate implements ShouldQueue
 
     private function markFailed(WebhookEvent $event, string $raison): void
     {
-        // La raison ne reprend jamais le contenu du payload : il porte des
-        // identifiants d'entreprise et des montants.
+        // The reason never quotes the payload: it carries company identifiers
+        // and amounts.
         $event->forceFill([
             'status' => WebhookEventStatus::Failed,
             'failed_reason' => $raison,

@@ -13,8 +13,8 @@ return new class extends Migration
         Schema::create('einvoicing_inbound_invoices', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // Nullable : une facture dont le tenant n'a pas pu être résolu est conservée
-            // malgré tout. Aucune perte, jamais de 5xx renvoyé à la plateforme.
+            // Nullable: an invoice whose tenant could not be resolved is kept all
+            // the same. Nothing is lost, and the platform never gets a 5xx.
             $table->uuid('tenant_id')->nullable();
 
             $table->string('provider');
@@ -33,14 +33,14 @@ return new class extends Migration
 
             $table->string('format')->nullable();
 
-            // Miroir local de markAsSeen côté plateforme.
+            // Local mirror of markAsSeen on the platform's side.
             $table->timestamp('seen_at')->nullable();
 
             $table->json('raw_metadata')->nullable();
             $table->timestamps();
 
-            // Clé d'idempotence : un retour de la plateforme sur la même facture met à jour
-            // la ligne existante au lieu d'en créer une seconde.
+            // Idempotency key: the platform revisiting the same invoice updates
+            // the existing row instead of adding a second one.
             $table->unique(['provider', 'provider_invoice_id']);
 
             $table->index(['tenant_id', 'seen_at']);

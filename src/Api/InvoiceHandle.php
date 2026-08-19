@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Carbon;
 
 /**
- * Une facture précise, et ce qu'on peut en faire.
+ * One specific invoice, and what can be done with it.
  */
 final class InvoiceHandle
 {
@@ -29,10 +29,10 @@ final class InvoiceHandle
     }
 
     /**
-     * Acquitte la facture auprès de la plateforme : elle sortira des « non vues ».
+     * Acknowledges the invoice with the platform: it leaves the "not seen" list.
      *
-     * L'horodatage local n'est posé qu'après l'accusé de la plateforme : le noter
-     * d'avance ferait croire à un acquittement qui n'a pas eu lieu.
+     * The local timestamp is stamped only after the platform confirms. Stamping
+     * first would claim an acknowledgement that never happened.
      */
     public function markAsSeen(): self
     {
@@ -44,7 +44,8 @@ final class InvoiceHandle
     }
 
     /**
-     * Document d'origine. Le contenu déjà stocké est servi sans appel réseau.
+     * The original document. Content already stored is served without a network
+     * call.
      */
     public function xml(): string
     {
@@ -59,7 +60,7 @@ final class InvoiceHandle
     }
 
     /**
-     * Pièces jointes déjà stockées.
+     * Attachments already stored.
      *
      * @return Collection<int, InvoiceFile>
      */
@@ -72,7 +73,7 @@ final class InvoiceHandle
     }
 
     /**
-     * Range le document d'origine sur un disque choisi par l'application.
+     * Stores the original document on a disk chosen by the application.
      */
     public function store(?string $disk = null): InvoiceFile
     {

@@ -10,10 +10,10 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 
 /**
- * Purge la table de déduplication.
+ * Prunes the deduplication table.
  *
- * Ne supprime que ce qui est traité : un événement non routé ou en échec reste
- * une donnée à récupérer, et l'effacer reviendrait à perdre une facture.
+ * Removes only what was processed: an unrouted or failed event still holds data
+ * to recover, and deleting it would lose an invoice for good.
  */
 final class PruneEventsCommand extends Command
 {

@@ -7,7 +7,8 @@ namespace AmazScript\Einvoicing\Console;
 use Illuminate\Console\Command;
 
 /**
- * Publie ce que l'application doit pouvoir modifier : configuration et migrations.
+ * Publishes what the application must be able to edit: configuration and
+ * migrations.
  */
 final class InstallCommand extends Command
 {
@@ -35,8 +36,8 @@ final class InstallCommand extends Command
         $this->line('   3. <fg=yellow>php artisan einvoicing:doctor</> pour vérifier le raccordement');
         $this->newLine();
 
-        // Une mise à jour du package ne met pas à jour les migrations déjà
-        // publiées : le rappeler évite de longues recherches de panne.
+        // Updating the package does not update migrations already published:
+        // saying so here spares a long hunt for the cause.
         $this->comment('  Après une mise à jour du package, republiez les migrations avec --force.');
         $this->newLine();
 

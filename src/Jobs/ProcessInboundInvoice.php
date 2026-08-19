@@ -24,13 +24,12 @@ use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
- * Consigne une facture fournisseur reçue.
+ * Records a received supplier invoice.
  *
- * La livraison ne porte que le strict nécessaire : un identifiant de facture et
- * le document lui-même. Les métadonnées comptables — numéro, date, montants,
- * émetteur — ne sont pas dans le webhook ; elles se récupèrent auprès de la
- * plateforme, ce que fera le lot suivant. On enregistre donc d'abord l'existence
- * de la facture, sans inventer ce qu'on ne sait pas.
+ * A delivery carries the bare minimum: an invoice identifier and the document
+ * itself. Accounting metadata — number, date, amounts, issuer — is not in the
+ * webhook; it is fetched from the platform right after. So the invoice's
+ * existence is recorded first, without inventing what is not known.
  */
 final class ProcessInboundInvoice implements ShouldQueue
 {
@@ -66,13 +65,13 @@ final class ProcessInboundInvoice implements ShouldQueue
         $providerInvoiceId = $payload['invoiceId'] ?? null;
 
         if (! is_string($providerInvoiceId) || $providerInvoiceId === '') {
-            $this->markFailed($event, 'livraison sans identifiant de facture');
+            $this->markFailed($event, 'delivery carries no invoice identifier');
 
             return;
         }
 
-        // Rejouable sans effet de bord : une seconde exécution met à jour la même
-        // ligne. C'est la garantie qu'un retry ne double pas une facture.
+        // Replayable without side effects: a second run updates the same row.
+        // That is what keeps a retry from duplicating an invoice.
         $invoice = InboundInvoice::query()->updateOrCreate(
             [
                 'provider' => $this->provider,
@@ -84,8 +83,8 @@ final class ProcessInboundInvoice implements ShouldQueue
             ],
         );
 
-        // Le webhook ne porte aucune métadonnée comptable : on va les chercher.
-        // Leur absence n'est pas bloquante, la facture existe déjà.
+        // The webhook carries no accounting metadata, so it is fetched. Its
+        // absence is not blocking: the invoice already exists.
         $this->completeFrom($gateway, $invoice, $providerInvoiceId);
         $this->downloadFiles($gateway, $store, $invoice, $providerInvoiceId);
 
@@ -101,8 +100,8 @@ final class ProcessInboundInvoice implements ShouldQueue
     }
 
     /**
-     * Complète la facture avec ce que la plateforme sait d'elle : numéro, date,
-     * montants, émetteur, format d'origine.
+     * Completes the invoice with what the platform knows of it: number, date,
+     * amounts, issuer, original format.
      */
     private function completeFrom(InvoiceGateway $gateway, InboundInvoice $invoice, string $providerInvoiceId): void
     {
@@ -122,9 +121,9 @@ final class ProcessInboundInvoice implements ShouldQueue
     }
 
     /**
-     * Télécharge et range les fichiers. Un fichier déjà stocké, reconnu à son
-     * empreinte, n'est pas retéléchargé ; l'échec de l'un n'empêche pas les
-     * autres, la facture restant exploitable sans ses pièces.
+     * Downloads and stores the files. A file already on record, recognised by its
+     * digest, is not fetched again; one failing does not stop the others, the
+     * invoice remaining usable without its attachments.
      */
     private function downloadFiles(
         InvoiceGateway $gateway,
@@ -155,17 +154,17 @@ final class ProcessInboundInvoice implements ShouldQueue
     }
 
     /**
-     * Un statut arrive souvent avant la facture qu'il concerne : il a alors été
-     * conservé sans rattachement. On le raccroche maintenant.
+     * A status often arrives before the invoice it concerns, and was then kept
+     * unlinked. It is attached here.
      *
-     * Le rapprochement se fait sur le numéro attribué par l'émetteur, qualifié
-     * par son SIREN. L'identifiant technique du statut ne convient pas : il
-     * désigne la facture émise, pas celle qui a été reçue.
+     * Matching uses the number the issuer assigned, qualified by their SIREN. The
+     * status's technical identifier will not do: it designates the invoice as
+     * issued, not as received.
      */
     private function attachOrphanStatuses(InboundInvoice $invoice, string $providerInvoiceId): void
     {
-        // where(..., null) plutôt que whereNull : la seconde passe par l'appel
-        // magique d'Eloquent, qui fait perdre le type du modèle à l'analyse.
+        // where(..., null) rather than whereNull: the latter goes through
+        // Eloquent's magic call, which loses the model type for static analysis.
         $orphelins = Status::query()
             ->where('provider', $this->provider)
             ->where('invoice_id', null)
@@ -179,8 +178,7 @@ final class ProcessInboundInvoice implements ShouldQueue
     }
 
     /**
-     * Le numéro seul ne suffirait pas : deux fournisseurs peuvent employer la
-     * même numérotation.
+     * The number alone would not do: two suppliers may share a numbering scheme.
      */
     private function concerns(Status $status, InboundInvoice $invoice, string $providerInvoiceId): bool
     {

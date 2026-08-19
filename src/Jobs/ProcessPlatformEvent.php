@@ -17,11 +17,11 @@ use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
- * Traite les événements de la plateforme qui ne sont ni une facture ni un statut.
+ * Handles platform events that are neither an invoice nor a status.
  *
- * Aujourd'hui : le refus d'une facture entrante. Ces événements suivent un
- * format générique — un identifiant, un type, un horodatage, une charge utile —
- * distinct de celui des factures et des statuts.
+ * Today: the refusal of an inbound invoice. These events follow a generic
+ * envelope — an identifier, a type, a timestamp, a payload — distinct from the
+ * one used by invoices and statuses.
  */
 final class ProcessPlatformEvent implements ShouldQueue
 {

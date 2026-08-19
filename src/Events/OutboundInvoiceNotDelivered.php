@@ -7,14 +7,13 @@ namespace AmazScript\Einvoicing\Events;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 
 /**
- * Une facture émise n'a pas pu être remise à son destinataire.
+ * An issued invoice could not be delivered to its recipient.
  *
- * Le cas a été observé en conditions réelles : un destinataire absent de
- * l'annuaire produit un statut REJECTED portant la raison ROUTING_FAILURE.
+ * Observed for real: a recipient missing from the directory produces a REJECTED
+ * status carrying ROUTING_FAILURE.
  *
- * L'émission relève de la v0.2 ; l'événement est exposé dès maintenant pour que
- * les applications qui émettent par ailleurs puissent surveiller les échecs de
- * remise sans attendre.
+ * Issuing invoices belongs to v0.2; the event is exposed now so applications
+ * that issue by other means can watch delivery failures without waiting.
  */
 final class OutboundInvoiceNotDelivered
 {

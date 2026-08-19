@@ -10,11 +10,10 @@ use AmazScript\Einvoicing\Exceptions\EinvoicingException;
 use Illuminate\Console\Command;
 
 /**
- * Confronte la configuration locale du webhook à celle de la plateforme.
+ * Compares the local webhook configuration with the platform's.
  *
- * La commande ne modifie rien sans qu'on le demande : la déclaration d'un
- * webhook redirige un flux de factures, et l'écraser par erreur enverrait les
- * livraisons dans le vide.
+ * The command changes nothing unasked: declaring a webhook redirects a stream of
+ * invoices, and overwriting one by mistake would send deliveries into the void.
  */
 final class SyncWebhooksCommand extends Command
 {

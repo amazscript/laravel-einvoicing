@@ -7,11 +7,10 @@ namespace AmazScript\Einvoicing\Events;
 use AmazScript\Einvoicing\Tenancy\RoutingKeys;
 
 /**
- * Aucun dossier n'a pu être associé à un événement entrant.
+ * No tenant could be matched to an inbound delivery.
  *
- * À surveiller : un événement non routé est une donnée conservée mais non
- * exploitée, donc une facture qui n'arrivera jamais dans la comptabilité tant
- * que personne n'intervient.
+ * Worth watching: an unrouted delivery is data that is kept but unused, so an
+ * invoice that will never reach the books until someone intervenes.
  */
 final class TenantResolutionFailed
 {

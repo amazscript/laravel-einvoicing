@@ -13,10 +13,10 @@ use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 
 /**
- * Point d'entrée du package pour l'application hôte.
+ * The package's entry point for the host application.
  *
- * C'est la seule surface publique : tout le reste — jobs, webhook, driver — est
- * de la plomberie interne, susceptible d'évoluer sans préavis.
+ * This is the only public surface: everything else — jobs, webhook, driver — is
+ * internal plumbing, liable to change without notice.
  */
 final class Einvoicing
 {
@@ -27,7 +27,7 @@ final class Einvoicing
     ) {}
 
     /**
-     * Agit au nom d'un dossier, avec son propre customer-id.
+     * Acts on behalf of one tenant, under its own customer-id.
      */
     public function for(Tenant $tenant): TenantScope
     {
@@ -35,7 +35,7 @@ final class Einvoicing
     }
 
     /**
-     * Agit sans distinction de dossier, avec le customer-id par défaut.
+     * Acts without tenant distinction, under the default customer-id.
      */
     public function operator(): TenantScope
     {
@@ -48,8 +48,8 @@ final class Einvoicing
     }
 
     /**
-     * Une passerelle liée au customer-id du dossier : sans cela, tous les appels
-     * partiraient sous l'identité de l'opérateur.
+     * A gateway bound to the tenant's customer-id: without it, every call would
+     * go out under the operator's identity.
      */
     private function gatewayFor(Tenant $tenant): InvoiceGateway
     {

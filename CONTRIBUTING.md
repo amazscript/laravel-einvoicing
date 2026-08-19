@@ -67,6 +67,15 @@ dupliquée ou mal routée — un incident comptable, pas un défaut d'affichage.
 
 Pour ces points, écrivez le test **avant** le code.
 
+## Langue
+
+Le code publié — `src/`, `config/`, `database/migrations/` — est commenté en **anglais** : ces
+docblocks s'affichent au survol dans un IDE, et le package s'adresse à tout l'écosystème Laravel.
+Les messages d'exception le sont aussi, puisqu'ils atterrissent dans les journaux.
+
+Le README, `docs/`, les noms de tests et les sorties des commandes Artisan restent en **français** :
+ils s'adressent à l'exploitant, et le marché visé est français.
+
 ## Fixtures
 
 `tests/Fixtures/` contient des livraisons réellement émises par la plateforme, anonymisées :

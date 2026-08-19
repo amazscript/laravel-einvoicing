@@ -10,10 +10,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Statut de cycle de vie émis par la Plateforme Agréée.
+ * A lifecycle status issued by the accredited platform.
  *
- * Les codes ne sont pas modélisés en enum : ils dépendent de la plateforme et
- * évoluent sans préavis. Les inventer figerait une liste qui n'est pas la nôtre.
+ * The codes are not modelled as an enum: they belong to the platform and change
+ * without notice. Enumerating them would freeze a list that is not ours.
  *
  * @property string $id
  * @property string|null $invoice_id

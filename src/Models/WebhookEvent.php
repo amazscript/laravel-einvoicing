@@ -11,10 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * Trace de déduplication d'un événement webhook.
+ * The deduplication record of a webhook delivery.
  *
- * La livraison est at-least-once : la contrainte unique sur event_id, portée par
- * la base, est la seule garantie fiable qu'un événement n'est traité qu'une fois.
+ * Delivery is at-least-once: the unique constraint on event_id, enforced by the
+ * database, is the only reliable guarantee that an event is handled once.
  *
  * @property string $id
  * @property string $event_id

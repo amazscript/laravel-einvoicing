@@ -13,16 +13,16 @@ return new class extends Migration
         Schema::create('einvoicing_webhook_events', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
-            // Clé d'idempotence. La contrainte est portée par la base : une violation
-            // signifie « déjà reçu », ce qui est un succès, pas une erreur.
+            // Idempotency key. The constraint is enforced by the database: a
+            // violation means "already received", which is a success, not an error.
             $table->string('event_id')->unique();
 
             $table->string('event_type');
             $table->uuid('tenant_id')->nullable();
             $table->string('status');
 
-            // Payload brut intégral : seule source permettant de rejouer un événement
-            // dont le traitement a échoué ou dont le tenant n'a pas été résolu.
+            // The complete raw payload: the only material allowing an event to be
+            // replayed after a failed processing or an unresolved tenant.
             $table->json('payload')->nullable();
 
             $table->timestamp('received_at');

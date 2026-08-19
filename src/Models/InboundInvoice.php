@@ -12,10 +12,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * Facture fournisseur reçue via la Plateforme Agréée.
+ * A supplier invoice received through the accredited platform.
  *
- * L'unicité porte sur le couple (provider, provider_invoice_id) : c'est la
- * garantie qu'un rejeu du webhook met à jour la ligne au lieu de la dupliquer.
+ * Uniqueness covers the (provider, provider_invoice_id) pair: that is what makes
+ * a webhook replay update the row instead of duplicating it.
  *
  * @property string $id
  * @property string|null $tenant_id

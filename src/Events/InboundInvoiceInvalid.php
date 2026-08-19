@@ -7,12 +7,11 @@ namespace AmazScript\Einvoicing\Events;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 
 /**
- * Une facture entrante a été refusée par la plateforme.
+ * An inbound invoice was refused by the platform.
  *
- * Elle n'entrera jamais en comptabilité : c'est au fournisseur de la corriger et
- * de la réémettre. L'événement porte les erreurs de validation pour que
- * l'application puisse alerter qui de droit plutôt que d'attendre une facture
- * qui ne viendra pas.
+ * It will never reach the books: the supplier has to correct and reissue it.
+ * The event carries the validation errors so the application can warn whoever
+ * needs to know, instead of waiting for an invoice that is not coming.
  */
 final class InboundInvoiceInvalid
 {

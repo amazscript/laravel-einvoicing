@@ -7,10 +7,10 @@ namespace AmazScript\Einvoicing\Exceptions;
 use RuntimeException;
 
 /**
- * Racine des exceptions du package.
+ * Root of the package's exceptions.
  *
- * Aucun message d'exception ne doit contenir de jeton, de secret ni de
- * customer-id : ces messages remontent dans les logs et les rapports d'erreur.
+ * No exception message may carry a token, a secret or a customer id: these
+ * messages end up in logs and error reports.
  */
 abstract class EinvoicingException extends RuntimeException
 {

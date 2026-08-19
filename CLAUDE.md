@@ -35,6 +35,14 @@ Priorités, dans cet ordre : **correction > sécurité > lisibilité > ergonomie
 | Versionnage | SemVer strict |
 
 Typage explicite sur tout paramètre et tout retour. Pas de `mixed` sans commentaire justificatif.
+
+**Langue.** Ce qui est publié dans l'application consommatrice — `src/`, `config/`,
+`database/migrations/` — est commenté en **anglais** : les docblocks s'affichent au survol dans
+l'IDE, et un package Packagist s'adresse à tout le monde. Les messages d'exception et les raisons
+d'échec aussi, puisqu'ils finissent dans les journaux et la supervision.
+
+Restent en **français** : le README, `docs/`, le CDC, le sprint, les noms de tests, et les sorties
+des commandes Artisan — celles-ci s'adressent à l'exploitant, et le marché est français.
 Pas de facade statique dans le code interne du package — injection par constructeur. La facade `Einvoicing` est réservée à l'API publique consommateur.
 
 ## 4. Architecture

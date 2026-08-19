@@ -8,29 +8,30 @@ use AmazScript\Einvoicing\Tenancy\RoutingKeys;
 use AmazScript\Einvoicing\Webhook\InboundRequest;
 
 /**
- * Lit une livraison entrante selon les conventions de la plateforme qui l'émet.
+ * Reads an inbound delivery according to the conventions of the platform that
+ * sent it.
  *
- * Chaque plateforme nomme ses en-têtes et structure ses payloads à sa façon.
- * Tout ce qui relève de ces conventions vit derrière ce contrat, pour que le
- * webhook, la tenancy et les modèles n'aient jamais à les connaître.
+ * Every platform names its headers and shapes its payloads differently. All of
+ * that lives behind this contract, so the webhook, the tenancy and the models
+ * never have to know about any of it.
  */
 interface PayloadInterpreter
 {
     /**
-     * Clé identifiant la livraison de façon unique et stable.
+     * A key identifying the delivery uniquely and stably.
      *
-     * Deux livraisons de la même chose doivent donner la même clé, sans quoi la
-     * déduplication ne sert à rien.
+     * Two deliveries of the same thing must yield the same key, otherwise
+     * deduplication is pointless.
      */
     public function idempotencyKey(InboundRequest $request): string;
 
     /**
-     * Nature de la livraison, telle qu'elle sera consignée.
+     * What kind of delivery this is, as it will be recorded.
      */
     public function eventType(InboundRequest $request): string;
 
     /**
-     * Clés permettant de retrouver le destinataire.
+     * The keys allowing the recipient tenant to be found.
      */
     public function routingKeys(InboundRequest $request): RoutingKeys;
 }

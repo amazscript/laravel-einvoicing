@@ -10,11 +10,11 @@ use AmazScript\Einvoicing\Webhook\InboundEventDispatcher;
 use Illuminate\Console\Command;
 
 /**
- * Remet en traitement les événements restés de côté.
+ * Puts aside events back into processing.
  *
- * Sans cette commande, un événement non routé — le tenant n'existait pas encore —
- * ou dont le traitement a échoué resterait invisible pour toujours, alors qu'il
- * porte une facture bien réelle.
+ * Without this command, an event left unrouted — the tenant did not exist yet —
+ * or whose processing failed would stay invisible forever, while holding a
+ * perfectly real invoice.
  */
 final class RetryEventsCommand extends Command
 {
@@ -29,8 +29,8 @@ final class RetryEventsCommand extends Command
         $etats = $this->statuses();
         $limite = (int) $this->option('limit');
 
-        // On ne retient que les identifiants, puis on recharge un par un : le
-        // lot est borné par --limit, et le modèle reste typé de bout en bout.
+        // Only identifiers are collected, then reloaded one by one: the batch is
+        // bounded by --limit, and the model stays typed throughout.
         $identifiants = WebhookEvent::query()
             ->whereIn('status', array_map(static fn (WebhookEventStatus $s): string => $s->value, $etats))
             ->orderBy('received_at')
@@ -47,8 +47,8 @@ final class RetryEventsCommand extends Command
         $toujoursOrphelins = 0;
 
         foreach ($identifiants as $identifiant) {
-            // pluck rend des valeurs non typées ; on écarte tout ce qui n'est pas
-            // un identifiant, faute de quoi find() pourrait rendre une collection.
+            // pluck yields untyped values; anything that is not an identifier is
+            // discarded, otherwise find() could return a collection.
             if (! is_string($identifiant)) {
                 continue;
             }
@@ -59,8 +59,8 @@ final class RetryEventsCommand extends Command
                 continue;
             }
 
-            // Repasser par RECEIVED donne au routage une nouvelle chance : le
-            // tenant manquant a pu être créé entre-temps.
+            // Going back through RECEIVED gives routing another chance: the
+            // missing tenant may have been created since.
             $evenement->forceFill([
                 'status' => WebhookEventStatus::Received,
                 'failed_reason' => null,

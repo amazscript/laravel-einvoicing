@@ -25,11 +25,11 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Point d'entrée du package dans l'application hôte.
+ * The package's entry point into the host application.
  *
- * Ne fait à ce stade que charger la configuration et exposer les ressources
- * publiables. L'enregistrement de la route webhook arrive en D04, les
- * migrations en D03 et les commandes Artisan en D15.
+ * Registers the callback route, the publishable resources, the Artisan commands,
+ * and the bindings that let each replaceable piece — signature verifier, tenant
+ * resolver, platform driver — be swapped by the application.
  */
 final class EinvoicingServiceProvider extends ServiceProvider
 {
@@ -49,8 +49,8 @@ final class EinvoicingServiceProvider extends ServiceProvider
             );
         });
 
-        // Le résolveur est remplaçable : une application dont le routage suit une
-        // autre règle déclare sa propre classe dans la configuration.
+        // The resolver is replaceable: an application whose routing follows a
+        // different rule declares its own class in the configuration.
         $this->app->bind(TenantResolver::class, function ($app): TenantResolver {
             $configured = $app->make('config')->get('einvoicing.tenant_resolver', SiretResolver::class);
 
@@ -90,10 +90,10 @@ final class EinvoicingServiceProvider extends ServiceProvider
     }
 
     /**
-     * Déclare l'URL de rappel unique de la plateforme.
+     * Declares the platform's single callback URL.
      *
-     * Aucune limitation de débit ne doit être appliquée ici : un 429 renvoyé à
-     * la plateforme déclencherait sa stratégie de retry sans raison.
+     * No rate limiting may be applied here: a 429 returned to the platform would
+     * trigger its retry strategy for nothing.
      */
     private function registerWebhookRoute(): void
     {
@@ -112,9 +112,9 @@ final class EinvoicingServiceProvider extends ServiceProvider
     }
 
     /**
-     * Valeur de configuration du driver actif, toujours rendue en chaîne : une
-     * variable d'environnement absente ne doit pas propager un null jusqu'aux
-     * constructeurs typés.
+     * A configuration value of the active driver, always returned as a string: a
+     * missing environment variable must not propagate a null into typed
+     * constructors.
      */
     private function driverConfig(string $key): string
     {

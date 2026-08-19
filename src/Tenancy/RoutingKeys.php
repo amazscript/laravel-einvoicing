@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Tenancy;
 
 /**
- * Clés permettant de retrouver le destinataire d'un événement entrant.
+ * The keys used to find the recipient of an inbound delivery.
  *
- * Volontairement neutre : c'est le driver de la plateforme qui sait extraire ces
- * valeurs de son propre format de payload. Rien de spécifique à un fournisseur
- * ne doit remonter jusqu'ici, le second driver arrivant en v0.4.
+ * Deliberately vendor-neutral: extracting these values from a payload is the
+ * platform driver's job. Nothing provider-specific may reach this far, since a
+ * second driver lands in v0.4.
  */
 final class RoutingKeys
 {
@@ -20,8 +20,8 @@ final class RoutingKeys
     ) {}
 
     /**
-     * SIRET réduit à ses chiffres. Les payloads réels contiennent espaces et
-     * séparateurs ; la base, elle, ne stocke que des chiffres.
+     * The SIRET reduced to its digits. Real payloads carry spaces and
+     * separators, whereas the database stores digits only.
      */
     public function normalizedSiret(): ?string
     {
@@ -34,9 +34,9 @@ final class RoutingKeys
     }
 
     /**
-     * SIREN déduit du SIRET : les neuf premiers chiffres identifient l'entreprise,
-     * les cinq suivants l'établissement. Permet de router une facture adressée à
-     * un établissement que le package ne connaît pas encore.
+     * The SIREN derived from a SIRET: the first nine digits identify the
+     * company, the next five its establishment. This routes an invoice
+     * addressed to an establishment the package does not know yet.
      */
     public function sirenFromSiret(): ?string
     {

@@ -8,10 +8,10 @@ use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use Illuminate\Support\LazyCollection;
 
 /**
- * Recherche dans l'annuaire des entreprises joignables.
+ * Searches the directory of reachable companies.
  *
- * Le parcours est paresseux : l'annuaire compte des millions d'entrées, les
- * charger toutes n'aurait aucun sens.
+ * The walk is lazy: the directory holds millions of entries, and loading them
+ * all would make no sense.
  */
 final class DirectoryQuery
 {

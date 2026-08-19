@@ -7,10 +7,10 @@ namespace AmazScript\Einvoicing\Events;
 use AmazScript\Einvoicing\Models\InboundInvoice;
 
 /**
- * Une facture fournisseur est arrivée et a été consignée.
+ * A supplier invoice has arrived and been recorded.
  *
- * C'est l'événement que l'application hôte écoute pour intégrer la facture dans
- * sa comptabilité.
+ * This is the event a host application listens to in order to bring the invoice
+ * into its own bookkeeping.
  */
 final class InboundInvoiceReceived
 {

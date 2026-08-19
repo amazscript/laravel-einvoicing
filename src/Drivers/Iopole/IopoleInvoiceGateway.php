@@ -10,11 +10,11 @@ use AmazScript\Einvoicing\Exceptions\EinvoicingException;
 use Illuminate\Support\LazyCollection;
 
 /**
- * Lecture des factures telles que la plateforme Iopole les expose.
+ * Reads invoices as the Iopole platform exposes them.
  *
- * La forme des réponses est relevée sur sa spécification publiée : les
- * métadonnées comptables vivent sous `businessData`, et les montants sont des
- * objets `{ amount, currency }` plutôt que des nombres nus.
+ * Response shapes come from its published specification: accounting metadata
+ * lives under `businessData`, and amounts are `{ amount, currency }` objects
+ * rather than bare numbers.
  */
 final class IopoleInvoiceGateway implements InvoiceGateway
 {
@@ -30,12 +30,12 @@ final class IopoleInvoiceGateway implements InvoiceGateway
         try {
             $reponse = $this->client->get(Endpoints::invoice($providerInvoiceId));
         } catch (EinvoicingException) {
-            // Une facture introuvable ou momentanément indisponible ne doit pas
-            // faire perdre celle qu'on a déjà consignée.
+            // An invoice that cannot be found, or is briefly unavailable, must
+            // not cost us the one already recorded.
             return null;
         }
 
-        // L'API répond par une liste, pas par un objet, malgré sa documentation.
+        // The API answers with a list, not an object, despite its documentation.
         if (array_is_list($reponse)) {
             $premiere = $reponse[0] ?? null;
             $reponse = is_array($premiere) ? $premiere : [];
@@ -56,13 +56,13 @@ final class IopoleInvoiceGateway implements InvoiceGateway
             'sender_name' => $this->string($seller['name'] ?? null),
             'sender_siren' => $this->string($seller['siren'] ?? null),
             'sender_siret' => $this->string($seller['siret'] ?? null),
-            // Le net à payer fait foi : c'est le montant que la comptabilité règle.
+            // The amount due governs: that is what accounting actually pays.
             'amount_total' => $this->amount($monetary['payableAmount'] ?? null)
                 ?? $this->amount($monetary['invoiceAmount'] ?? null),
             'amount_tax' => $this->amount($monetary['taxTotalAmount'] ?? null),
             'currency' => $this->string($monetary['invoiceCurrency'] ?? null),
-            // La spécification annonce FACTURX, l'API sert FacturX : on normalise
-            // plutôt que de perdre le format sur une différence de casse.
+            // The specification announces FACTURX, the API serves FacturX: the
+            // case is normalised rather than losing the format over it.
             'format' => $this->upper($reponse['originalFormat'] ?? null),
         ];
     }
@@ -167,8 +167,8 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     }
 
     /**
-     * Les endpoints « non vus » répondent par un tableau nu, sans enveloppe ni
-     * pagination — constaté sur l'API réelle.
+     * The "not seen" endpoints answer with a bare array, without envelope or
+     * pagination — observed on the real API.
      *
      * @return list<array<string, mixed>>
      */
@@ -186,9 +186,9 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     }
 
     /**
-     * La nature du fichier n'est pas normalisée : on la déduit du type annoncé
-     * puis, à défaut, du type MIME. Un PDF est le document lisible, un XML le
-     * document d'origine ; tout le reste est une pièce jointe.
+     * The file's nature is not standardised: it is inferred from the announced
+     * type, then from the MIME type. A PDF is the readable rendering, an XML the
+     * original document; everything else is an attachment.
      *
      * @param  array<string, mixed>  $fichier
      */
@@ -205,8 +205,8 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     }
 
     /**
-     * Les montants arrivent sous la forme { amount, currency }. On les conserve
-     * en chaîne pour ne pas perdre de précision en passant par un flottant.
+     * Amounts arrive as { amount, currency }. They are kept as strings, since
+     * money does not survive binary floating point unscathed.
      */
     private function amount(mixed $valeur): ?string
     {

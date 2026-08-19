@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Fichier rattaché à une facture reçue : XML d'origine, PDF lisible ou pièce jointe.
+ * A file attached to a received invoice: original XML, readable PDF or attachment.
  *
  * @property string $id
  * @property string $invoice_id

@@ -7,15 +7,15 @@ namespace AmazScript\Einvoicing\Contracts;
 use Illuminate\Support\LazyCollection;
 
 /**
- * Accès aux données d'une facture détenues par la plateforme.
+ * Access to the invoice data the platform holds.
  *
- * Le webhook ne transporte qu'un identifiant et le document : tout le reste —
- * numéro, date, montants, émetteur, fichiers annexes — se récupère ici.
+ * A webhook carries only an identifier and the document: everything else —
+ * number, date, amounts, issuer, attached files — is fetched here.
  */
 interface InvoiceGateway
 {
     /**
-     * Métadonnées comptables, déjà traduites en attributs du modèle.
+     * Accounting metadata, already translated into model attributes.
      *
      * @return array{
      *     invoice_number: string|null,
@@ -27,62 +27,62 @@ interface InvoiceGateway
      *     amount_tax: string|null,
      *     currency: string|null,
      *     format: string|null
-     * }|null  null si la plateforme ne connaît pas cette facture
+     * }|null  null when the platform does not know this invoice
      */
     public function metadata(string $providerInvoiceId): ?array;
 
     /**
-     * Fichiers attachés à la facture.
+     * Files attached to the invoice.
      *
      * @return list<array{id: string, kind: string, filename: string|null, mime: string|null, size: int|null, checksum: string|null}>
      */
     public function files(string $providerInvoiceId): array;
 
     /**
-     * Contenu binaire d'un fichier.
+     * Binary content of a file.
      */
     public function download(string $fileId): string;
 
     /**
-     * Factures reçues que le package n'a pas encore acquittées.
+     * Received invoices the package has not acknowledged yet.
      *
-     * Sert de filet quand un webhook s'est perdu. L'endpoint ne pagine pas : il
-     * rend l'ensemble des factures non vues, que l'on consomme puis acquitte.
+     * A safety net for a webhook that went missing. The endpoint does not
+     * paginate: it returns every unseen invoice, to be consumed then acknowledged.
      *
      * @return list<array<string, mixed>>
      */
     public function notSeen(): array;
 
     /**
-     * Statuts non encore acquittés, même principe.
+     * Statuses not yet acknowledged, same principle.
      *
      * @return list<array<string, mixed>>
      */
     public function statusesNotSeen(): array;
 
     /**
-     * Acquitte une facture auprès de la plateforme : elle sortira de notSeen.
+     * Acknowledges an invoice with the platform: it leaves notSeen.
      */
     public function markInvoiceAsSeen(string $providerInvoiceId): void;
 
     public function markStatusAsSeen(string $providerStatusId): void;
 
     /**
-     * Document d'origine, tel qu'émis par le fournisseur.
+     * The original document, as the supplier issued it.
      */
     public function downloadInvoice(string $providerInvoiceId): string;
 
     /**
-     * Version lisible par un humain.
+     * A human-readable rendering.
      */
     public function downloadReadable(string $providerInvoiceId): string;
 
     /**
-     * Recherche de factures selon la syntaxe de filtres de la plateforme,
-     * par exemple : invoice.direction:"INBOUND" AND invoice.state:"NOT_DELIVERED".
+     * Invoice search using the platform's filter syntax, for instance:
+     * invoice.direction:"INBOUND" AND invoice.state:"NOT_DELIVERED".
      *
-     * Chaque résultat porte un objet `metadata`. `expand` demande des sections
-     * supplémentaires dans la même réponse, évitant un appel par facture.
+     * Each result carries a `metadata` object. `expand` asks for extra sections
+     * in the same response, sparing one call per invoice.
      *
      * @param  list<string>  $expand
      * @return LazyCollection<int, array<mixed>>
@@ -90,7 +90,7 @@ interface InvoiceGateway
     public function searchInvoices(string $query, array $expand = []): LazyCollection;
 
     /**
-     * Recherche dans l'annuaire des entreprises joignables.
+     * Searches the directory of reachable companies.
      *
      * @return LazyCollection<int, array<mixed>>
      */

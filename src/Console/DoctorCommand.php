@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Schema;
 use Throwable;
 
 /**
- * Diagnostic du raccordement.
+ * Diagnoses the connection to the platform.
  *
- * Chaque contrôle correspond à une panne déjà vue, et répond à la question
- * « pourquoi je ne reçois rien ? » sans ouvrir de ticket. Aucun secret n'est
- * affiché : la sortie est faite pour être collée dans une conversation.
+ * Every check maps to a failure already seen, and answers "why am I receiving
+ * nothing?" before a ticket is opened. No secret is printed: the output is meant
+ * to be pasted into a conversation.
  */
 final class DoctorCommand extends Command
 {
@@ -71,7 +71,7 @@ final class DoctorCommand extends Command
             $rempli = is_string($valeur) && $valeur !== '';
 
             $rempli
-                // Les identifiants ne sont jamais affichés : cette sortie circule.
+                // Credentials are never printed: this output travels.
                 ? $this->ok($clef, str_contains($clef, 'secret') || str_contains($clef, 'client_id')
                     ? 'renseigné'
                     : (string) $valeur)
@@ -145,7 +145,7 @@ final class DoctorCommand extends Command
 
         $limiteur === []
             ? $this->ok('limitation de débit', 'absente, comme il se doit')
-            // Un 429 renvoyé à la plateforme la ferait relancer sans raison.
+            // A 429 returned to the platform would make it retry for nothing.
             : $this->ko('limitation de débit', 'présente — un 429 déclencherait des relances inutiles');
 
         $canonique = config('einvoicing.webhook.canonical_path');
