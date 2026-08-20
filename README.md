@@ -121,6 +121,8 @@ Einvoicing::for($tenant)->invoice($id)->attachments();
 | `InboundInvoiceReceived` | une facture fournisseur est arrivée et a été consignée |
 | `InvoiceStatusUpdated` | un statut de cycle de vie a été reçu |
 | `InboundInvoiceInvalid` | une facture entrante a été refusée par la plateforme |
+| `OutboundInvoiceSent` | la plateforme a pris une facture émise et l'a nommée |
+| `OutboundInvoiceFailed` | elle l'a refusée d'emblée — rien n'est parti |
 | `OutboundInvoiceNotDelivered` | une facture émise n'a pas atteint son destinataire |
 | `TenantResolutionFailed` | aucun dossier ne correspond au destinataire — à surveiller |
 | `WebhookSignatureRejected` | signature invalide — à surveiller de près |

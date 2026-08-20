@@ -2,7 +2,7 @@
 
 Le package ne fait rien de vos factures : il les reçoit, les vérifie, les range, puis vous prévient.
 
-## Les six événements
+## Les huit événements
 
 ### `InboundInvoiceReceived`
 
@@ -57,6 +57,30 @@ $event->invoiceNumber;
 $event->validationErrors;   // [['code' => 'VAL001', 'message' => 'Invalid XML structure']]
 ```
 
+### `OutboundInvoiceSent`
+
+La plateforme a pris une facture émise et lui a donné un identifiant.
+
+```php
+$event->invoice;                        // OutboundInvoice
+$event->invoice->provider_invoice_id;
+```
+
+Prise n'est pas livrée : la suite arrive sous forme de statuts. C'est le moment où le document
+cesse d'être le problème de votre application.
+
+### `OutboundInvoiceFailed`
+
+La plateforme a refusé une facture d'emblée — **rien n'est parti**.
+
+```php
+$event->invoice->failure_reason;   // ce que la plateforme a répondu
+```
+
+À distinguer de `OutboundInvoiceNotDelivered`, qui survient plus tard dans le cycle : ici le
+document n'a jamais quitté la plateforme, et il faut le corriger avant toute nouvelle tentative.
+Renvoyer les mêmes octets rend le même refus, sans rappeler la plateforme.
+
 ### `OutboundInvoiceNotDelivered`
 
 Une facture émise n'a pas atteint son destinataire.
@@ -66,7 +90,15 @@ $event->reason;    // ROUTING_FAILURE
 $event->message;   // No route found for given key (electronicAddress : 0225:…)
 ```
 
-Cas le plus courant : le destinataire n'est pas enregistré dans l'annuaire.
+Cas le plus courant : le destinataire n'est pas enregistré dans l'annuaire — voir
+[Entreprises](entreprises.md) pour le vérifier **avant** d'émettre.
+
+Cet événement porte le `WebhookEvent` brut, pas le modèle : il existe depuis la v0.1, où l'émission
+n'était pas du ressort du package. Pour retrouver la facture concernée :
+
+```php
+Einvoicing::for($tenant)->sent()->find($event->providerInvoiceId);
+```
 
 ### `TenantResolutionFailed`
 
