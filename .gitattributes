@@ -13,6 +13,8 @@
 /pint.json            export-ignore
 /phpunit.xml          export-ignore
 /phpunit.critical.xml export-ignore
+/Makefile             export-ignore
+/CONTRIBUTING.md      export-ignore
 /SPRINT.md            export-ignore
 /CLAUDE.md            export-ignore
 /CDC-laravel-einvoicing.md export-ignore

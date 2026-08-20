@@ -1,0 +1,14 @@
+v0.1.0 — réception des factures électroniques françaises
+
+Première version. Le package reçoit, authentifie, route et range les factures
+qu'une Plateforme Agréée lui livre, et prévient l'application par des events.
+
+Signature HMAC validée deux fois : contre l'implémentation de référence de la
+plateforme, puis contre ses livraisons réelles, reproduites à l'octet près. Une
+application Laravel neuve a reçu une facture réelle complète.
+
+Aucun usage en production connu à ce jour : le package a été vérifié contre une
+sandbox, pas contre les flux d'une entreprise. L'API publique peut évoluer d'ici
+la 1.0.
+
+PHP 8.3 et 8.4 · Laravel 11, 12 et 13 · Guzzle 7 et 8.

@@ -4,24 +4,23 @@
 
 ```bash
 composer install
-composer test
+make            # liste les raccourcis disponibles
 ```
 
 ## Avant chaque commit
 
 ```bash
-composer test      # Pest
-composer analyse   # PHPStan niveau 8
-composer format    # Laravel Pint
+make check      # format, analyse statique et tests d'affilée
 ```
 
-Aucun commit ne part si `composer test` échoue.
+Aucun commit ne part si les tests échouent. Les cibles individuelles existent aussi :
+`make test`, `make analyse`, `make format`.
 
 ## Couverture
 
 ```bash
-composer test:critical   # Webhook/ et Tenancy/, seuil 85 %
-composer test:coverage   # ensemble du package, seuil 70 %
+make test-critical   # Webhook/ et Tenancy/, seuil 85 %
+make test-coverage   # ensemble du package, seuil 70 %
 ```
 
 Les deux exigent un driver de couverture. **PCOV** convient et ne ralentit pas la suite :
@@ -47,8 +46,7 @@ Deux tests interrogent une vraie sandbox. Ils s'ignorent partout où les identif
 l'environnement — donc en intégration continue, et sur toute machine sans sandbox.
 
 ```bash
-IOPOLE_TOKEN_URL=… IOPOLE_CLIENT_ID=… IOPOLE_CLIENT_SECRET=… IOPOLE_BASE_URL=… \
-  vendor/bin/pest --group=integration
+make test-integration   # lit les identifiants du .env du playground
 ```
 
 Aucun secret ne doit être écrit dans le dépôt.
@@ -66,6 +64,20 @@ dupliquée ou mal routée — un incident comptable, pas un défaut d'affichage.
 5. **Erreurs d'API** — un 5xx renvoyé à la plateforme déclenche ses relances pour rien.
 
 Pour ces points, écrivez le test **avant** le code.
+
+## Recette manuelle
+
+Les tests automatisés tournent en isolation ; le playground voisin sert à voir le package à
+l'œuvre dans une vraie application.
+
+```bash
+make serve      # sert le playground sur le port 8000
+make work       # traite la file d'attente
+make doctor     # diagnostique le raccordement
+make fresh      # réinitialise la base et republie les migrations
+make captures   # liste les livraisons capturées sur le tunnel
+make package    # montre ce qui partirait réellement chez un utilisateur
+```
 
 ## Langue
 
