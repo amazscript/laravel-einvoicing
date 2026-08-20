@@ -115,8 +115,8 @@ Tout ce qui suit a été éprouvé contre la sandbox réelle de la plateforme, p
 
 ### Limites connues
 
-- **Aucune facture au format Factur-X valide n'a été émise.** Le transport est prouvé de bout en
-  bout ; la validation du format par la plateforme ne l'est pas.
+- L'émission a été vérifiée avec un Factur-X authentique produit par `horstoeko/zugferd` :
+  accepté, validé, livré, puis relu — `SUBMITTED`, `ISSUED`, `RECEIVED`, `MADE_AVAILABLE`.
 - Une déclaration d'e-reporting ne peut être ni corrigée ni retirée : la plateforme répond `501`
   sur ses propres endpoints de mise à jour et de suppression.
 - Le rattachement d'une entreprise à un compte (KYB) reste hors périmètre.

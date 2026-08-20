@@ -681,3 +681,4 @@ aussi pourquoi la story n'a pas été exécutée en réel.
 | 2026-08-20 | Publication | fait | `main` et `v0.1.0` poussés ; `v0.2.0` préparé |
 | 2026-08-20 | CI | corrigé | Laravel 11 retiré : branche entière bloquée par 7 avis de sécurité |
 | 2026-08-20 | D23 | fait | Rattachement au compte — 5 tests ; non exécuté en réel, risque d'écrasement |
+| 2026-08-20 | Émission | **prouvée** | Factur-X réel généré, accepté, validé et livré — la limite tombe |
