@@ -8,8 +8,7 @@
         "iopole",
         "dgfip",
         "factur-x",
-        "e-reporting",
-        "peppol"
+        "e-reporting"
     ],
     "homepage": "https://github.com/amazscript/laravel-einvoicing",
     "license": "MIT",
