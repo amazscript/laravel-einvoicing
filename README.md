@@ -1,6 +1,7 @@
 # laravel-einvoicing
 
-Recevoir les factures électroniques françaises dans une application Laravel, via une Plateforme Agréée.
+Recevoir et émettre les factures électroniques françaises dans une application Laravel, via une
+Plateforme Agréée.
 
 [![Tests](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml)
 [![Qualité](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml)
@@ -8,7 +9,7 @@ Recevoir les factures électroniques françaises dans une application Laravel, v
 [![PHP](https://img.shields.io/packagist/php-v/amazscript/laravel-einvoicing.svg)](https://github.com/amazscript/laravel-einvoicing/blob/main/composer.json)
 [![Licence](https://img.shields.io/packagist/l/amazscript/laravel-einvoicing.svg)](https://github.com/amazscript/laravel-einvoicing/blob/main/LICENSE)
 
-> **Maturité.** Version `0.1.0` : le package est fonctionnel et couvert par 234 tests, mais il
+> **Maturité.** Version `0.2.0` : le package est fonctionnel et couvert par 318 tests, mais il
 > **n'a pas encore d'usage en production connu**. Il a été vérifié contre une sandbox réelle, pas
 > contre des flux de facturation d'entreprise. L'API publique peut évoluer d'ici la `1.0`.
 >
@@ -129,10 +130,11 @@ Einvoicing::for($tenant)->invoice($id)->attachments();
 
 ## Ce que le package ne fait pas
 
-- Il ne génère aucun format de facture : ni Factur-X, ni UBL, ni CII, ni PDF/A-3.
+- Il ne génère aucun format de facture : ni Factur-X, ni UBL, ni CII, ni PDF/A-3. À l'émission, il
+  transporte un document que votre application a déjà produit.
 - Il n'exécute aucune validation Schematron.
 - Il ne remplace pas un compte chez une Plateforme Agréée : il en consomme l'API.
-- Il n'émet pas de factures.
+- Il ne conduit pas le rattachement d'une entreprise à votre compte (KYB).
 
 Le package est un **Opérateur de Dématérialisation**. Il ne certifie rien et n'apporte aucune garantie
 de conformité : seule la Plateforme Agréée est agréée.

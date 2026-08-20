@@ -377,7 +377,8 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 - [x] `docs/depannage.md` : signature invalide, 403, tenant introuvable, 429, job en échec
 - [x] `CHANGELOG.md` à jour
 - [x] Aucune promesse de conformité — le package est un OD, la PA seule est agréée
-- [ ] Publication Packagist, tag `v0.1.0`
+- [x] Tag `v0.1.0` poussé le 20/08 avec `main`
+- [ ] Publication Packagist (soumission de l'URL du dépôt, côté packagist.org)
 - [x] **DoD** : recette finale dans un playground **neuf** — un dev installe, configure, reçoit sa première facture en < 15 min (CDC §3)
 
 ---
@@ -661,3 +662,4 @@ aussi le rapport, et non l'entité, qui permet de relire ce régime.
 | 2026-08-20 | D24 | fait | E-reporting B2C — 10 tests ; refus réel sur régime de TVA manquant, précondition documentée |
 | 2026-08-20 | D22 | corrigé | Écriture réelle : exception après création réussie, et corps vide encodé `[]` |
 | 2026-08-20 | D25 | fait | Consultation des périodes et régime de TVA — déclaration réelle acceptée ; PUT et DELETE en 501 |
+| 2026-08-20 | Publication | fait | `main` et `v0.1.0` poussés ; `v0.2.0` préparé |

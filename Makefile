@@ -3,6 +3,7 @@
 # « make » seul liste ce qui est disponible. Les cibles qui touchent au
 # playground supposent l'application de recette voisine, décrite dans SPRINT.md.
 
+VERSION ?= v0.2.0
 PLAYGROUND := ../einvoicing-playground
 PHP_COVERAGE := php -d pcov.enabled=1
 
@@ -78,9 +79,10 @@ package: ## Montrer ce qui partirait réellement chez un utilisateur
 	@git archive HEAD | tar -t | grep -vc "/$$" | xargs echo "fichiers publiés :"
 
 .PHONY: retag
-retag: ## Replacer le tag v0.1.0 sur la pointe de main
-	git tag -f -a v0.1.0 -F .github/releases/TAG_MESSAGE.txt
-	@echo "tag v0.1.0 -> $$(git rev-parse --short v0.1.0^{commit})"
+retag: ## Poser le tag de la version en préparation sur la pointe de main
+	@# Ne cible que la version non publiée : v0.1.0 est en ligne et ne bouge plus.
+	git tag -a $(VERSION) -F .github/releases/TAG_MESSAGE_$(VERSION).txt
+	@echo "tag $(VERSION) -> $$(git rev-parse --short $(VERSION)^{commit})"
 
 # ------------------------------------------------------------------------ aide
 

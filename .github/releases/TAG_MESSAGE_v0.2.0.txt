@@ -1,0 +1,20 @@
+v0.2.0 — émission, suivi et réponses
+
+La v0.1 recevait des factures. Celle-ci en émet, suit ce qu'elles deviennent et
+permet d'y répondre. S'y ajoutent l'inscription d'une entreprise à l'annuaire et
+l'e-reporting des ventes B2C.
+
+Le package transporte les documents, il n'en fabrique aucun : produire un
+Factur-X valide relève de la plateforme agréée. L'endpoint d'émission n'offrant
+aucune clé d'idempotence, une contrainte d'unicité sur l'empreinte du fichier
+empêche qu'un renvoi après timeout facture le client deux fois.
+
+Éprouvé contre la sandbox réelle : facture émise et acceptée, cycle de vie revenu
+par webhook, réponses acheteur parties et rattachées, entreprise déclarée puis
+rendue joignable, déclaration d'e-reporting acceptée.
+
+Aucune facture au format Factur-X valide n'a en revanche été émise : le transport
+est prouvé, la validation du format ne l'est pas. Toujours aucun usage en
+production connu.
+
+PHP 8.3 et 8.4 · Laravel 11, 12 et 13 · Guzzle 7 et 8.

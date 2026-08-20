@@ -5,9 +5,13 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.2.0] — 2026-08-20
 
-### Émission (palier v0.2, en cours)
+Le package émet, suit et répond. La v0.1 ne faisait que recevoir.
+
+Tout ce qui suit a été éprouvé contre la sandbox réelle de la plateforme, pas seulement en test.
+
+### Émission
 
 - `Einvoicing::for($tenant)->send($chemin)` remet à la plateforme un document PDF ou XML **produit
   par l'application** : le package n'a jamais fabriqué de format, et ne commence pas.
@@ -29,7 +33,7 @@ respecte [SemVer](https://semver.org/lang/fr/).
   plateforme les rejetterait, et « refusée » tout court n'apprend rien au fournisseur.
 - 28 motifs de refus normatifs (`RejectionReason`), une chaîne restant acceptée si la liste évolue.
 
-### Onboarding (palier v0.3, en cours)
+### Onboarding
 
 - `Einvoicing::entities()->declareLegalUnit()` et `->register()` : déclarer une entreprise puis
   publier son adresse à l'annuaire. Deux gestes distincts — le premier la fait connaître, seul le
@@ -40,7 +44,7 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - L'inscription n'envoie jamais un corps vide : un tableau PHP vide s'encode `[]` là où l'endpoint
   attend `{}`, et l'inscription échouait alors sans rien dire.
 
-### E-reporting (palier v0.4, en cours)
+### E-reporting
 
 - `Einvoicing::for($tenant)->reporting()` déclare les ventes B2C et les encaissements. Tout est en
   JSON : le package porte l'échange entier, sans dépendre d'un format produit ailleurs.
@@ -51,7 +55,7 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Prérequis relevé en réel : sans régime de TVA sur l'entité, la plateforme refuse. Ce régime
   n'étant jamais renvoyé en lecture, le manque ne se découvre qu'au premier refus.
 
-### E-reporting — consultation et prérequis
+### E-reporting — consultation
 
 - `reports()` lit les périodes de déclaration : ouverte ou close, acceptée ou refusée, et la date de
   clôture automatique au-delà de laquelle plus rien n'y entre. Le mois de départ est obligatoire et
@@ -64,9 +68,26 @@ respecte [SemVer](https://semver.org/lang/fr/).
 
 ### Corrigé
 
+- Un statut de facture émise nomme le client comme destinataire, jamais l'émetteur : le routage
+  multi-tenant n'y trouvait rien et le premier statut réel est resté `UNROUTED`. Il est désormais
+  rattaché par l'identifiant de la facture.
+- `einvoicing:doctor` détecte un worker absent ou lancé sur la mauvaise file — la panne la plus
+  silencieuse : la route répond 202, les livraisons s'enregistrent, et rien n'est traité.
+- Une requête d'upload n'hérite plus du `Content-Type: application/json` posé par `asJson()`, qui
+  survivait à `asMultipart()` et faisait partir le corps sous une fausse étiquette.
+- `einvoicing:webhooks:sync` n'annonce plus une option `--apply` qui n'était branchée sur rien.
 - `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :
   jusqu'ici un événement `UNROUTED` ne pouvait être récupéré par aucun moyen, ce qui vidait la
   commande de son objet.
+
+### Limites connues
+
+- **Aucune facture au format Factur-X valide n'a été émise.** Le transport est prouvé de bout en
+  bout ; la validation du format par la plateforme ne l'est pas.
+- Une déclaration d'e-reporting ne peut être ni corrigée ni retirée : la plateforme répond `501`
+  sur ses propres endpoints de mise à jour et de suppression.
+- Le rattachement d'une entreprise à un compte (KYB) reste hors périmètre.
+- Toujours aucun usage en production connu.
 
 ## [0.1.0] — 2026-08-19
 
