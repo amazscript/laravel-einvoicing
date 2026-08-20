@@ -3,6 +3,10 @@
 Recevoir et émettre les factures électroniques françaises dans une application Laravel, via une
 Plateforme Agréée.
 
+> **Prérequis : un compte [Iopole](https://iopole.com).** C'est aujourd'hui le seul driver
+> disponible. Si votre Plateforme Agréée est une autre, ce package ne vous servira pas en l'état —
+> voir [écrire un driver](docs/drivers.md).
+
 [![Tests](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/tests.yml)
 [![Qualité](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml/badge.svg)](https://github.com/amazscript/laravel-einvoicing/actions/workflows/quality.yml)
 [![Packagist](https://img.shields.io/packagist/v/amazscript/laravel-einvoicing.svg)](https://packagist.org/packages/amazscript/laravel-einvoicing)
@@ -134,6 +138,9 @@ Einvoicing::for($tenant)->invoice($id)->attachments();
   transporte un document que votre application a déjà produit.
 - Il n'exécute aucune validation Schematron.
 - Il ne remplace pas un compte chez une Plateforme Agréée : il en consomme l'API.
+- **Il ne parle qu'à Iopole.** Les huit contrats internes sont neutres et un second driver est
+  prévu, mais aucun n'est écrit à ce jour : rien ne serait vérifiable sans un compte pour
+  l'éprouver. Voir [écrire un driver](docs/drivers.md) si vous en avez un.
 - Il ne conduit pas le rattachement d'une entreprise à votre compte (KYB).
 
 Le package est un **Opérateur de Dématérialisation**. Il ne certifie rien et n'apporte aucune garantie
@@ -180,6 +187,7 @@ Pour signaler une vulnérabilité : [contact@amazscript.com](mailto:contact@amaz
 [Émission](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/emission.md) ·
 [Réponses](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/reponses.md) ·
 [E-reporting](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/reporting.md) ·
+[Drivers](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/drivers.md) ·
 [Dépannage](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/depannage.md)
 
 ## Licence

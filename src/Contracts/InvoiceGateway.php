@@ -22,6 +22,8 @@ interface InvoiceGateway
      *     invoice_date: string|null,
      *     sender_name: string|null,
      *     sender_siren: string|null,
+     *     recipient_siren: string|null,
+     *     recipient_siret: string|null,
      *     sender_siret: string|null,
      *     amount_total: string|null,
      *     amount_tax: string|null,

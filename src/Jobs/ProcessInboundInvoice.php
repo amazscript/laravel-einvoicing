@@ -114,6 +114,11 @@ final class ProcessInboundInvoice implements ShouldQueue
         $format = $metadonnees['format'];
         $metadonnees['format'] = is_string($format) ? InvoiceFormat::tryFrom($format) : null;
 
+        // The recipient is not stored: it is already the invoice's tenant, and
+        // two records of the same fact drift apart. It is read for routing a
+        // replay, nothing more.
+        unset($metadonnees['recipient_siren'], $metadonnees['recipient_siret']);
+
         $invoice->forceFill(array_filter(
             $metadonnees,
             static fn (mixed $valeur): bool => $valeur !== null,

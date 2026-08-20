@@ -23,7 +23,7 @@ final class IopoleInvoiceGateway implements InvoiceGateway
     ) {}
 
     /**
-     * @return array{invoice_number: string|null, invoice_date: string|null, sender_name: string|null, sender_siren: string|null, sender_siret: string|null, amount_total: string|null, amount_tax: string|null, currency: string|null, format: string|null}|null
+     * @return array{invoice_number: string|null, invoice_date: string|null, sender_name: string|null, sender_siren: string|null, sender_siret: string|null, recipient_siren: string|null, recipient_siret: string|null, amount_total: string|null, amount_tax: string|null, currency: string|null, format: string|null}|null
      */
     public function metadata(string $providerInvoiceId): ?array
     {
@@ -50,12 +50,19 @@ final class IopoleInvoiceGateway implements InvoiceGateway
         $monetary = is_array($business['monetary'] ?? null) ? $business['monetary'] : [];
         $seller = is_array($business['seller'] ?? null) ? $business['seller'] : [];
 
+        // The recipient never travels in the delivery payload — only in a
+        // header, which a replay no longer has. Reading it here is what makes
+        // an unrouted invoice recoverable.
+        $buyer = is_array($business['buyer'] ?? null) ? $business['buyer'] : [];
+
         return [
             'invoice_number' => $this->string($business['invoiceId'] ?? null),
             'invoice_date' => $this->string($business['invoiceDate'] ?? null),
             'sender_name' => $this->string($seller['name'] ?? null),
             'sender_siren' => $this->string($seller['siren'] ?? null),
             'sender_siret' => $this->string($seller['siret'] ?? null),
+            'recipient_siren' => $this->string($buyer['siren'] ?? null),
+            'recipient_siret' => $this->string($buyer['siret'] ?? null),
             // The amount due governs: that is what accounting actually pays.
             'amount_total' => $this->amount($monetary['payableAmount'] ?? null)
                 ?? $this->amount($monetary['invoiceAmount'] ?? null),

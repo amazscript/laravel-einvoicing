@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Console;
 
+use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Contracts\PayloadInterpreter;
 use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
+use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Models\WebhookEvent;
+use AmazScript\Einvoicing\Tenancy\RoutingKeys;
 use AmazScript\Einvoicing\Webhook\InboundEventDispatcher;
 use AmazScript\Einvoicing\Webhook\InboundRequest;
 use Illuminate\Console\Command;
+use Throwable;
 
 /**
  * Puts aside events back into processing.
@@ -27,11 +31,16 @@ final class RetryEventsCommand extends Command
 
     protected $description = 'Rejoue les événements webhook non routés ou en échec';
 
+    private InvoiceGateway $gateway;
+
     public function handle(
         InboundEventDispatcher $dispatcher,
         TenantResolver $resolver,
         PayloadInterpreter $interpreter,
+        InvoiceGateway $gateway,
     ): int {
+        $this->gateway = $gateway;
+
         $etats = $this->statuses();
         $limite = (int) $this->option('limit');
 
@@ -138,8 +147,53 @@ final class RetryEventsCommand extends Command
     ): ?string {
         $payload = $evenement->payload ?? [];
 
-        return $resolver->resolve(
+        $tenant = $resolver->resolve(
             $interpreter->routingKeys(InboundRequest::fromStoredPayload($payload))
-        )?->id;
+        );
+
+        if ($tenant instanceof Tenant) {
+            return $tenant->id;
+        }
+
+        return $this->rerouteFromPlatform($payload, $resolver);
+    }
+
+    /**
+     * Last resort: ask the platform who the invoice was for.
+     *
+     * An inbound delivery carries only an identifier in its body — the
+     * recipient travels in a header, which a stored event no longer has. So an
+     * unrouted invoice could never be recovered, whatever tenant was created
+     * afterwards.
+     *
+     * Deliberately here rather than in the webhook: the controller must answer
+     * without calling anything, and a replay is already asynchronous.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    private function rerouteFromPlatform(array $payload, TenantResolver $resolver): ?string
+    {
+        $invoiceId = $payload['invoiceId'] ?? null;
+
+        if (! is_string($invoiceId) || $invoiceId === '') {
+            return null;
+        }
+
+        try {
+            $metadata = $this->gateway->metadata($invoiceId);
+        } catch (Throwable) {
+            // A platform that is down must not turn a recoverable event into a
+            // failed one: it stays unrouted, and the next run tries again.
+            return null;
+        }
+
+        if ($metadata === null) {
+            return null;
+        }
+
+        return $resolver->resolve(new RoutingKeys(
+            siret: $metadata['recipient_siret'],
+            siren: $metadata['recipient_siren'],
+        ))?->id;
     }
 }
