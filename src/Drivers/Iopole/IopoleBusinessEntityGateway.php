@@ -83,6 +83,11 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
         );
     }
 
+    public function configureVatRegime(string $businessEntityId, string $vatRegime): void
+    {
+        $this->client->post(Endpoints::configureEntity($businessEntityId), ['vatRegime' => $vatRegime]);
+    }
+
     /**
      * @param  array<string, mixed>  $ligne
      */

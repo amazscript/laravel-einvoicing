@@ -46,12 +46,38 @@ final class Endpoints
         return '/v1/reporting/payment/transaction/scheme/'.rawurlencode($scheme).'/value/'.rawurlencode($value);
     }
 
+    public static function reportingTransaction(string $transactionId): string
+    {
+        return '/v1/reporting/transaction/'.rawurlencode($transactionId);
+    }
+
+    public static function reportingPayment(string $paymentId): string
+    {
+        return '/v1/reporting/payment/'.rawurlencode($paymentId);
+    }
+
+    /**
+     * The reporting periods held for a company.
+     */
+    public static function reports(string $scheme, string $value): string
+    {
+        return '/v1/reporting/report/scheme/'.rawurlencode($scheme).'/value/'.rawurlencode($value);
+    }
+
     /**
      * Declares a legal unit.
      */
     public static function declareLegalUnit(): string
     {
         return '/v1/config/business/entity/legalunit';
+    }
+
+    /**
+     * Sets an entity's VAT regime, which e-reporting requires.
+     */
+    public static function configureEntity(string $businessEntityId): string
+    {
+        return '/v1/config/business/entity/'.rawurlencode($businessEntityId).'/configure';
     }
 
     /**

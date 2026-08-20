@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Api;
 
 use AmazScript\Einvoicing\Contracts\ReportingGateway;
+use AmazScript\Einvoicing\Enums\VatRegime;
 use AmazScript\Einvoicing\Models\Tenant;
+use AmazScript\Einvoicing\Reporting\ReportFolder;
 use AmazScript\Einvoicing\Reporting\Transaction;
+use DateTimeImmutable;
 use DateTimeInterface;
+use Illuminate\Support\LazyCollection;
 use InvalidArgumentException;
 
 /**
@@ -95,5 +99,84 @@ final class ReportingQuery
         }
 
         return $chiffres;
+    }
+
+    /**
+     * Withdraws a declaration.
+     *
+     * **Not available yet.** The platform answers 501 here as it does on the
+     * update endpoints, so nothing declared can currently be taken back or
+     * amended. Kept because the call is correct and will work the day the
+     * platform implements it; verified against the real API on 2026-08-20.
+     *
+     * Until then, treat every declaration as final and check the figures before
+     * sending them.
+     */
+    public function deleteTransaction(string $transactionId): void
+    {
+        $this->gateway->deleteTransaction($transactionId);
+    }
+
+    public function deletePayment(string $paymentId): void
+    {
+        $this->gateway->deletePayment($paymentId);
+    }
+
+    /**
+     * The reporting periods held for this tenant.
+     *
+     * Declarations accumulate into a period that closes on its own; once
+     * closed, nothing more goes in.
+     *
+     * The starting month is required — the platform rejects the call without
+     * it — and both bounds are months, not days: a reporting period is never
+     * finer than that.
+     *
+     * @return LazyCollection<int, ReportFolder>
+     */
+    public function reports(DateTimeInterface $from, ?DateTimeInterface $to = null): LazyCollection
+    {
+        return $this->gateway
+            ->reports('0002', $this->siren(), $from->format('Y-m'), $to?->format('Y-m'))
+            ->map(fn (array $ligne): ReportFolder => $this->toFolder($ligne));
+    }
+
+    /**
+     * @param  array<mixed>  $ligne
+     */
+    private function toFolder(array $ligne): ReportFolder
+    {
+        $regime = $ligne['vatRegime'] ?? null;
+
+        return new ReportFolder(
+            id: (string) ($ligne['id'] ?? ''),
+            state: $this->stringOrNull($ligne['state'] ?? null),
+            status: $this->stringOrNull($ligne['status'] ?? null),
+            transactionType: $this->stringOrNull($ligne['transactionType'] ?? null),
+            vatRegime: is_string($regime) ? VatRegime::tryFrom($regime) : null,
+            startDate: $this->dateOrNull($ligne['startDate'] ?? null),
+            endDate: $this->dateOrNull($ligne['endDate'] ?? null),
+            autoCloseDate: $this->dateOrNull($ligne['autoCloseDate'] ?? null),
+        );
+    }
+
+    private function stringOrNull(mixed $valeur): ?string
+    {
+        return is_string($valeur) && $valeur !== '' ? $valeur : null;
+    }
+
+    /**
+     * Dates come as plain days or as timestamps depending on the field; only
+     * the day is kept, which is all a reporting period is expressed in.
+     */
+    private function dateOrNull(mixed $valeur): ?DateTimeImmutable
+    {
+        if (! is_string($valeur) || $valeur === '') {
+            return null;
+        }
+
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', substr($valeur, 0, 10));
+
+        return $date === false ? null : $date;
     }
 }

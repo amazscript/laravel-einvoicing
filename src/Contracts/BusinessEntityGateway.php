@@ -46,4 +46,12 @@ interface BusinessEntityGateway
      * @param  array<string, mixed>  $payload
      */
     public function registerOnNetwork(string $scheme, string $value, string $network, array $payload = []): void;
+
+    /**
+     * Sets an entity's VAT regime.
+     *
+     * A call of its own: the regime sent when declaring the entity does not
+     * take, and e-reporting is refused until this one has been made.
+     */
+    public function configureVatRegime(string $businessEntityId, string $vatRegime): void;
 }

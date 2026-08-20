@@ -121,4 +121,16 @@ final class EntityQuery
             'selfBilling' => $selfBilling,
         ], static fn (mixed $v): bool => $v !== null));
     }
+
+    /**
+     * Sets a company's VAT regime.
+     *
+     * Needed before any e-reporting: without it the platform answers "The
+     * business entity does not have a VAT regime specified". Passing the regime
+     * when declaring the entity is not enough — it takes this separate call.
+     */
+    public function setVatRegime(string $businessEntityId, VatRegime $regime): void
+    {
+        $this->gateway->configureVatRegime($businessEntityId, $regime->value);
+    }
 }

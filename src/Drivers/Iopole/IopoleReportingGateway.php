@@ -6,6 +6,7 @@ namespace AmazScript\Einvoicing\Drivers\Iopole;
 
 use AmazScript\Einvoicing\Contracts\ReportingGateway;
 use AmazScript\Einvoicing\Exceptions\EinvoicingServerException;
+use Illuminate\Support\LazyCollection;
 
 /**
  * E-reporting through the Iopole platform.
@@ -31,6 +32,27 @@ final class IopoleReportingGateway implements ReportingGateway
         return $this->identifierOf(
             $this->client->post(Endpoints::reportPaymentForTransaction($scheme, $value), $payload)
         );
+    }
+
+    public function deleteTransaction(string $transactionId): void
+    {
+        $this->client->delete(Endpoints::reportingTransaction($transactionId));
+    }
+
+    public function deletePayment(string $paymentId): void
+    {
+        $this->client->delete(Endpoints::reportingPayment($paymentId));
+    }
+
+    /**
+     * @return LazyCollection<int, array<mixed>>
+     */
+    public function reports(string $scheme, string $value, ?string $from = null, ?string $to = null): LazyCollection
+    {
+        return $this->client->paginate(Endpoints::reports($scheme, $value), array_filter([
+            'from' => $from,
+            'to' => $to,
+        ], static fn (mixed $v): bool => $v !== null));
     }
 
     /**

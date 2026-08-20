@@ -90,3 +90,40 @@ journées de caisse identiques sont parfaitement possibles.
 
 Le regroupement vous appartient. Conservez l'identifiant rendu par `reportTransactions()` — c'est
 lui qui permettra de corriger la déclaration.
+
+## Consulter les périodes
+
+Les déclarations s'accumulent dans une période qui se clôt d'elle-même. Passé la clôture, plus rien
+n'y entre.
+
+```php
+$periodes = Einvoicing::for($tenant)->reporting()->reports(new DateTimeImmutable('2026-01-01'));
+
+foreach ($periodes as $p) {
+    $p->isOpen();        // on peut encore y déclarer
+    $p->wasRejected();   // le fisc l'a refusée
+    $p->autoCloseDate;   // au-delà, c'est clos
+    $p->vatRegime;
+}
+```
+
+Le mois de départ est **obligatoire**, et les bornes sont des **mois** : la plateforme refuse une
+date complète (`from must match YYYY-MM`). Une période de déclaration n'est jamais plus fine.
+
+C'est aussi le seul endroit où le régime de TVA est lisible — il ne figure pas sur l'entité.
+
+## Corriger : impossible pour l'instant
+
+**Une déclaration envoyée ne peut être ni modifiée ni retirée.** Les endpoints existent et sont
+documentés, mais la plateforme répond `501 Not Implemented` sur les deux — vérifié le 20 août 2026.
+
+```php
+$reporting->deleteTransaction($id);   // → 501 aujourd'hui
+```
+
+Les méthodes sont exposées parce que l'appel est correct et fonctionnera le jour où la plateforme
+suivra. En attendant, **considérez chaque déclaration comme définitive** : vérifiez les montants
+avant l'envoi, pas après.
+
+Conservez tout de même l'identifiant rendu par `reportTransactions()` : c'est lui qui permettra la
+correction quand elle existera.

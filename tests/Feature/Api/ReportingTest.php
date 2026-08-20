@@ -41,9 +41,12 @@ beforeEach(function (): void {
     config()->set('einvoicing.drivers.iopole.client_id', 'client');
     config()->set('einvoicing.drivers.iopole.client_secret', 'secret');
 
+    // Volontairement étroit : un motif large gagnerait sur les stubs posés
+    // dans les tests, le premier enregistré l'emportant.
     Http::fake([
         '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
-        REPORTING_API.'/v1/reporting/*' => Http::response(['type' => 'STREAM', 'id' => 'rep-1'], 201),
+        REPORTING_API.'/v1/reporting/transaction/scheme/*' => Http::response(['type' => 'STREAM', 'id' => 'rep-1'], 201),
+        REPORTING_API.'/v1/reporting/payment/transaction/scheme/*' => Http::response(['type' => 'STREAM', 'id' => 'rep-1'], 201),
     ]);
 });
 
@@ -187,3 +190,89 @@ it('accepte une devise étrangère et une catégorie de TVA choisie', function (
 it('exige un dossier pour déclarer', function (): void {
     Einvoicing::operator()->reporting();
 })->throws(RuntimeException::class, 'Reporting requires a tenant');
+
+it('retire une déclaration', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        REPORTING_API.'/v1/reporting/transaction/*' => Http::response([], 204),
+    ]);
+
+    // Il n'existe aucun moyen de modifier : corriger, c'est retirer puis
+    // redéclarer, les endpoints de mise à jour répondant 501.
+    Einvoicing::for(dossierDeclarant())->reporting()->deleteTransaction('tr-1');
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE'
+        && str_ends_with($request->url(), '/v1/reporting/transaction/tr-1'));
+});
+
+it('retire un encaissement', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        REPORTING_API.'/v1/reporting/payment/*' => Http::response([], 204),
+    ]);
+
+    Einvoicing::for(dossierDeclarant())->reporting()->deletePayment('pay-1');
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE'
+        && str_ends_with($request->url(), '/v1/reporting/payment/pay-1'));
+});
+
+it('lit les périodes de déclaration', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        REPORTING_API.'/v1/reporting/report/scheme/*' => Http::response([
+            'data' => [[
+                'id' => 'rep-2026-08',
+                'state' => 'OPEN',
+                'status' => 'PENDING',
+                'transactionType' => 'INITIAL',
+                'vatRegime' => 'VAT_EXEMPTION_REGIME',
+                'startDate' => '2026-08-01',
+                'endDate' => '2026-08-31',
+                'autoCloseDate' => '2026-09-05',
+            ]],
+            'meta' => ['offset' => 0, 'limit' => 50, 'count' => 1],
+        ]),
+    ]);
+
+    $periode = Einvoicing::for(dossierDeclarant())->reporting()->reports(new DateTimeImmutable('2026-08-01'))->first();
+
+    expect($periode->id)->toBe('rep-2026-08')
+        ->and($periode->isOpen())->toBeTrue()
+        ->and($periode->wasRejected())->toBeFalse()
+        ->and($periode->vatRegime->value)->toBe('VAT_EXEMPTION_REGIME')
+        ->and($periode->autoCloseDate->format('Y-m-d'))->toBe('2026-09-05');
+});
+
+it('reconnaît une période close et une déclaration refusée', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        REPORTING_API.'/v1/reporting/report/scheme/*' => Http::response([
+            'data' => [['id' => 'rep-1', 'state' => 'CLOSED', 'status' => 'REJECTED']],
+            'meta' => ['offset' => 0, 'limit' => 50, 'count' => 1],
+        ]),
+    ]);
+
+    $periode = Einvoicing::for(dossierDeclarant())->reporting()->reports(new DateTimeImmutable('2026-08-01'))->first();
+
+    // Close : plus rien ne peut y être déclaré. Refusée : à reprendre.
+    expect($periode->isOpen())->toBeFalse()
+        ->and($periode->wasRejected())->toBeTrue()
+        ->and($periode->startDate)->toBeNull();
+});
+
+it('borne la consultation à des mois, pas à des jours', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        REPORTING_API.'/v1/reporting/report/scheme/*' => Http::response(['data' => [], 'meta' => ['count' => 0]]),
+    ]);
+
+    Einvoicing::for(dossierDeclarant())->reporting()
+        ->reports(new DateTimeImmutable('2026-01-15'), new DateTimeImmutable('2026-12-31'))
+        ->all();
+
+    // Relevé en réel : « from must match YYYY-MM ». Une période de déclaration
+    // n'est jamais plus fine qu'un mois.
+    Http::assertSent(fn ($request): bool => str_contains($request->url(), 'from=2026-01')
+        && ! str_contains($request->url(), 'from=2026-01-15'));
+});

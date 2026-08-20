@@ -51,6 +51,17 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Prérequis relevé en réel : sans régime de TVA sur l'entité, la plateforme refuse. Ce régime
   n'étant jamais renvoyé en lecture, le manque ne se découvre qu'au premier refus.
 
+### E-reporting — consultation et prérequis
+
+- `reports()` lit les périodes de déclaration : ouverte ou close, acceptée ou refusée, et la date de
+  clôture automatique au-delà de laquelle plus rien n'y entre. Le mois de départ est obligatoire et
+  les bornes sont des mois, pas des jours.
+- `setVatRegime()` : le régime envoyé à la création d'une entité ne prend pas, et sans lui la
+  plateforme refuse toute déclaration. C'est aussi le rapport, et non l'entité, qui permet de le
+  relire ensuite.
+- `deleteTransaction()` / `deletePayment()` sont exposées mais **la plateforme répond 501** : rien
+  de déclaré ne peut aujourd'hui être repris ni corrigé. À considérer comme définitif.
+
 ### Corrigé
 
 - `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :

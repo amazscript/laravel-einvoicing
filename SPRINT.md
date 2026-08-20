@@ -557,10 +557,29 @@ n'est **jamais renvoyé** en lecture, ni en liste ni en unitaire. `doctor` ne pe
 le manque n'apparaît qu'au refus de la première déclaration. Documenté plutôt que contourné — un
 diagnostic bâti sur un champ absent serait exactement l'erreur du matin.
 
-## D25 — Corriger une déclaration
+## D25 — Corriger et consulter une déclaration
 
-- [ ] `PUT` et `DELETE` sur transactions et paiements
-- [ ] Consultation du rapport (`GET /v1/reporting/report/...`)
+- [x] Consultation des périodes : `reports()`, objet `ReportFolder`, `isOpen()`, `wasRejected()`
+- [x] `deleteTransaction()` / `deletePayment()` exposés
+- [x] `setVatRegime()` — l'endpoint `configure`, sans lequel aucune déclaration n'est acceptée
+- [x] 15 tests
+- [x] `docs/reporting.md` complété
+- [x] **DoD** : déclaration réelle **acceptée** sur l'entreprise de l'utilisateur après
+      configuration du régime, période lue en retour (ouverte, clôture au 28/09/2026)
+
+**Trois écarts entre la spec et l'API réelle.**
+
+`PUT` **et** `DELETE` répondent `501`. Le premier était annoncé comme non implémenté ; le second
+annonçait un `204`, et n'est pas implémenté non plus. Rien de déclaré ne peut donc être repris. Les
+méthodes restent exposées — l'appel est juste, la plateforme ne suit pas — et la doc le dit sans
+détour.
+
+`from` est **requis** sur la consultation, et au format **`YYYY-MM`** : la spec ne disait ni l'un
+ni l'autre.
+
+Le `vatRegime` envoyé à la création d'une entité **ne prend pas**. Il faut
+`POST /v1/config/business/entity/{id}/configure`, et sans lui toute déclaration est refusée. C'est
+aussi le rapport, et non l'entité, qui permet de relire ce régime.
 
 ---
 
@@ -641,3 +660,4 @@ diagnostic bâti sur un champ absent serait exactement l'erreur du matin.
 | 2026-08-20 | D22 | fait | Déclarer et inscrire une entreprise — 9 tests ; écriture réelle non lancée |
 | 2026-08-20 | D24 | fait | E-reporting B2C — 10 tests ; refus réel sur régime de TVA manquant, précondition documentée |
 | 2026-08-20 | D22 | corrigé | Écriture réelle : exception après création réussie, et corps vide encodé `[]` |
+| 2026-08-20 | D25 | fait | Consultation des périodes et régime de TVA — déclaration réelle acceptée ; PUT et DELETE en 501 |
