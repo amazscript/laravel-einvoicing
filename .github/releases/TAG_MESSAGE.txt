@@ -3,6 +3,10 @@ v0.1.0 — réception des factures électroniques françaises
 Première version. Le package reçoit, authentifie, route et range les factures
 qu'une Plateforme Agréée lui livre, et prévient l'application par des events.
 
+`einvoicing:doctor` contrôle aussi la joignabilité de chaque entreprise déclarée :
+une entreprise inscrite que personne ne dessert ne recevra rien, et c'est le seul
+endroit qui le dit avant qu'une facture ne rebondisse.
+
 Signature HMAC validée deux fois : contre l'implémentation de référence de la
 plateforme, puis contre ses livraisons réelles, reproduites à l'octet près. Une
 application Laravel neuve a reçu une facture réelle complète.
