@@ -39,12 +39,15 @@ driver Iopole.
 
 - Façade `Einvoicing` : factures d'un dossier, acquittement auprès de la plateforme, accès aux
   documents et pièces jointes.
-- Recherche de factures et parcours de l'annuaire, tous deux paresseux.
+- Recherche de factures et parcours des factures distantes, tous deux paresseux.
+- Lecture des entreprises déclarées et de leur joignabilité : une entreprise inscrite mais
+  desservie par aucune plateforme ne peut rien recevoir, et rien d'autre ne le révélait avant
+  qu'une facture ne rebondisse.
 
 ### Commandes
 
 `einvoicing:install`, `secret`, `doctor`, `poll`, `webhooks:sync`, `retry:sync`, `events:prune`
-et `events:retry`.
+et `events:retry`. `doctor` contrôle aussi la joignabilité de chaque entreprise déclarée.
 
 ### Compatibilité
 
@@ -54,8 +57,9 @@ PHP 8.3 et 8.4 · Laravel 11, 12 et 13 · Guzzle 7 et 8.
 
 - **Aucun usage en production connu.** Le package a été vérifié contre une sandbox réelle, pas
   contre les flux de facturation d'une entreprise.
-- L'émission de factures est hors périmètre (prévue en v0.2), de même que l'e-reporting et
-  l'onboarding (v0.3).
+- L'émission de factures est hors périmètre (prévue en v0.2), de même que l'e-reporting (v0.3).
+  L'onboarding est **en lecture seule** : le package constate qu'une entreprise n'est pas joignable,
+  il ne l'enregistre pas.
 - Un seul driver de Plateforme Agréée. L'abstraction multi-plateforme est prête mais n'a pas été
   éprouvée sur un second fournisseur.
 - Les seuls formats reçus en conditions réelles sont Factur-X et PDF. UBL et CII sont pris en

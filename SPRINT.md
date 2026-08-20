@@ -382,6 +382,25 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 
 ---
 
+## D17 — Lire les entreprises et leur joignabilité
+
+Hors périmètre v0.1 à l'origine, ouverte sur demande : une entreprise déclarée mais non desservie
+ne reçoit rien, et rien ne le disait avant qu'une facture ne rebondisse.
+
+- [x] `BusinessEntity`, `EntityIdentifier`, `NetworkRegistration` — objets de valeur, aucun Iopole
+- [x] `BusinessEntityGateway` (contrat) + implémentation Iopole sous `Drivers/Iopole`
+- [x] `Einvoicing::entities()` : `all()`, `find()`, `reachable()`, `unreachable()`, parcours paresseux
+- [x] `unreachableReason()` rend un **code** (`no-identifier`, `no-registration`,
+      `no-serving-platform`), pas une phrase — la langue appartient à l'application hôte
+- [x] `einvoicing:doctor` contrôle chaque entreprise et nomme la cause
+- [x] Lecture seule : aucun enregistrement d'entité, aucune écriture dans l'annuaire
+- [x] 7 tests sur la forme réelle des réponses, dont l'entreprise sans identifiant et la pagination
+- [x] `docs/entreprises.md`, dépannage et README raccordés
+- [x] **DoD** : vérifié en réel sur la sandbox — 8 entreprises déclarées, **0 joignable**, ce qui
+      explique le rejet `No route found` rencontré à l'émission de test
+
+---
+
 ## Décisions en attente
 
 - [x] **Support de Laravel 13** — tranché par les faits : les 234 tests passent sur Laravel 13 avec
@@ -437,3 +456,4 @@ Relevés le 18 août 2026 sur `docs.iopole.com`. Documentation complète copiée
 | 2026-08-19 | Version | tranché | `v0.1.0` sans `beta` ; maturité réelle annoncée dans le README |
 | 2026-08-19 | Statuts | corrigé | Rattachement à la facture par le numéro de l'émetteur — 4/4 en réel |
 | 2026-08-19 | D14 | complété | Recherche de factures sur `/v1.1/invoice/search`, vérifiée en réel |
+| 2026-08-20 | D17 | fait | Lecture des entreprises et de leur joignabilité — 7 tests, 0/8 joignables en réel |

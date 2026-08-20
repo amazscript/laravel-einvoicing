@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing;
 
 use AmazScript\Einvoicing\Api\DirectoryQuery;
+use AmazScript\Einvoicing\Api\EntityQuery;
 use AmazScript\Einvoicing\Api\TenantScope;
+use AmazScript\Einvoicing\Contracts\BusinessEntityGateway;
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
@@ -23,6 +25,7 @@ final class Einvoicing
     public function __construct(
         private readonly Client $client,
         private readonly InvoiceGateway $gateway,
+        private readonly BusinessEntityGateway $entities,
         private readonly InvoiceFileStore $store,
     ) {}
 
@@ -45,6 +48,14 @@ final class Einvoicing
     public function directory(): DirectoryQuery
     {
         return new DirectoryQuery($this->gateway);
+    }
+
+    /**
+     * The companies declared on the platform, and whether they are reachable.
+     */
+    public function entities(): EntityQuery
+    {
+        return new EntityQuery($this->entities);
     }
 
     /**

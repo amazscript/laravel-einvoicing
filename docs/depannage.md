@@ -43,8 +43,11 @@ fréquente.
 ### Le destinataire n'est pas dans l'annuaire
 
 Statut `REJECTED` portant `No route found for given key (electronicAddress : …)`. L'entreprise
-existe, mais elle n'est pas enregistrée comme destinataire joignable. C'est une question
-d'onboarding, à régler avec la plateforme — le package n'y peut rien.
+existe, mais aucune plateforme ne dessert son adresse électronique.
+
+`php artisan einvoicing:doctor` le dit avant qu'une facture ne rebondisse, entreprise par
+entreprise, avec la cause. La correction, elle, passe par votre plateforme : voir
+[Entreprises et joignabilité](entreprises.md).
 
 ---
 

@@ -165,6 +165,7 @@ Pour signaler une vulnérabilité : [contact@amazscript.com](mailto:contact@amaz
 [Multi-tenant](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/multi-tenant.md) ·
 [Events](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/events.md) ·
 [Commandes](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/commandes.md) ·
+[Entreprises](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/entreprises.md) ·
 [Dépannage](https://github.com/amazscript/laravel-einvoicing/blob/main/docs/depannage.md)
 
 ## Licence
