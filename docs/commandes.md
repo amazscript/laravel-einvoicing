@@ -2,7 +2,9 @@
 
 ## `einvoicing:doctor`
 
-Diagnostique la configuration, la base, la route, puis interroge la plateforme.
+Diagnostique la configuration, la base, la route, puis interroge la plateforme : jeton,
+`customer-id`, webhooks déclarés, et **joignabilité de vos entreprises** — une entreprise déclarée
+mais non desservie ne recevra rien, voir [Entreprises et joignabilité](entreprises.md).
 
 ```bash
 php artisan einvoicing:doctor

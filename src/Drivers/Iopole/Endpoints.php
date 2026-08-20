@@ -30,6 +30,16 @@ final class Endpoints
         return '/v1/config/webhook/'.rawurlencode($webhookId);
     }
 
+    public static function businessEntities(): string
+    {
+        return '/v1/config/business/entity';
+    }
+
+    public static function businessEntity(string $businessEntityId): string
+    {
+        return '/v1/config/business/entity/'.rawurlencode($businessEntityId);
+    }
+
     public static function retryStrategy(): string
     {
         return '/v1/config/retry/strategy';

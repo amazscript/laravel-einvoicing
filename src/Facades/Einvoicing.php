@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static TenantScope for(Tenant $tenant)
  * @method static TenantScope operator()
  * @method static DirectoryQuery directory()
+ * @method static \AmazScript\Einvoicing\Api\EntityQuery entities()
  *
  * @see \AmazScript\Einvoicing\Einvoicing
  */

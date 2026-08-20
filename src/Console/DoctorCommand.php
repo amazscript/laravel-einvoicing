@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Console;
 
+use AmazScript\Einvoicing\Contracts\BusinessEntityGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\Endpoints;
@@ -29,7 +30,7 @@ final class DoctorCommand extends Command
 
     private int $problemes = 0;
 
-    public function handle(Client $client, AccessTokenProvider $tokens): int
+    public function handle(Client $client, AccessTokenProvider $tokens, BusinessEntityGateway $entities): int
     {
         $this->newLine();
         $this->section('Configuration');
@@ -44,6 +45,9 @@ final class DoctorCommand extends Command
         if (! $this->option('no-network')) {
             $this->section('Plateforme');
             $this->checkPlatform($client, $tokens);
+
+            $this->section('Entreprises');
+            $this->checkEntities($entities);
         }
 
         $this->newLine();
@@ -204,6 +208,59 @@ final class DoctorCommand extends Command
         } catch (Throwable $e) {
             $this->ko('webhooks', $e->getMessage());
         }
+    }
+
+    /**
+     * A company can be declared without being reachable, in which case invoices
+     * addressed to it bounce with "No route found". Nothing else in the setup
+     * reveals that, so it is checked here.
+     */
+    private function checkEntities(BusinessEntityGateway $entities): void
+    {
+        try {
+            $declarees = $entities->all()->take(200)->all();
+        } catch (Throwable $e) {
+            $this->ko('entreprises', $e->getMessage());
+
+            return;
+        }
+
+        if ($declarees === []) {
+            $this->ko('entreprises déclarées', 'aucune — personne ne peut vous adresser de facture');
+
+            return;
+        }
+
+        $joignables = array_filter($declarees, static fn ($e): bool => $e->isReachable());
+
+        $this->ok('entreprises déclarées', (string) count($declarees));
+
+        count($joignables) === count($declarees)
+            ? $this->ok('joignables', 'toutes')
+            : $this->ko('joignables', count($joignables).'/'.count($declarees));
+
+        foreach ($declarees as $entite) {
+            $raison = $entite->unreachableReason();
+
+            if ($raison !== null) {
+                $this->line('     <fg=yellow>·</> '
+                    .str_pad(mb_substr($entite->name, 0, 28), 30)
+                    .'<fg=gray>'.$this->explain($raison).'</>');
+            }
+        }
+    }
+
+    /**
+     * Traduit un code de non-joignabilité en explication, avec le geste à faire.
+     */
+    private function explain(string $raison): string
+    {
+        return match ($raison) {
+            'no-identifier' => 'aucun identifiant déclaré',
+            'no-registration' => 'identifiants déclarés, aucun inscrit sur un réseau',
+            'no-serving-platform' => 'inscrite, mais aucune plateforme ne dessert cette adresse',
+            default => $raison,
+        };
     }
 
     private function section(string $titre): void
