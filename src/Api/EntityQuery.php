@@ -8,6 +8,7 @@ use AmazScript\Einvoicing\Contracts\BusinessEntityGateway;
 use AmazScript\Einvoicing\Entities\BusinessEntity;
 use AmazScript\Einvoicing\Enums\EntityScope;
 use AmazScript\Einvoicing\Enums\InvoicingNetwork;
+use AmazScript\Einvoicing\Enums\StreamDirection;
 use AmazScript\Einvoicing\Enums\VatRegime;
 use DateTimeInterface;
 use Illuminate\Support\LazyCollection;
@@ -132,5 +133,76 @@ final class EntityQuery
     public function setVatRegime(string $businessEntityId, VatRegime $regime): void
     {
         $this->gateway->configureVatRegime($businessEntityId, $regime->value);
+    }
+
+    /**
+     * Claims a company for your operator account.
+     *
+     * This is what makes its invoices arrive on your callback URL rather than
+     * somewhere else: without the link, the platform knows the company but does
+     * not hand you its traffic.
+     *
+     * @param  StreamDirection|null  $direction  narrows the claim to one way; both when omitted
+     * @param  array<string, string>  $headers  added to every webhook call for this entity
+     */
+    public function claim(
+        string $businessEntityId,
+        ?StreamDirection $direction = null,
+        array $headers = [],
+    ): void {
+        $this->gateway->claimEntity($businessEntityId, $this->claimPayload($direction, $headers));
+    }
+
+    /**
+     * Changes an existing claim — its direction, or the headers it carries.
+     *
+     * **Replaces, does not merge.** Whatever headers the relation already
+     * carried are dropped unless passed again, and those headers are how the
+     * platform tags webhook calls for this entity: losing them breaks delivery.
+     * Read the current relation first, or pass the full set.
+     *
+     * @param  array<string, string>  $headers
+     */
+    public function updateClaim(
+        string $businessEntityId,
+        ?StreamDirection $direction = null,
+        array $headers = [],
+    ): void {
+        $this->gateway->claimEntity($businessEntityId, $this->claimPayload($direction, $headers), update: true);
+    }
+
+    /**
+     * Releases a company from your account.
+     *
+     * Its invoices stop reaching you. Nothing is deleted on the platform — the
+     * company stays declared and reachable, it simply is no longer yours to
+     * handle.
+     */
+    public function release(string $businessEntityId): void
+    {
+        $this->gateway->releaseEntity($businessEntityId);
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     * @return array<string, mixed>
+     */
+    private function claimPayload(?StreamDirection $direction, array $headers): array
+    {
+        $payload = [];
+
+        if ($headers !== []) {
+            $payload['data'] = ['header' => array_map(
+                static fn (string $cle, string $valeur): array => ['key' => $cle, 'value' => $valeur],
+                array_keys($headers),
+                array_values($headers),
+            )];
+        }
+
+        if ($direction instanceof StreamDirection) {
+            $payload['direction'] = $direction->value;
+        }
+
+        return $payload;
     }
 }

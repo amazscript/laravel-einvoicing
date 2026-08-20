@@ -584,10 +584,26 @@ aussi le rapport, et non l'entité, qui permet de relire ce régime.
 
 ---
 
-## D23 — Rattacher une entreprise au compte (KYB)
+## D23 — Rattacher une entreprise au compte
 
-- [ ] `POST /v1/config/business/entity/{id}/claim`
-- [ ] Suivi de l'état de la revendication
+- [x] `claim()`, `updateClaim()`, `release()` sur `POST`/`PUT`/`DELETE .../claim`
+- [x] Enum `StreamDirection` — rattachement restreint à un sens, ou aux deux
+- [x] Entêtes de webhook transportés par la relation opérateur
+- [x] 5 tests
+- [x] `docs/entreprises.md` complété, avec le piège de `updateClaim()`
+- [ ] **DoD** : non éprouvé contre la plateforme — l'exécuter aurait écrasé la configuration
+      opérateur d'entreprises existantes du parc
+
+**Objection levée.** J'avais écarté cette story deux fois en la croyant lourde : « la revendication
+est une vérification d'identité, pas un appel d'API ». C'était faux, et la spec le disait —
+`DELETE` retire le *business entity link with operator*. Il s'agit du rattachement technique d'une
+entité au compte opérateur, avec sa configuration de webhook. Une supposition tenue pour un fait,
+la même erreur que le matin.
+
+**Piège trouvé en lisant le parc réel.** Chaque entité porte un entête opérateur
+(`x-sandbox-client-id` sur la sandbox), et `PUT .../claim` **remplace** au lieu de fusionner : un
+appel sans repasser les entêtes les efface, et la livraison casse sans message d'erreur. C'est
+aussi pourquoi la story n'a pas été exécutée en réel.
 
 ---
 
@@ -664,3 +680,4 @@ aussi le rapport, et non l'entité, qui permet de relire ce régime.
 | 2026-08-20 | D25 | fait | Consultation des périodes et régime de TVA — déclaration réelle acceptée ; PUT et DELETE en 501 |
 | 2026-08-20 | Publication | fait | `main` et `v0.1.0` poussés ; `v0.2.0` préparé |
 | 2026-08-20 | CI | corrigé | Laravel 11 retiré : branche entière bloquée par 7 avis de sécurité |
+| 2026-08-20 | D23 | fait | Rattachement au compte — 5 tests ; non exécuté en réel, risque d'écrasement |

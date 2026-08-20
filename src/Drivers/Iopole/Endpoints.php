@@ -73,6 +73,14 @@ final class Endpoints
     }
 
     /**
+     * The link between an entity and the operator account.
+     */
+    public static function entityClaim(string $businessEntityId): string
+    {
+        return '/v1/config/business/entity/'.rawurlencode($businessEntityId).'/claim';
+    }
+
+    /**
      * Sets an entity's VAT regime, which e-reporting requires.
      */
     public static function configureEntity(string $businessEntityId): string

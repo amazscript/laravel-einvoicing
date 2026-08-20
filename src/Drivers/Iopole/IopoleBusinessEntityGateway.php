@@ -11,6 +11,7 @@ use AmazScript\Einvoicing\Entities\NetworkRegistration;
 use AmazScript\Einvoicing\Exceptions\EinvoicingException;
 use DateTimeImmutable;
 use Illuminate\Support\LazyCollection;
+use stdClass;
 
 /**
  * Reads companies as the Iopole platform exposes them.
@@ -86,6 +87,22 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
     public function configureVatRegime(string $businessEntityId, string $vatRegime): void
     {
         $this->client->post(Endpoints::configureEntity($businessEntityId), ['vatRegime' => $vatRegime]);
+    }
+
+    public function claimEntity(string $businessEntityId, array $payload, bool $update = false): void
+    {
+        // An empty array encodes as `[]` where an object is expected — the same
+        // trap as network registration.
+        $corps = $payload === [] ? ['data' => new stdClass] : $payload;
+
+        $update
+            ? $this->client->put(Endpoints::entityClaim($businessEntityId), $corps)
+            : $this->client->post(Endpoints::entityClaim($businessEntityId), $corps);
+    }
+
+    public function releaseEntity(string $businessEntityId): void
+    {
+        $this->client->delete(Endpoints::entityClaim($businessEntityId));
     }
 
     /**

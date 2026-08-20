@@ -54,4 +54,16 @@ interface BusinessEntityGateway
      * take, and e-reporting is refused until this one has been made.
      */
     public function configureVatRegime(string $businessEntityId, string $vatRegime): void;
+
+    /**
+     * Claims an entity for the operator account, or updates that claim.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function claimEntity(string $businessEntityId, array $payload, bool $update = false): void;
+
+    /**
+     * Releases the link between an entity and the operator account.
+     */
+    public function releaseEntity(string $businessEntityId): void;
 }

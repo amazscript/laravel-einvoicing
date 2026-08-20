@@ -5,6 +5,20 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Rattachement au compte
+
+- `claim()`, `updateClaim()` et `release()` : rattacher une entreprise à votre compte opérateur,
+  restreindre le rattachement à un sens, ou le retirer. C'est ce lien qui fait arriver les factures
+  sur votre URL de rappel.
+- Des entêtes peuvent être joints à la relation ; la plateforme les ajoute à chaque appel de webhook
+  concernant l'entreprise.
+- **`updateClaim()` remplace et ne fusionne pas** : les entêtes déjà attachés disparaissent s'ils ne
+  sont pas repassés, et la livraison casse sans message d'erreur. Documenté, pas contourné.
+- Non éprouvé contre une plateforme réelle, contrairement au reste : l'exécuter aurait écrasé la
+  configuration d'entreprises existantes.
+
 ## [0.3.0] — 2026-08-20
 
 ### Compatibilité

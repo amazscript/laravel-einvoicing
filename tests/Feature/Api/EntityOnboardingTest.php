@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use AmazScript\Einvoicing\Enums\EntityScope;
 use AmazScript\Einvoicing\Enums\InvoicingNetwork;
+use AmazScript\Einvoicing\Enums\StreamDirection;
 use AmazScript\Einvoicing\Enums\VatRegime;
 use AmazScript\Einvoicing\Facades\Einvoicing;
 use Illuminate\Support\Facades\Http;
@@ -163,3 +164,67 @@ it('inscrit sur Peppol à une date d\'effet donnée', function (): void {
 it('refuse un identifiant qui n\'est ni SIREN ni SIRET', function (): void {
     Einvoicing::entities()->register('42');
 })->throws(InvalidArgumentException::class, 'SIREN or a SIRET');
+
+it('rattache une entreprise au compte', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/*/claim' => Http::response(['type' => 'BUSINESS_ENTITY'], 201),
+    ]);
+
+    Einvoicing::entities()->claim('be-1');
+
+    $appel = dernierAppel('/claim');
+
+    // Un corps vide s'encoderait `[]` là où un objet est attendu.
+    expect($appel['url'])->toEndWith('/v1/config/business/entity/be-1/claim')
+        ->and($appel['corps'])->toHaveKey('data');
+});
+
+it('restreint le rattachement à un seul sens', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/*/claim' => Http::response([], 201),
+    ]);
+
+    Einvoicing::entities()->claim('be-1', StreamDirection::Inbound);
+
+    expect(dernierAppel('/claim')['corps']['direction'])->toBe('INBOUND');
+});
+
+it('transporte les entêtes ajoutés aux appels webhook', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/*/claim' => Http::response([], 201),
+    ]);
+
+    Einvoicing::entities()->claim('be-1', headers: ['x-dossier' => '42']);
+
+    expect(dernierAppel('/claim')['corps']['data']['header'][0])
+        ->toMatchArray(['key' => 'x-dossier', 'value' => '42']);
+});
+
+it('met à jour un rattachement existant sans le recréer', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/*/claim' => Http::response([], 201),
+    ]);
+
+    Einvoicing::entities()->updateClaim('be-1', StreamDirection::Outbound);
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'PUT'
+        && str_ends_with($request->url(), '/be-1/claim'));
+});
+
+it('détache une entreprise du compte', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/*/claim' => Http::response([], 204),
+    ]);
+
+    // Rien n'est supprimé : l'entreprise reste déclarée et joignable, elle
+    // cesse simplement de relever de ce compte.
+    Einvoicing::entities()->release('be-1');
+
+    Http::assertSent(fn ($request): bool => $request->method() === 'DELETE'
+        && str_ends_with($request->url(), '/be-1/claim'));
+});

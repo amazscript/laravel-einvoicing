@@ -133,7 +133,53 @@ Einvoicing::entities()->declareLegalUnit(
 Le SIREN est vérifié avant l'appel : neuf chiffres, espaces tolérés. Mieux vaut échouer ici que
 créer sur la plateforme une entité inutilisable.
 
+## Rattacher une entreprise à votre compte
+
+Déclarée et joignable, une entreprise ne vous confie pas pour autant son courrier. Le
+**rattachement** est ce qui fait arriver ses factures sur votre URL de rappel plutôt qu'ailleurs.
+
+```php
+use AmazScript\Einvoicing\Enums\StreamDirection;
+
+Einvoicing::entities()->claim($businessEntityId);
+
+// Ou pour un seul sens :
+Einvoicing::entities()->claim($businessEntityId, StreamDirection::Inbound);
+```
+
+Des entêtes peuvent être joints : la plateforme les ajoutera à chaque appel de webhook concernant
+cette entreprise, ce qui permet de la reconnaître côté application.
+
+```php
+Einvoicing::entities()->claim($businessEntityId, headers: ['x-dossier' => '42']);
+```
+
+Détacher ne supprime rien — l'entreprise reste déclarée et joignable, elle cesse simplement de
+relever de votre compte :
+
+```php
+Einvoicing::entities()->release($businessEntityId);
+```
+
+### Le piège : `updateClaim()` remplace, il ne fusionne pas
+
+```php
+Einvoicing::entities()->updateClaim($id, StreamDirection::Inbound);   // ⚠ efface les entêtes
+```
+
+Les entêtes déjà attachés à la relation **disparaissent** s'ils ne sont pas repassés. Or ce sont eux
+qui identifient l'entreprise dans les appels de webhook : les perdre casse la livraison sans qu'aucune
+erreur ne le signale.
+
+Sur une sandbox Iopole, chaque entité porte par exemple un `x-sandbox-client-id`. Repassez toujours
+l'ensemble des entêtes, ou n'utilisez pas `updateClaim()`.
+
+**Non éprouvé en conditions réelles.** Contrairement au reste de cette page, le rattachement n'a pas
+été exécuté contre une plateforme : le faire aurait écrasé la configuration opérateur d'entreprises
+existantes. Le code suit la spécification et ses tests, pas une réponse observée.
+
 ## Ce que ce chapitre ne couvre pas
 
-Le **rattachement** d'une entreprise à votre compte (KYB) reste à faire auprès de votre plateforme :
-il engage une vérification d'identité que le package ne peut pas conduire à votre place.
+La **vérification d'identité** d'une entreprise, si votre plateforme l'exige avant d'accepter un
+rattachement, se règle avec elle : le package pose le lien technique, il ne conduit aucune
+procédure.
