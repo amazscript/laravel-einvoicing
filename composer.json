@@ -1,13 +1,15 @@
 {
     "name": "amazscript/laravel-einvoicing",
-    "description": "Réception de factures électroniques françaises via une Plateforme Agréée. Webhook signé, routage multi-tenant, déduplication et events Laravel.",
+    "description": "Réception et émission de factures électroniques françaises dans Laravel, via une Plateforme Agréée.",
     "keywords": [
         "laravel",
         "facture-electronique",
         "e-invoicing",
         "iopole",
         "dgfip",
-        "factur-x"
+        "factur-x",
+        "e-reporting",
+        "peppol"
     ],
     "homepage": "https://github.com/amazscript/laravel-einvoicing",
     "license": "MIT",
@@ -67,5 +69,10 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "support": {
+        "issues": "https://github.com/amazscript/laravel-einvoicing/issues",
+        "source": "https://github.com/amazscript/laravel-einvoicing",
+        "docs": "https://github.com/amazscript/laravel-einvoicing/tree/main/docs"
+    }
 }

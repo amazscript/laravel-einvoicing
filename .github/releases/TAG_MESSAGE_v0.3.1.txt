@@ -1,0 +1,9 @@
+v0.3.1 — description du paquet
+
+La description annonçait la seule réception, alors que le package émet depuis la
+v0.2.0. C'est le texte que Packagist reprend en vitrine, donc il devait être
+juste avant la mise en ligne.
+
+Ajout des mots-clés e-reporting et peppol, et des liens de support.
+
+Aucun changement de code.
