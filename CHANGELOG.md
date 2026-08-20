@@ -16,6 +16,16 @@ respecte [SemVer](https://semver.org/lang/fr/).
   renvoi après un timeout ne facturera pas le client deux fois.
 - Un refus est conservé avec sa raison plutôt qu'effacé.
 - Events `OutboundInvoiceSent` et `OutboundInvoiceFailed`.
+- Suivi du cycle de vie des factures émises : `Einvoicing::for($tenant)->sent()` distingue ce qui a
+  été refusé, ce qui est parti sans nouvelle, et ce que la plateforme dit qu'elle ne livrera pas.
+- Les statuts de factures émises sont routés par l'identifiant de la facture : ils nomment le client
+  comme destinataire, jamais l'émetteur, et le routage multi-tenant n'y trouvait rien.
+
+### Corrigé
+
+- `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :
+  jusqu'ici un événement `UNROUTED` ne pouvait être récupéré par aucun moyen, ce qui vidait la
+  commande de son objet.
 
 ## [0.1.0] — 2026-08-19
 

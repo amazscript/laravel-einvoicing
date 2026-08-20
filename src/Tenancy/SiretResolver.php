@@ -6,6 +6,7 @@ namespace AmazScript\Einvoicing\Tenancy;
 
 use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Events\TenantResolutionFailed;
+use AmazScript\Einvoicing\Models\OutboundInvoice;
 use AmazScript\Einvoicing\Models\Tenant;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,6 +34,7 @@ final class SiretResolver implements TenantResolver
     public function resolve(RoutingKeys $keys): ?Tenant
     {
         $tenant = $this->byExternalId($keys)
+            ?? $this->bySentInvoice($keys)
             ?? $this->bySiret($keys)
             ?? $this->bySiren($keys);
 
@@ -54,6 +56,30 @@ final class SiretResolver implements TenantResolver
         }
 
         return $this->activeTenants()->whereKey($keys->externalId)->first();
+    }
+
+    /**
+     * The tenant that sent the invoice a status reports on.
+     *
+     * Placed just after the explicit identifier because it is the surest key
+     * available: the invoice was sent from here, so its owner is known for
+     * certain rather than inferred from a registration number.
+     */
+    private function bySentInvoice(RoutingKeys $keys): ?Tenant
+    {
+        if ($keys->providerInvoiceId === null || $keys->providerInvoiceId === '') {
+            return null;
+        }
+
+        $tenantId = OutboundInvoice::query()
+            ->where('provider_invoice_id', $keys->providerInvoiceId)
+            ->value('tenant_id');
+
+        if (! is_string($tenantId)) {
+            return null;
+        }
+
+        return $this->activeTenants()->whereKey($tenantId)->first();
     }
 
     private function bySiret(RoutingKeys $keys): ?Tenant

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Console;
 
+use AmazScript\Einvoicing\Contracts\PayloadInterpreter;
+use AmazScript\Einvoicing\Contracts\TenantResolver;
 use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 use AmazScript\Einvoicing\Webhook\InboundEventDispatcher;
+use AmazScript\Einvoicing\Webhook\InboundRequest;
 use Illuminate\Console\Command;
 
 /**
@@ -24,8 +27,11 @@ final class RetryEventsCommand extends Command
 
     protected $description = 'Rejoue les événements webhook non routés ou en échec';
 
-    public function handle(InboundEventDispatcher $dispatcher): int
-    {
+    public function handle(
+        InboundEventDispatcher $dispatcher,
+        TenantResolver $resolver,
+        PayloadInterpreter $interpreter,
+    ): int {
         $etats = $this->statuses();
         $limite = (int) $this->option('limit');
 
@@ -59,11 +65,14 @@ final class RetryEventsCommand extends Command
                 continue;
             }
 
-            // Going back through RECEIVED gives routing another chance: the
-            // missing tenant may have been created since.
+            // Routing is redone, not merely re-read: the tenant may have been
+            // created since, and until now the retry only ever looked at the
+            // tenant_id left null by the first attempt — so an unrouted event
+            // could never be recovered at all.
             $evenement->forceFill([
                 'status' => WebhookEventStatus::Received,
                 'failed_reason' => null,
+                'tenant_id' => $evenement->tenant_id ?? $this->reroute($evenement, $resolver, $interpreter),
             ])->save();
 
             $dispatcher->dispatch($evenement);
@@ -113,5 +122,24 @@ final class RetryEventsCommand extends Command
         }
 
         return $etats === [] ? [WebhookEventStatus::Unrouted, WebhookEventStatus::Failed] : $etats;
+    }
+
+    /**
+     * Finds the tenant for a stored event, from its payload alone.
+     *
+     * The original headers are gone — only the body was kept — so the routing
+     * keys are rebuilt from what remains. Enough for the payload-borne keys:
+     * recipients, idPath, and the invoice identifier.
+     */
+    private function reroute(
+        WebhookEvent $evenement,
+        TenantResolver $resolver,
+        PayloadInterpreter $interpreter,
+    ): ?string {
+        $payload = $evenement->payload ?? [];
+
+        return $resolver->resolve(
+            $interpreter->routingKeys(InboundRequest::fromStoredPayload($payload))
+        )?->id;
     }
 }

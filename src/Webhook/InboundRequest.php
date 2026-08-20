@@ -34,6 +34,28 @@ final class InboundRequest
         public readonly array $payload,
     ) {}
 
+    /**
+     * Rebuilds a request from a stored payload, for routing only.
+     *
+     * Replaying an event has nothing but the body: headers and raw bytes were
+     * never kept. Signature fields are therefore left empty — this object must
+     * never be handed to signature verification, only to routing.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public static function fromStoredPayload(array $payload): self
+    {
+        return new self(
+            headers: [],
+            method: 'POST',
+            pathWithQuery: '',
+            checksumSource: '',
+            isMultipart: false,
+            rawBody: '',
+            payload: $payload,
+        );
+    }
+
     public static function fromRequest(Request $request, ?string $canonicalPath = null): self
     {
         $file = self::firstUploadedFile($request);

@@ -17,6 +17,7 @@ use Illuminate\Support\Carbon;
  *
  * @property string $id
  * @property string|null $invoice_id
+ * @property string|null $outbound_invoice_id
  * @property string $provider
  * @property string $provider_status_id
  * @property string $code
@@ -51,5 +52,23 @@ class Status extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(InboundInvoice::class, 'invoice_id');
+    }
+
+    /**
+     * The sent invoice this status reports on, when it reports on one.
+     *
+     * @return BelongsTo<OutboundInvoice, $this>
+     */
+    public function outboundInvoice(): BelongsTo
+    {
+        return $this->belongsTo(OutboundInvoice::class, 'outbound_invoice_id');
+    }
+
+    /**
+     * Whether this status concerns an invoice we sent rather than received.
+     */
+    public function isOutbound(): bool
+    {
+        return $this->outbound_invoice_id !== null;
     }
 }

@@ -17,6 +17,13 @@ final class RoutingKeys
         public readonly ?string $externalId = null,
         public readonly ?string $siret = null,
         public readonly ?string $siren = null,
+        /**
+         * The platform's identifier for the invoice a status reports on.
+         *
+         * Routes statuses about invoices we sent: those name the customer as
+         * recipient, not us, so no SIRET in them points at our own tenant.
+         */
+        public readonly ?string $providerInvoiceId = null,
     ) {}
 
     /**

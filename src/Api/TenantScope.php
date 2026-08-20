@@ -28,6 +28,18 @@ final class TenantScope
     ) {}
 
     /**
+     * The invoices this tenant has sent, and what became of them.
+     */
+    public function sent(): OutboundInvoiceQuery
+    {
+        if (! $this->tenant instanceof Tenant) {
+            throw new RuntimeException('Reading sent invoices requires a tenant: use Einvoicing::for($tenant)->sent().');
+        }
+
+        return new OutboundInvoiceQuery($this->tenant);
+    }
+
+    /**
      * Sends an invoice document the application has already produced.
      *
      * The package never builds the document itself — see InvoiceSender. Sending

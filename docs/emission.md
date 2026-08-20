@@ -83,3 +83,57 @@ Rien n'est effacé : ce qui a été refusé, et pourquoi, est exactement ce qu'o
 | `OutboundInvoiceFailed` | elle l'a refusé d'emblée — rien n'est parti |
 
 Pris n'est pas livré. La suite arrive sous forme de statuts de cycle de vie.
+
+## Suivre ce que devient une facture émise
+
+Prise n'est pas livrée. La suite arrive par le webhook **OUTBOUND**, qui doit pointer sur la même
+route que le reste — un seul `callbackUrl` pour tout le parc.
+
+```php
+$envois = Einvoicing::for($tenant)->sent();
+
+$envois->get();                // toutes, avec leur cycle de vie
+$envois->failed();             // refusées à l'envoi — rien n'est parti
+$envois->awaitingDelivery();   // parties, aucune nouvelle depuis
+$envois->rejected();           // la plateforme dit qu'elles n'arriveront pas
+```
+
+Sur une facture :
+
+```php
+$envoi->statuses;          // le cycle de vie rapporté
+$envoi->lastStatus();      // le dernier mot de la plateforme
+$envoi->deliveryFailed();  // elle n'arrivera pas
+$envoi->failureCode();     // pourquoi, dans ses termes
+```
+
+**Sans nouvelle n'est pas livrée.** `awaitingDelivery()` isole les factures parties dont rien n'est
+revenu : le silence n'est pas un verdict, et le package ne le traite pas comme tel.
+
+### Les motifs de non-livraison
+
+`deliveryFailed()` s'appuie sur les codes **observés**, pas sur une énumération figée — la liste de
+la plateforme est ouverte, et un code inconnu ne doit pas être écarté :
+
+| Code | Ce qu'il veut dire |
+|---|---|
+| `REJECTED` | le routage a échoué, aucun destinataire joignable |
+| `UNACCEPTABLE` | le document lui-même est refusé — vu avec `UNKNOWN_INVOICE_FLAVOR` sur un fichier qui n'était pas un Factur-X valide |
+
+C'est `OutboundInvoice::FAILURE_CODES`, destiné à s'allonger. Un code hors liste reste enregistré et
+lisible par `lastStatus()`.
+
+### Le routage des statuts sortants
+
+Un statut de facture émise nomme **votre client** comme destinataire, pas vous. Le routage
+multi-tenant habituel n'y trouve donc rien. Le package le rattache par l'identifiant de la facture :
+elle est partie de chez vous, son dossier est connu de façon certaine.
+
+Si un statut arrive avant que sa facture soit enregistrée, il est conservé en `UNROUTED` et
+récupérable :
+
+```bash
+php artisan einvoicing:events:retry
+```
+
+La commande **refait** le routage, elle ne se contente pas de relire l'ancien résultat.

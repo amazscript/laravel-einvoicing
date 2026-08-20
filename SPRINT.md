@@ -462,9 +462,29 @@ parti en multipart sous une fausse étiquette. Une requête d'upload distincte l
 
 ## D20 — Suivre le cycle de vie sortant
 
-- [ ] Webhook OUTBOUND routé vers l'application
-- [ ] Statuts rattachés à `OutboundInvoice`
-- [ ] `Einvoicing::for($tenant)->sent()` — parcours des factures émises
+- [x] Webhook OUTBOUND rebasculé sur la route du package — un flux sortant n'accepte que
+      l'endpoint `status`, la plateforme refuse `invoice`
+- [x] Colonne `outbound_invoice_id` sur les statuts, rattachement dans `ProcessStatusUpdate`
+- [x] `Einvoicing::for($tenant)->sent()` : `get`, `failed`, `awaitingDelivery`, `rejected`, `find`
+- [x] `deliveryFailed()` / `failureCode()` sur les codes **observés**, liste ouverte
+- [x] Routage des statuts sortants par identifiant de facture — 4 tests écrits **avant** le code
+- [x] 12 tests au total (8 cycle de vie, 4 routage)
+- [x] `docs/emission.md` complété
+- [x] **DoD** : facture émise en réel, statut revenu par webhook, routé, rattaché —
+      `UNACCEPTABLE / UNKNOWN_INVOICE_FLAVOR`, verdict exact sur un fichier qui n'était pas un
+      Factur-X valide
+
+**Deux défauts trouvés par le test en réel.**
+
+Le premier était prévisible mais invisible en test : un statut de facture émise nomme le **client**
+comme destinataire, jamais l'émetteur. Le routage multi-tenant n'y trouvait rien, et le premier
+statut réel est arrivé en `UNROUTED` — enregistré, jamais traité. Rattaché désormais par
+l'identifiant de la facture, la clé la plus sûre puisqu'elle vient de chez nous.
+
+Le second est un **bug de la v0.1** : `einvoicing:events:retry` promettait « le tenant manquant a pu
+être créé depuis » mais relisait un `tenant_id` resté nul, sans jamais refaire la résolution. Un
+événement `UNROUTED` ne pouvait donc être récupéré par aucun moyen. La commande refait le routage
+depuis le payload conservé.
 
 ## D21 — Accepter ou refuser une facture reçue
 
@@ -532,3 +552,4 @@ parti en multipart sous une fausse étiquette. Une requête d'upload distincte l
 | 2026-08-20 | D17 | **corrigé** | `platformDetail` n'existe pas : joignabilité relue sur `directoryAddress` — 8/8 en réel |
 | 2026-08-20 | D18 | fait | Réception bouclée : webhook rebasculé, 202 en réel, worker surveillé par `doctor` |
 | 2026-08-20 | D19 | fait | Émission d'un fichier fourni — 9 tests, acceptée en réel, idempotence vérifiée |
+| 2026-08-20 | D20 | fait | Cycle de vie sortant — 12 tests ; routage des statuts émis et rejeu corrigés |

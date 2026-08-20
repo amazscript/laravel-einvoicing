@@ -9,6 +9,7 @@ use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Events\InvoiceStatusUpdated;
 use AmazScript\Einvoicing\Events\OutboundInvoiceNotDelivered;
 use AmazScript\Einvoicing\Models\InboundInvoice;
+use AmazScript\Einvoicing\Models\OutboundInvoice;
 use AmazScript\Einvoicing\Models\Status;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 use Illuminate\Bus\Queueable;
@@ -76,6 +77,7 @@ final class ProcessStatusUpdate implements ShouldQueue
             ],
             [
                 'invoice_id' => $this->linkedInvoiceId($attributs),
+                'outbound_invoice_id' => $this->linkedOutboundInvoiceId($attributs),
                 'code' => $attributs['code'],
                 'value' => $attributs['value'],
                 'description' => $attributs['description'],
@@ -172,6 +174,29 @@ final class ProcessStatusUpdate implements ShouldQueue
             $attributs['issuer_invoice_number'],
             $attributs['issuer_siren'],
         )?->id;
+    }
+
+    /**
+     * The sent invoice a status reports on, if it reports on one.
+     *
+     * One callback URL carries both directions, so a status arriving here may
+     * concern an invoice we sent as easily as one we received. The platform's
+     * own identifier is what tells them apart; nothing else is guessed at.
+     *
+     * @param  array{provider_invoice_id: string|null, ...}  $attributs
+     */
+    private function linkedOutboundInvoiceId(array $attributs): ?string
+    {
+        $providerInvoiceId = $attributs['provider_invoice_id'];
+
+        if ($providerInvoiceId === null) {
+            return null;
+        }
+
+        return OutboundInvoice::query()
+            ->where('provider', $this->provider)
+            ->where('provider_invoice_id', $providerInvoiceId)
+            ->first()?->id;
     }
 
     /**

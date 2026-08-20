@@ -97,6 +97,7 @@ final class IopolePayloadInterpreter implements PayloadInterpreter
             externalId: $this->stringOrNull($request->payload['idPath'] ?? null),
             siret: $siret ?? $this->stringOrNull($destinataire['siret'] ?? null),
             siren: $siren ?? $this->stringOrNull($destinataire['siren'] ?? null),
+            providerInvoiceId: $this->stringOrNull($request->payload['invoiceId'] ?? null),
         );
     }
 
