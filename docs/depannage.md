@@ -152,6 +152,33 @@ Ces événements ne sont **jamais** purgés automatiquement.
 
 ---
 
+## Les tests d'intégration sont toujours « skipped »
+
+```
+- it obtient un jeton auprès du serveur d'authentification réel → identifiants sandbox absents
+```
+
+C'est le comportement voulu : ces deux tests sont les seuls à toucher le réseau, et ils s'ignorent
+partout où les identifiants ne sont pas dans l'environnement — en intégration continue, et sur toute
+machine sans sandbox.
+
+**Renseigner le `.env` de votre application ne suffit pas.** Les tests du package tournent sous
+Testbench, qui fabrique sa propre application Laravel minimale : elle ne lit le `.env` d'aucun autre
+projet. Les identifiants doivent lui être passés explicitement :
+
+```bash
+make test-integration
+```
+
+ou, à la main :
+
+```bash
+IOPOLE_TOKEN_URL=… IOPOLE_CLIENT_ID=… IOPOLE_CLIENT_SECRET=… IOPOLE_BASE_URL=… \
+  vendor/bin/pest --group=integration
+```
+
+---
+
 ## Signaler un problème
 
 Joignez la sortie de `einvoicing:doctor` : elle ne contient aucun identifiant.

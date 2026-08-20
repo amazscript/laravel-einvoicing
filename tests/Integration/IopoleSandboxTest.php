@@ -10,18 +10,25 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Seuls tests du dépôt qui touchent le réseau.
+ * The only tests in this repository that touch the network.
  *
- * Ils sont ignorés partout où les identifiants ne sont pas présents dans
- * l'environnement — donc en intégration continue, et sur toute machine qui n'a
- * pas de sandbox. Aucun secret ne doit être écrit dans le dépôt : ces variables
- * se renseignent dans un .env local, jamais versionné.
+ * They skip themselves wherever the credentials are absent from the environment
+ * — so in CI, and on any machine without a sandbox. No secret is ever written
+ * into the repository.
  *
- * Pour les exécuter :
+ * These tests run under Testbench, which builds its own minimal Laravel
+ * application: it does not read the .env of any neighbouring project. The
+ * credentials therefore have to be handed over explicitly.
  *
- *     IOPOLE_TOKEN_URL=... IOPOLE_CLIENT_ID=... IOPOLE_CLIENT_SECRET=... \
- *     IOPOLE_CUSTOMER_ID=... IOPOLE_BASE_URL=... vendor/bin/pest --group=integration
+ *     make test-integration
  */
+/**
+ * Le message dit quoi faire : ces tests s'ignorent partout où les identifiants
+ * manquent, et rien n'indiquait comment les fournir.
+ */
+const MESSAGE_IDENTIFIANTS_ABSENTS = 'identifiants sandbox absents — lancez « make test-integration », '
+    .'ou exportez IOPOLE_TOKEN_URL, IOPOLE_CLIENT_ID, IOPOLE_CLIENT_SECRET et IOPOLE_BASE_URL';
+
 function sandboxCredentialsMissing(): bool
 {
     foreach (['IOPOLE_TOKEN_URL', 'IOPOLE_CLIENT_ID', 'IOPOLE_CLIENT_SECRET', 'IOPOLE_BASE_URL'] as $key) {
@@ -62,11 +69,11 @@ it('obtient un jeton auprès du serveur d\'authentification réel', function ():
     );
 
     expect($token->token())->toBeString()->not->toBeEmpty();
-})->group('integration')->skip(sandboxCredentialsMissing(...), 'identifiants sandbox absents de l\'environnement');
+})->group('integration')->skip(sandboxCredentialsMissing(...), MESSAGE_IDENTIFIANTS_ABSENTS);
 
 it('interroge l\'api réelle et retrouve le customer id', function (): void {
     // Réponse constatée : text/html contenant l'identifiant nu, sans json.
     $reponse = trim(sandboxClient()->raw(Endpoints::customerId()));
 
     expect($reponse)->toBe(getenv('IOPOLE_CUSTOMER_ID'));
-})->group('integration')->skip(sandboxCredentialsMissing(...), 'identifiants sandbox absents de l\'environnement');
+})->group('integration')->skip(sandboxCredentialsMissing(...), MESSAGE_IDENTIFIANTS_ABSENTS);
