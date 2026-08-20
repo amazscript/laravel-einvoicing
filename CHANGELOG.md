@@ -48,7 +48,8 @@ driver Iopole.
 ### Commandes
 
 `einvoicing:install`, `secret`, `doctor`, `poll`, `webhooks:sync`, `retry:sync`, `events:prune`
-et `events:retry`. `doctor` contrôle aussi la joignabilité de chaque entreprise déclarée.
+et `events:retry`. `doctor` contrôle aussi la joignabilité de chaque entreprise déclarée et
+détecte un worker absent ou lancé sur la mauvaise file — la panne la plus silencieuse du lot.
 
 ### Compatibilité
 

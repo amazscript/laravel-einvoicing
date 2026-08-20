@@ -84,11 +84,31 @@ php artisan einvoicing:webhooks:sync
 La commande compare ce qui est déclaré à ce qui est attendu. Elle n'écrit rien : déclarer un webhook
 redirige un flux de factures, cette décision vous revient.
 
+## Lancer le worker
+
+Le webhook n'exécute rien : il vérifie, encaisse et dispatche. Le traitement se fait dans une file
+dédiée, `einvoicing`.
+
+```bash
+php artisan queue:work --queue=einvoicing
+```
+
+**C'est l'étape la plus facile à oublier**, parce que son absence ne ressemble pas à une panne : la
+route répond `202`, les livraisons s'enregistrent, `doctor` est vert partout ailleurs — et pas une
+facture n'est traitée. `--queue=einvoicing` est obligatoire : un worker lancé sans lui écoute
+`default` et ne verra jamais ces jobs.
+
+En production, confiez-le à un superviseur (`supervisord`, `systemd`, Horizon) plutôt qu'à un
+terminal ouvert.
+
 ## Vérifier
 
 ```bash
 php artisan einvoicing:doctor
 ```
 
-Vérifie la configuration, les tables, la route, puis interroge la plateforme. Aucun identifiant n'est
-affiché : la sortie peut être transmise telle quelle à un support.
+Vérifie la configuration, les tables, la route, la file, puis interroge la plateforme. Aucun
+identifiant n'est affiché : la sortie peut être transmise telle quelle à un support.
+
+Le contrôle « jobs en souffrance » compte ceux qui attendent depuis plus d'une minute : c'est la
+signature d'un worker absent ou lancé sur la mauvaise file.

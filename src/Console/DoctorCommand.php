@@ -12,6 +12,7 @@ use AmazScript\Einvoicing\Enums\WebhookEventStatus;
 use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Models\WebhookEvent;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Throwable;
 
@@ -41,6 +42,9 @@ final class DoctorCommand extends Command
 
         $this->section('Webhook');
         $this->checkWebhookRoute();
+
+        $this->section('Traitement');
+        $this->checkQueueWorker();
 
         if (! $this->option('no-network')) {
             $this->section('Plateforme');
@@ -95,6 +99,58 @@ final class DoctorCommand extends Command
             ),
             default => $this->ok('secret du webhook', strlen($secret).' caractères'),
         };
+    }
+
+    /**
+     * Whether anything is actually consuming the package's queue.
+     *
+     * Without a worker on the right queue, everything upstream looks healthy:
+     * the route answers 202, deliveries are recorded, and not a single invoice
+     * is ever processed. Jobs sitting past their due time are the tell.
+     */
+    private function checkQueueWorker(): void
+    {
+        $file = $this->configString('einvoicing.queue.name') ?? 'default';
+        $connexion = $this->configString('einvoicing.queue.connection');
+        $pilote = $this->configString('queue.connections.'.($connexion ?? (string) config('queue.default')).'.driver');
+
+        $this->ok('file', $file);
+
+        if ($pilote !== 'database') {
+            // Only the database driver can be inspected from here; anything
+            // else would need to talk to Redis or SQS, which doctor will not do.
+            $this->line('     <fg=gray>file '.($pilote ?? 'inconnue').' : en attente non vérifiable depuis ici</>');
+
+            return;
+        }
+
+        try {
+            $enRetard = DB::table('jobs')
+                ->where('queue', $file)
+                ->where('available_at', '<=', time() - 60)
+                ->count();
+        } catch (Throwable) {
+            $this->line('     <fg=gray>table des jobs absente : file non vérifiable</>');
+
+            return;
+        }
+
+        if ($enRetard === 0) {
+            $this->ok('jobs en souffrance', 'aucun');
+
+            return;
+        }
+
+        $this->ko('jobs en souffrance', $enRetard.' depuis plus d\'une minute');
+        $this->line('     <fg=yellow>·</> aucun worker ne consomme cette file');
+        $this->line('     <fg=gray>php artisan queue:work --queue='.$file.'</>');
+    }
+
+    private function configString(string $cle): ?string
+    {
+        $valeur = config($cle);
+
+        return is_string($valeur) && $valeur !== '' ? $valeur : null;
     }
 
     private function checkDatabase(): void

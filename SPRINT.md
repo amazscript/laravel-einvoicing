@@ -410,6 +410,28 @@ jusque-là. Règle rappelée : une fixture se copie d'une réponse réelle, elle
 
 ---
 
+## D18 — Boucler la réception réelle
+
+Constat : la chaîne n'avait jamais tourné seule. Le webhook de la plateforme pointait sur le
+capteur brut du playground, et les factures en base venaient de rejeux manuels.
+
+- [x] Webhook INBOUND rebasculé sur `/einvoicing/webhook`, secret HMAC refourni dans le `PUT`
+- [x] Livraison réelle rejouée **signée** à travers la vraie route : `202` en 125 ms, job traité
+      en 12,65 ms, idempotence vérifiée (aucun doublon créé)
+- [x] `doctor` détecte un worker absent ou lancé sur la mauvaise file — 3 tests
+- [x] Worker documenté dans le README et `docs/installation.md`, absent des deux jusqu'ici
+- [x] **DoD** : `doctor` tout vert sur la sandbox, worker inclus
+
+**Le piège trouvé en chemin.** Le package dispatche sur la file `einvoicing`. Un worker lancé sans
+`--queue=einvoicing` écoute `default` et ne voit jamais ces jobs : la route répond `202`, les
+livraisons s'enregistrent, et rien n'est traité. Le parcours d'installation ne mentionnait pas le
+worker — un utilisateur suivant le README aurait eu un système muet, sans un message d'erreur.
+
+Reste ouvert : aucune facture n'a encore traversé la chaîne **depuis une émission réelle**. Le
+rejeu signé prouve la route, la file et l'idempotence, pas la livraison par la plateforme.
+
+---
+
 ## Décisions en attente
 
 - [x] **Support de Laravel 13** — tranché par les faits : les 234 tests passent sur Laravel 13 avec
@@ -467,3 +489,4 @@ jusque-là. Règle rappelée : une fixture se copie d'une réponse réelle, elle
 | 2026-08-19 | D14 | complété | Recherche de factures sur `/v1.1/invoice/search`, vérifiée en réel |
 | 2026-08-20 | D17 | fait | Lecture des entreprises et de leur joignabilité — 7 tests, 0/8 joignables en réel |
 | 2026-08-20 | D17 | **corrigé** | `platformDetail` n'existe pas : joignabilité relue sur `directoryAddress` — 8/8 en réel |
+| 2026-08-20 | D18 | fait | Réception bouclée : webhook rebasculé, 202 en réel, worker surveillé par `doctor` |

@@ -47,6 +47,13 @@ IOPOLE_CUSTOMER_ID=
 EINVOICING_WEBHOOK_SECRET=
 ```
 
+Le traitement passe par une file dédiée. Sans worker qui l'écoute, tout paraît sain — la route
+répond, les livraisons sont enregistrées — et aucune facture n'est traitée :
+
+```bash
+php artisan queue:work --queue=einvoicing
+```
+
 Enfin, vérifiez le raccordement :
 
 ```bash
