@@ -72,7 +72,7 @@ Une facture entrante arrive en `multipart/form-data` : un champ `file` contenant
 sont récupérées auprès de l'API dans la foulée.
 
 Un statut arrive en `application/json`, avec `invoiceId`, `statusId`, `destType`, `status.code` et le
-justificatif XML. Le cycle observé : `SUBMITTED → ISSUED → RECEIVED → MADE_AVAILABLE`.
+justificatif XML. Le cycle observé : `SUBMITTED → ISSUED → RECEIVED → MADE_AVAILABLE → IN_HAND`.
 
 ## Si un webhook se perd
 

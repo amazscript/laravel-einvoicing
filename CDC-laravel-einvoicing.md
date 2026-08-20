@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.10 — 19 août 2026
+**Version** 1.11 — 20 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -551,3 +551,16 @@ paramètre `expand` accepte `businessData` et `lastStatusData`, ce qui évite un
 Les valeurs assemblées en requête voient leurs guillemets **retirés**, non échappés : la syntaxe
 d'échappement du moteur n'est pas documentée, et un échappement mal interprété laisserait une valeur
 extérieure réécrire le sens de la recherche.
+
+### v1.11 — 20 août 2026
+
+Deuxième série de livraisons réelles, sur des entreprises et des factures que le package n'avait
+jamais vues : douze livraisons, douze traitées, aucun échec.
+
+| Constat | Conséquence |
+|---|---|
+| Le cycle de vie comporte une cinquième étape, **`IN_HAND`** | La liste relevée en v1.5 était incomplète. Confirme le choix de ne pas modéliser ces codes en énumération : une liste figée aurait rejeté un statut authentique. |
+| Le rapprochement statut ↔ facture tient sur plusieurs dossiers | Dix statuts répartis sur deux factures et quatre entreprises, tous rattachés correctement. |
+
+Enseignement général : chaque nouvelle série de livraisons révèle un cas de plus. Ce qui n'a été vu
+qu'une fois ne doit pas être traité comme une règle.

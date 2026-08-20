@@ -23,7 +23,15 @@ montants peuvent être `null`, et un `einvoicing:events:retry` les complétera.
 
 ### `InvoiceStatusUpdated`
 
-Un statut de cycle de vie a été reçu : `SUBMITTED`, `ISSUED`, `RECEIVED`, `MADE_AVAILABLE`, `REJECTED`…
+Un statut de cycle de vie a été reçu. Codes observés en conditions réelles :
+
+```
+SUBMITTED → ISSUED → RECEIVED → MADE_AVAILABLE → IN_HAND
+```
+
+et `REJECTED` lorsque la remise échoue. Cette liste n'est pas exhaustive : les codes appartiennent
+à la plateforme et évoluent sans préavis, c'est pourquoi le package ne les modélise pas en
+énumération. Un code inconnu est consigné tel quel plutôt que rejeté.
 
 ```php
 $event->status->code;        // RECEIVED
