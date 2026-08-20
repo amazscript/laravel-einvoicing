@@ -1,0 +1,18 @@
+v0.4.0 — rattachement des entreprises au compte
+
+Déclarée et joignable, une entreprise ne confie pas pour autant son courrier :
+le rattachement est ce qui fait arriver ses factures sur votre URL de rappel.
+claim(), updateClaim() et release() posent, modifient et retirent ce lien.
+
+Piège documenté : updateClaim() remplace la relation au lieu de la fusionner.
+Les entêtes déjà attachés disparaissent s'ils ne sont pas repassés, et comme ils
+identifient l'entreprise dans les appels de webhook, la livraison casse sans
+message d'erreur.
+
+Seule fonctionnalité du package non éprouvée contre une plateforme réelle :
+l'exécuter aurait écrasé la configuration opérateur d'entreprises existantes.
+
+La description du paquet passe en anglais, « French » y qualifiant le périmètre.
+Le README reste en français.
+
+PHP 8.3 et 8.4 · Laravel 12 et 13 · Guzzle 7 et 8.

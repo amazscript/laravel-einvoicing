@@ -5,7 +5,7 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.4.0] — 2026-08-20
 
 ### Rattachement au compte
 
@@ -18,6 +18,15 @@ respecte [SemVer](https://semver.org/lang/fr/).
   sont pas repassés, et la livraison casse sans message d'erreur. Documenté, pas contourné.
 - Non éprouvé contre une plateforme réelle, contrairement au reste : l'exécuter aurait écrasé la
   configuration d'entreprises existantes.
+
+### Métadonnées
+
+- La description du paquet passe en anglais, « French » y qualifiant le périmètre : c'est ce que
+  Packagist affiche à qui parcourt une liste sans savoir si elle le concerne. Le README, lu après le
+  clic, reste en français.
+- Le mot-clé `peppol` est retiré : il attirait un public cherchant de la facturation transfrontalière
+  générique. L'énumération `InvoicingNetwork` garde son cas Peppol, qui est une valeur acceptée par
+  la plateforme.
 
 ## [0.3.0] — 2026-08-20
 
