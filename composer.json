@@ -1,6 +1,6 @@
 {
     "name": "amazscript/laravel-einvoicing",
-    "description": "Réception et émission de factures électroniques françaises dans Laravel, via une Plateforme Agréée.",
+    "description": "French e-invoicing for Laravel: receive and send invoices through an accredited platform (Plateforme Agréée).",
     "keywords": [
         "laravel",
         "facture-electronique",

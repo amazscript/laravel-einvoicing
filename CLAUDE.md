@@ -46,6 +46,12 @@ d'échec aussi, puisqu'ils finissent dans les journaux et la supervision.
 
 Restent en **français** : le README, `docs/`, le CDC, le sprint, les noms de tests, et les sorties
 des commandes Artisan — celles-ci s'adressent à l'exploitant, et le marché est français.
+
+**La règle de partage : ce que Packagist affiche est en anglais, ce qui s'ouvre après le clic est en
+français.** La `description` du `composer.json` et les métadonnées du dépôt sont lues par quelqu'un
+qui parcourt une liste sans savoir si elle le concerne : l'anglais y est la convention, et le mot
+« French » y fait le tri mieux qu'une phrase française. Le README, lui, s'adresse à quelqu'un qui a
+déjà cliqué — donc à un développeur confronté à la réforme française.
 Pas de facade statique dans le code interne du package — injection par constructeur. La facade `Einvoicing` est réservée à l'API publique consommateur.
 
 ## 4. Architecture
