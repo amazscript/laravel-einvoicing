@@ -19,7 +19,10 @@ Priorités, dans cet ordre : **correction > sécurité > lisibilité > ergonomie
 - **Ne jamais logger** : token Bearer, `customer-id`, secret HMAC, contenu de facture, SIREN/SIRET en clair dans un contexte d'erreur public.
 - **Ne jamais renvoyer un 5xx** à la PA sur une erreur métier — ça déclenche sa stratégie de retry pour rien. Encaisser, persister, dispatcher, répondre 2xx.
 - **Ne jamais traiter en synchrone** dans le contrôleur webhook. Vérifier, dédupliquer, dispatcher, répondre.
-- **Ne jamais inventer** un champ, un endpoint ou un comportement d'API. Si la doc Iopole ne le dit pas, demande.
+- **Ne jamais inventer** un champ, un endpoint ou un comportement d'API. Si la doc Iopole ne le dit
+  pas, demande. Une forme d'API supposée est le pire des bugs : les tests écrits dans la foulée
+  décrivent la supposition, passent au vert, et la fonctionnalité est fausse de bout en bout.
+  Le seul garde-fou est la **réponse réelle** — va la chercher avant d'écrire le mapping.
 - **Aucune dépendance** hors `illuminate/*` et `guzzlehttp/guzzle` sans validation explicite.
 
 ## 3. Stack et conventions
@@ -114,8 +117,17 @@ Ne jamais enchaîner plusieurs stories dans un même commit.
 ## 7. Tests
 
 - Pest, `tests/Unit` et `tests/Feature`, orchestration via `orchestra/testbench`.
-- Jamais d'appel réseau réel. Fixtures figées issues de la doc Iopole dans `tests/Fixtures/`.
+- Jamais d'appel réseau réel dans les tests.
+- **Une fixture se copie d'une réponse réelle capturée, elle ne se rédige pas.** La doc décrit ce
+  que l'API devrait renvoyer ; la fixture doit dire ce qu'elle renvoie. Les écarts déjà constatés
+  — horodatage en millisecondes, endpoint unitaire répondant par une liste, casing `FacturX`,
+  champ `platformDetail` inexistant — étaient tous invisibles depuis la doc seule.
 - Couverture minimale **85 %** sur `Webhook/` et `Tenancy/`. Le reste : 70 %.
+
+Toute lecture d'une nouvelle ressource d'API se vérifie **contre la sandbox** avant d'être déclarée
+faite, et son résultat se confronte aux faits déjà en base. Une conclusion qui contredit les données
+observées — « cette entreprise ne peut rien recevoir » alors qu'elle vient de recevoir — est fausse
+jusqu'à preuve du contraire, et c'est le code qu'il faut soupçonner, pas la réalité.
 
 Cas obligatoires avant toute PR touchant le webhook :
 

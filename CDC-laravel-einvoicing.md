@@ -1,6 +1,6 @@
 # CDC — `amazscript/laravel-einvoicing`
 
-**Version** 1.11 — 20 août 2026
+**Version** 1.12 — 20 août 2026
 **Auteur** Denis Decilap / AmazScript
 **Périmètre** v0.1 — Réception de factures électroniques (driver Iopole)
 
@@ -564,3 +564,25 @@ jamais vues : douze livraisons, douze traitées, aucun échec.
 
 Enseignement général : chaque nouvelle série de livraisons révèle un cas de plus. Ce qui n'a été vu
 qu'une fois ne doit pas être traité comme une règle.
+
+### v1.12 — 20 août 2026
+
+Lecture des entreprises et de leur joignabilité (D17), livrée fausse puis corrigée le même jour.
+
+| Constat | Conséquence |
+|---|---|
+| **Une entreprise porte deux adresses distinctes.** L'identifiant légal (`0002:449290493`, le SIREN) dit qui elle est ; l'adresse d'annuaire (`0225:449290493`) dit où elle reçoit. | Seule la seconde route une facture, et un rejet `No route found for given key` ne cite jamais que celle-là. Les confondre fait afficher une adresse qui n'existe pour personne. |
+| La joignabilité se lit dans `identifiers[].networkRegistered[]` : `directoryId`, `networkId`, `directoryAddress`, `networkIdentifier`, `isSelfBilling`, `validFrom`. | Il n'y a **ni statut, ni plateforme desservante** sur une inscription. Le champ `platformDetail` n'existe pas ici — il appartient à `/v1/directory/french?withPlatformDetails=true`, une autre ressource. |
+| `validFrom` peut être postérieur à aujourd'hui. | Une inscription déposée n'est pas une inscription en vigueur : une facture émise avant sa date d'effet rebondit. |
+| `GET /v1/config/business/entity/{id}` répond par une **liste** d'un élément. | Même piège que `/v1/invoice/{id}` (v1.10). À considérer comme le comportement par défaut des endpoints unitaires, non comme une exception. |
+| La recherche `q` attend la syntaxe `champ:"valeur"`, jointe par ` AND `. | Identique à `/v1.1/invoice/search`. Toute autre forme renvoie `Unable to parse correctly query search`. |
+
+**Ce qui a échoué, et pourquoi.** La première version reposait sur un `platformDetail` supposé, et
+ses fixtures avaient été rédigées à partir de cette supposition. Les tests passaient donc au vert
+sur une forme d'API inexistante, et le diagnostic déclarait huit entreprises sur huit injoignables
+alors que deux venaient de recevoir une facture. Ni les tests, ni PHPStan, ni la relecture n'ont pu
+le voir : seule la contradiction avec les données affichées à l'écran l'a révélé.
+
+Enseignement général : une fixture rédigée ne teste rien, elle confirme l'hypothèse de départ. Elle
+se copie d'une réponse réelle. Et une conclusion qui contredit un fait observé est fausse avant que
+le fait ne le soit.
