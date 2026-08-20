@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace AmazScript\Einvoicing\Api;
 
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
+use AmazScript\Einvoicing\Contracts\OutboundInvoiceGateway;
 use AmazScript\Einvoicing\Models\InboundInvoice;
+use AmazScript\Einvoicing\Models\OutboundInvoice;
 use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 use RuntimeException;
@@ -22,7 +24,29 @@ final class TenantScope
         private readonly ?Tenant $tenant,
         private readonly InvoiceGateway $gateway,
         private readonly InvoiceFileStore $store,
+        private readonly ?OutboundInvoiceGateway $sender = null,
     ) {}
+
+    /**
+     * Sends an invoice document the application has already produced.
+     *
+     * The package never builds the document itself — see InvoiceSender. Sending
+     * the same file twice returns the first send rather than issuing a second
+     * invoice, which the platform gives no idempotency key to prevent.
+     */
+    public function send(string $filePath): OutboundInvoice
+    {
+        if (! $this->tenant instanceof Tenant) {
+            // An invoice leaves in someone's name; there is no default sender.
+            throw new RuntimeException('Sending an invoice requires a tenant: use Einvoicing::for($tenant)->send(...).');
+        }
+
+        if (! $this->sender instanceof OutboundInvoiceGateway) {
+            throw new RuntimeException('No outbound gateway is configured for this driver.');
+        }
+
+        return (new InvoiceSender($this->tenant, $this->sender))->send($filePath);
+    }
 
     public function invoices(): InvoiceQuery
     {

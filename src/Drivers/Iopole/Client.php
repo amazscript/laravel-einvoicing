@@ -12,6 +12,7 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\LazyCollection;
+use InvalidArgumentException;
 
 /**
  * HTTP client for the Iopole platform.
@@ -65,6 +66,67 @@ final class Client
     public function put(string $path, array $payload = []): array
     {
         return $this->decode($this->send('put', $path, $payload));
+    }
+
+    /**
+     * Uploads a file as multipart/form-data.
+     *
+     * Sending an invoice is the only call that carries a document rather than a
+     * payload, and the platform accepts nothing else for it. The file is streamed
+     * from disk rather than read into a string: invoices with attachments run to
+     * tens of megabytes.
+     *
+     * @return array<mixed>
+     */
+    public function upload(string $path, string $field, string $filePath, string $fileName): array
+    {
+        $flux = @fopen($filePath, 'rb');
+
+        if ($flux === false) {
+            throw new InvalidArgumentException('Unable to read the file to upload: '.$filePath);
+        }
+
+        try {
+            $response = $this->dispatchUpload($path, $field, $flux, $fileName);
+
+            if ($response->status() === 401) {
+                $this->tokens->forget();
+                // The stream was consumed by the first attempt; it has to be
+                // reopened, not rewound, since it may not be seekable.
+                fclose($flux);
+                $flux = @fopen($filePath, 'rb');
+
+                if ($flux === false) {
+                    throw new InvalidArgumentException('Unable to re-read the file to upload: '.$filePath);
+                }
+
+                $response = $this->dispatchUpload($path, $field, $flux, $fileName);
+            }
+
+            if ($response->failed()) {
+                throw $this->errors->map($response);
+            }
+
+            return $this->decode($response);
+        } finally {
+            if (is_resource($flux)) {
+                fclose($flux);
+            }
+        }
+    }
+
+    /**
+     * @param  resource  $flux
+     */
+    private function dispatchUpload(string $path, string $field, $flux, string $fileName): Response
+    {
+        try {
+            return $this->uploadRequest()
+                ->attach($field, $flux, $fileName)
+                ->post($path);
+        } catch (ConnectionException $e) {
+            throw new EinvoicingServerException('Platform unreachable: '.$e->getMessage());
+        }
     }
 
     /**
@@ -159,11 +221,27 @@ final class Client
 
     private function request(): PendingRequest
     {
+        return $this->baseRequest()->asJson();
+    }
+
+    /**
+     * The same request, minus the JSON body format.
+     *
+     * asJson() also pins a `Content-Type: application/json` header, and that
+     * header outlives a later asMultipart(): the body would go out as multipart
+     * while announcing itself as JSON, and the platform would refuse it.
+     */
+    private function uploadRequest(): PendingRequest
+    {
+        return $this->baseRequest()->asMultipart();
+    }
+
+    private function baseRequest(): PendingRequest
+    {
         $request = $this->http
             ->baseUrl(rtrim($this->baseUrl, '/'))
             ->withToken($this->tokens->token())
-            ->acceptJson()
-            ->asJson();
+            ->acceptJson();
 
         return $this->customerId === ''
             ? $request

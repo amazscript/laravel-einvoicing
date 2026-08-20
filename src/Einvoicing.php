@@ -11,6 +11,7 @@ use AmazScript\Einvoicing\Contracts\BusinessEntityGateway;
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
+use AmazScript\Einvoicing\Drivers\Iopole\IopoleOutboundInvoiceGateway;
 use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 
@@ -34,7 +35,7 @@ final class Einvoicing
      */
     public function for(Tenant $tenant): TenantScope
     {
-        return new TenantScope($tenant, $this->gatewayFor($tenant), $this->store);
+        return new TenantScope($tenant, $this->gatewayFor($tenant), $this->store, $this->senderFor($tenant));
     }
 
     /**
@@ -42,7 +43,7 @@ final class Einvoicing
      */
     public function operator(): TenantScope
     {
-        return new TenantScope(null, $this->gateway, $this->store);
+        return new TenantScope(null, $this->gateway, $this->store, new IopoleOutboundInvoiceGateway($this->client));
     }
 
     public function directory(): DirectoryQuery
@@ -65,5 +66,14 @@ final class Einvoicing
     private function gatewayFor(Tenant $tenant): InvoiceGateway
     {
         return new IopoleInvoiceGateway($this->client->forCustomer($tenant->customer_id));
+    }
+
+    /**
+     * Same reasoning for sending: an invoice issued under the wrong customer-id
+     * leaves in someone else's name.
+     */
+    private function senderFor(Tenant $tenant): IopoleOutboundInvoiceGateway
+    {
+        return new IopoleOutboundInvoiceGateway($this->client->forCustomer($tenant->customer_id));
     }
 }

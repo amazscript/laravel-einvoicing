@@ -5,6 +5,18 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Émission (palier v0.2, en cours)
+
+- `Einvoicing::for($tenant)->send($chemin)` remet à la plateforme un document PDF ou XML **produit
+  par l'application** : le package n'a jamais fabriqué de format, et ne commence pas.
+- Envoyer deux fois le même fichier n'émet qu'une facture. L'endpoint n'offrant aucune clé
+  d'idempotence, une contrainte d'unicité sur `(dossier, empreinte du fichier)` la remplace — un
+  renvoi après un timeout ne facturera pas le client deux fois.
+- Un refus est conservé avec sa raison plutôt qu'effacé.
+- Events `OutboundInvoiceSent` et `OutboundInvoiceFailed`.
+
 ## [0.1.0] — 2026-08-19
 
 Première version. Réception des factures électroniques françaises via une Plateforme Agréée,

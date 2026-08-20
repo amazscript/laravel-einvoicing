@@ -6,6 +6,7 @@ namespace AmazScript\Einvoicing;
 
 use AmazScript\Einvoicing\Contracts\BusinessEntityGateway;
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
+use AmazScript\Einvoicing\Contracts\OutboundInvoiceGateway;
 use AmazScript\Einvoicing\Contracts\PayloadInterpreter;
 use AmazScript\Einvoicing\Contracts\SignatureVerifier;
 use AmazScript\Einvoicing\Contracts\StatusMapper;
@@ -14,6 +15,7 @@ use AmazScript\Einvoicing\Drivers\Iopole\AccessTokenProvider;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleBusinessEntityGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
+use AmazScript\Einvoicing\Drivers\Iopole\IopoleOutboundInvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\IopolePayloadInterpreter;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\ErrorMapper;
 use AmazScript\Einvoicing\Drivers\Iopole\ResponseMappers\IopoleStatusMapper;
@@ -61,6 +63,7 @@ final class EinvoicingServiceProvider extends ServiceProvider
 
         $this->app->bind(InvoiceGateway::class, IopoleInvoiceGateway::class);
         $this->app->bind(BusinessEntityGateway::class, IopoleBusinessEntityGateway::class);
+        $this->app->bind(OutboundInvoiceGateway::class, IopoleOutboundInvoiceGateway::class);
 
         $this->app->singleton(Einvoicing::class, function ($app): Einvoicing {
             return new Einvoicing(

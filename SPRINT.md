@@ -432,6 +432,47 @@ rejeu signé prouve la route, la file et l'idempotence, pas la livraison par la 
 
 ---
 
+# Palier v0.2 — Émission
+
+Ouvert le 20 août sur demande utilisateur : « il faut toutes les versions pour un produit complet
+que je peux tester ». Le périmètre v0.1 était clos, il est rouvert.
+
+**Contrainte structurante.** Aucun endpoint n'accepte de données de facture en JSON : l'émission
+passe obligatoirement par un fichier PDF ou XML. Le package ne le fabrique pas — il transporte ce
+que l'application produit. La règle absolue du CLAUDE.md tient, et elle est juste : un format
+fiscal invalide est un problème fiscal.
+
+## D19 — Envoyer une facture
+
+- [x] `Client::upload()` — multipart, flux depuis le disque, rejeu du 401 sur flux rouvert
+- [x] `OutboundInvoiceGateway` (contrat) + implémentation Iopole
+- [x] Migration + modèle `OutboundInvoice`, enum `OutboundStatus`
+- [x] `Einvoicing::for($tenant)->send($chemin)` — ligne écrite **avant** l'appel, unicité sur
+      `(tenant_id, file_hash)` : l'endpoint n'a pas de clé d'idempotence, la base la remplace
+- [x] Refus conservé avec sa raison, jamais effacé
+- [x] Events `OutboundInvoiceSent` et `OutboundInvoiceFailed`
+- [x] 9 tests, dont la double émission et le refus
+- [x] `docs/emission.md`
+- [x] **DoD** : émission réelle acceptée par la sandbox, second envoi du même fichier renvoyant la
+      même ligne sans rappeler la plateforme
+
+**Bug trouvé par le test.** `Client::request()` appliquait `asJson()`, dont l'en-tête
+`Content-Type: application/json` **survit** à un `asMultipart()` appelé ensuite : le corps serait
+parti en multipart sous une fausse étiquette. Une requête d'upload distincte le corrige.
+
+## D20 — Suivre le cycle de vie sortant
+
+- [ ] Webhook OUTBOUND routé vers l'application
+- [ ] Statuts rattachés à `OutboundInvoice`
+- [ ] `Einvoicing::for($tenant)->sent()` — parcours des factures émises
+
+## D21 — Accepter ou refuser une facture reçue
+
+- [ ] `POST /v1/invoice/{id}/status`
+- [ ] `Einvoicing::for($tenant)->invoice($id)->approve()` / `->reject($raison)`
+
+---
+
 ## Décisions en attente
 
 - [x] **Support de Laravel 13** — tranché par les faits : les 234 tests passent sur Laravel 13 avec
@@ -490,3 +531,4 @@ rejeu signé prouve la route, la file et l'idempotence, pas la livraison par la 
 | 2026-08-20 | D17 | fait | Lecture des entreprises et de leur joignabilité — 7 tests, 0/8 joignables en réel |
 | 2026-08-20 | D17 | **corrigé** | `platformDetail` n'existe pas : joignabilité relue sur `directoryAddress` — 8/8 en réel |
 | 2026-08-20 | D18 | fait | Réception bouclée : webhook rebasculé, 202 en réel, worker surveillé par `doctor` |
+| 2026-08-20 | D19 | fait | Émission d'un fichier fourni — 9 tests, acceptée en réel, idempotence vérifiée |

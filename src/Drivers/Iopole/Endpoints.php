@@ -30,6 +30,14 @@ final class Endpoints
         return '/v1/config/webhook/'.rawurlencode($webhookId);
     }
 
+    /**
+     * Hands over an invoice document. multipart/form-data, single `file` part.
+     */
+    public static function sendInvoice(): string
+    {
+        return '/v1/invoice';
+    }
+
     public static function businessEntities(): string
     {
         return '/v1/config/business/entity';
