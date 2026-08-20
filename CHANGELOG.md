@@ -5,6 +5,16 @@ Toutes les évolutions notables de ce package sont consignées ici.
 Le format suit [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le versionnage
 respecte [SemVer](https://semver.org/lang/fr/).
 
+## [0.3.0] — 2026-08-20
+
+### Compatibilité
+
+- **Laravel 11 n'est plus pris en charge.** La totalité de la branche (`v11.0.0` → `v11.56.0`) est
+  frappée d'avis de sécurité, et Composer refuse d'installer ces versions. Continuer à l'annoncer
+  reviendrait à orienter des projets vers une base vulnérable, ou à leur demander de désactiver une
+  protection. Reste **Laravel 12 et 13**.
+- Les actions GitHub passent en `checkout@v5` : la v4 tournait sur Node 20, déprécié.
+
 ## [0.2.0] — 2026-08-20
 
 Le package émet, suit et répond. La v0.1 ne faisait que recevoir.

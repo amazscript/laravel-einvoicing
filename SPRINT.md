@@ -663,3 +663,4 @@ aussi le rapport, et non l'entité, qui permet de relire ce régime.
 | 2026-08-20 | D22 | corrigé | Écriture réelle : exception après création réussie, et corps vide encodé `[]` |
 | 2026-08-20 | D25 | fait | Consultation des périodes et régime de TVA — déclaration réelle acceptée ; PUT et DELETE en 501 |
 | 2026-08-20 | Publication | fait | `main` et `v0.1.0` poussés ; `v0.2.0` préparé |
+| 2026-08-20 | CI | corrigé | Laravel 11 retiré : branche entière bloquée par 7 avis de sécurité |

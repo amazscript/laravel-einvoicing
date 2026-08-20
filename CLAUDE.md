@@ -30,7 +30,7 @@ Priorités, dans cet ordre : **correction > sécurité > lisibilité > ergonomie
 | | |
 |---|---|
 | PHP | 8.3 minimum, `declare(strict_types=1)` partout |
-| Laravel | 11, 12 et 13 |
+| Laravel | 12 et 13 |
 | Namespace | `AmazScript\Einvoicing\` |
 | Tests | Pest |
 | Style | Laravel Pint, preset `laravel` |

@@ -3,7 +3,7 @@
 ## Prérequis
 
 - PHP 8.3 ou 8.4
-- Laravel 11, 12 ou 13
+- Laravel 12 ou 13
 - Un compte chez une Plateforme Agréée (Iopole pour cette version)
 - Une file d'attente fonctionnelle : le traitement des factures ne se fait pas dans la requête
 

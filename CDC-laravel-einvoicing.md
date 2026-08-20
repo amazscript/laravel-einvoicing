@@ -312,7 +312,7 @@ return [
 - **Unitaires** : chaîne canonique, checksum JSON vs multipart, tolérance de timestamp, résolution de tenant sur les 4 stratégies.
 - **Fonctionnels** : rejeu du même `eventId` → un seul traitement ; signature invalide → 401 + event ; multipart avec champs annexes → signature valide.
 - **Contract tests** : fixtures figées issues de la doc Iopole (payload statut, payload onboarding, `INVOICE_INBOUND_INVALID`).
-- **Matrice CI** : PHP 8.3 / 8.4, Laravel 11 / 12 / 13.
+- **Matrice CI** : PHP 8.3 / 8.4, Laravel 12 / 13.
 - **Cible** : couverture ≥ 85 % sur les namespaces `Webhook` et `Tenancy`.
 
 ## 14. Charge estimée
