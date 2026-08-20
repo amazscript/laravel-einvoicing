@@ -12,6 +12,7 @@ use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\Client;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleInvoiceGateway;
 use AmazScript\Einvoicing\Drivers\Iopole\IopoleOutboundInvoiceGateway;
+use AmazScript\Einvoicing\Drivers\Iopole\IopoleReportingGateway;
 use AmazScript\Einvoicing\Models\Tenant;
 use AmazScript\Einvoicing\Storage\InvoiceFileStore;
 
@@ -35,7 +36,7 @@ final class Einvoicing
      */
     public function for(Tenant $tenant): TenantScope
     {
-        return new TenantScope($tenant, $this->gatewayFor($tenant), $this->store, $this->senderFor($tenant));
+        return new TenantScope($tenant, $this->gatewayFor($tenant), $this->store, $this->senderFor($tenant), new IopoleReportingGateway($this->client->forCustomer($tenant->customer_id)));
     }
 
     /**
@@ -43,7 +44,7 @@ final class Einvoicing
      */
     public function operator(): TenantScope
     {
-        return new TenantScope(null, $this->gateway, $this->store, new IopoleOutboundInvoiceGateway($this->client));
+        return new TenantScope(null, $this->gateway, $this->store, new IopoleOutboundInvoiceGateway($this->client), new IopoleReportingGateway($this->client));
     }
 
     public function directory(): DirectoryQuery

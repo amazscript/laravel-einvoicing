@@ -521,6 +521,36 @@ côté réception. Les deux traitements sont opposés parce que les deux situati
 n'apparaissait dans aucune de nos réponses, et pourquoi le diagnostic de joignabilité bâti dessus
 était faux de bout en bout. La spec le disait, à un endroit où je ne l'avais pas lue.
 
+---
+
+# Palier v0.4 — E-reporting
+
+## D24 — Déclarer les ventes B2C et les encaissements
+
+- [x] Enums `TransactionCategory`, `VatPointDate`, `VatCategory` — codes et sens relevés dans le
+      guide, pas devinés
+- [x] Objet de valeur `Transaction` à fabriques nommées : la règle « un service exige sa date
+      d'exigibilité » est portée par la signature, pas par un commentaire
+- [x] `ReportingGateway` + driver Iopole + `Einvoicing::for($tenant)->reporting()`
+- [x] Aucun montant recalculé — un écart est une question comptable, pas un arrondi à rattraper
+- [x] 10 tests
+- [x] `docs/reporting.md`
+- [x] **DoD** : appel réel émis et **refusé pour un motif métier** —
+      `The business entity does not have a VAT regime specified.` La chaîne fonctionne ; c'est
+      l'entité de test qui n'a pas de régime de TVA.
+
+**Limite trouvée en réel.** Le `vatRegime` peut être **envoyé** à la création d'une entité mais
+n'est **jamais renvoyé** en lecture, ni en liste ni en unitaire. `doctor` ne peut donc pas prévenir :
+le manque n'apparaît qu'au refus de la première déclaration. Documenté plutôt que contourné — un
+diagnostic bâti sur un champ absent serait exactement l'erreur du matin.
+
+## D25 — Corriger une déclaration
+
+- [ ] `PUT` et `DELETE` sur transactions et paiements
+- [ ] Consultation du rapport (`GET /v1/reporting/report/...`)
+
+---
+
 ## D23 — Rattacher une entreprise au compte (KYB)
 
 - [ ] `POST /v1/config/business/entity/{id}/claim`
@@ -596,3 +626,4 @@ n'apparaissait dans aucune de nos réponses, et pourquoi le diagnostic de joigna
 | 2026-08-20 | D20 | fait | Cycle de vie sortant — 12 tests ; routage des statuts émis et rejeu corrigés |
 | 2026-08-20 | D21 | fait | Réponses acheteur — 10 tests ; IN_HAND et REFUSED envoyés et revenus en réel |
 | 2026-08-20 | D22 | fait | Déclarer et inscrire une entreprise — 9 tests ; écriture réelle non lancée |
+| 2026-08-20 | D24 | fait | E-reporting B2C — 10 tests ; refus réel sur régime de TVA manquant, précondition documentée |

@@ -36,6 +36,17 @@ respecte [SemVer](https://semver.org/lang/fr/).
   second la rend joignable, et l'écart entre les deux est ce qui fait rebondir une facture.
 - Le SIREN est vérifié avant l'appel plutôt qu'après le refus.
 
+### E-reporting (palier v0.4, en cours)
+
+- `Einvoicing::for($tenant)->reporting()` déclare les ventes B2C et les encaissements. Tout est en
+  JSON : le package porte l'échange entier, sans dépendre d'un format produit ailleurs.
+- Quatre fabriques de transaction — biens, services, hors champ, mixte — qui portent les règles de
+  la plateforme : une prestation de service **exige** sa date d'exigibilité de TVA, et la signature
+  la réclame plutôt que de laisser la plateforme refuser.
+- Aucun montant n'est recalculé : ce qui est déclaré est ce que l'application dit avoir encaissé.
+- Prérequis relevé en réel : sans régime de TVA sur l'entité, la plateforme refuse. Ce régime
+  n'étant jamais renvoyé en lecture, le manque ne se découvre qu'au premier refus.
+
 ### Corrigé
 
 - `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :

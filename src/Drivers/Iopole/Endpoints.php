@@ -31,6 +31,22 @@ final class Endpoints
     }
 
     /**
+     * Declares B2C transactions for a company.
+     */
+    public static function reportTransactions(string $scheme, string $value): string
+    {
+        return '/v1/reporting/transaction/scheme/'.rawurlencode($scheme).'/value/'.rawurlencode($value);
+    }
+
+    /**
+     * Declares payments collected against reported transactions.
+     */
+    public static function reportPaymentForTransaction(string $scheme, string $value): string
+    {
+        return '/v1/reporting/payment/transaction/scheme/'.rawurlencode($scheme).'/value/'.rawurlencode($value);
+    }
+
+    /**
      * Declares a legal unit.
      */
     public static function declareLegalUnit(): string

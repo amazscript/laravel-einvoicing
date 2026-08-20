@@ -6,6 +6,7 @@ namespace AmazScript\Einvoicing\Api;
 
 use AmazScript\Einvoicing\Contracts\InvoiceGateway;
 use AmazScript\Einvoicing\Contracts\OutboundInvoiceGateway;
+use AmazScript\Einvoicing\Contracts\ReportingGateway;
 use AmazScript\Einvoicing\Models\InboundInvoice;
 use AmazScript\Einvoicing\Models\OutboundInvoice;
 use AmazScript\Einvoicing\Models\Tenant;
@@ -25,7 +26,24 @@ final class TenantScope
         private readonly InvoiceGateway $gateway,
         private readonly InvoiceFileStore $store,
         private readonly ?OutboundInvoiceGateway $sender = null,
+        private readonly ?ReportingGateway $reporting = null,
     ) {}
+
+    /**
+     * Declares this tenant's B2C activity to the tax authority.
+     */
+    public function reporting(): ReportingQuery
+    {
+        if (! $this->tenant instanceof Tenant) {
+            throw new RuntimeException('Reporting requires a tenant: use Einvoicing::for($tenant)->reporting().');
+        }
+
+        if (! $this->reporting instanceof ReportingGateway) {
+            throw new RuntimeException('No reporting gateway is configured for this driver.');
+        }
+
+        return new ReportingQuery($this->tenant, $this->reporting);
+    }
 
     /**
      * The invoices this tenant has sent, and what became of them.
