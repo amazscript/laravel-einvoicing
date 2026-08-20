@@ -40,9 +40,10 @@ driver Iopole.
 - Façade `Einvoicing` : factures d'un dossier, acquittement auprès de la plateforme, accès aux
   documents et pièces jointes.
 - Recherche de factures et parcours des factures distantes, tous deux paresseux.
-- Lecture des entreprises déclarées et de leur joignabilité : une entreprise inscrite mais
-  desservie par aucune plateforme ne peut rien recevoir, et rien d'autre ne le révélait avant
-  qu'une facture ne rebondisse.
+- Lecture des entreprises déclarées et de leur joignabilité : une entreprise absente de l'annuaire,
+  ou dont l'inscription n'a pas encore pris effet, ne peut rien recevoir, et rien d'autre ne le
+  révélait avant qu'une facture ne rebondisse. L'adresse qui route (`0225:…`) est distinguée de
+  l'identifiant légal (`0002:…`), que le rejet ne cite jamais.
 
 ### Commandes
 

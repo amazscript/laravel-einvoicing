@@ -9,14 +9,16 @@ use AmazScript\Einvoicing\Entities\BusinessEntity;
 use AmazScript\Einvoicing\Entities\EntityIdentifier;
 use AmazScript\Einvoicing\Entities\NetworkRegistration;
 use AmazScript\Einvoicing\Exceptions\EinvoicingException;
+use DateTimeImmutable;
 use Illuminate\Support\LazyCollection;
 
 /**
  * Reads companies as the Iopole platform exposes them.
  *
  * The shape below is taken from real responses: identifiers carry their network
- * registrations inline, and a registration's platformDetail is null when nobody
- * serves that address — the case that makes an invoice bounce.
+ * registrations inline, and each registration exposes the directory address the
+ * company is actually reachable at — which uses a different scheme (0225) from
+ * the legal identifier (0002) sitting next to it.
  */
 final class IopoleBusinessEntityGateway implements BusinessEntityGateway
 {
@@ -64,7 +66,6 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
             id: (string) ($ligne['businessEntityId'] ?? ''),
             name: (string) ($ligne['name'] ?? ''),
             type: $this->string($ligne['type'] ?? null),
-            scope: $this->string($ligne['scope'] ?? null),
             country: $this->string($ligne['country'] ?? null),
             siren: $this->string($pays['siren'] ?? null),
             siret: $this->string($pays['siret'] ?? null),
@@ -92,7 +93,6 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
                 id: $this->string($item['businessEntityIdentifierId'] ?? null),
                 scheme: (string) $item['scheme'],
                 value: (string) $item['value'],
-                type: $this->string($item['type'] ?? null),
                 registrations: $this->toRegistrations($item['networkRegistered'] ?? null),
             );
         }
@@ -112,23 +112,37 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
         $inscriptions = [];
 
         foreach ($brut as $item) {
-            if (! is_array($item)) {
+            // Without a directory address the entry routes nothing, so it is
+            // not an entry as far as reachability is concerned.
+            if (! is_array($item) || ! isset($item['directoryAddress'])) {
                 continue;
             }
 
-            $plateforme = is_array($item['platformDetail'] ?? null) ? $item['platformDetail'] : [];
-
             $inscriptions[] = new NetworkRegistration(
-                network: (string) ($item['networkIdentifier'] ?? ''),
-                status: $this->string($item['status'] ?? null),
-                validFrom: $this->string($item['validFrom'] ?? null),
-                validTo: $this->string($item['validTo'] ?? null),
-                platformName: $this->string($plateforme['name'] ?? null),
-                directoryId: $this->string($item['directoryId'] ?? null),
+                directoryId: (string) ($item['directoryId'] ?? ''),
+                directoryAddress: (string) $item['directoryAddress'],
+                networkIdentifier: $this->string($item['networkIdentifier'] ?? null),
+                validFrom: $this->date($item['validFrom'] ?? null),
+                isSelfBilling: ($item['isSelfBilling'] ?? false) === true,
             );
         }
 
         return $inscriptions;
+    }
+
+    /**
+     * The platform sends plain dates ("2026-08-19"); anything else is ignored
+     * rather than guessed at.
+     */
+    private function date(mixed $valeur): ?DateTimeImmutable
+    {
+        if (! is_string($valeur) || $valeur === '') {
+            return null;
+        }
+
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $valeur);
+
+        return $date === false ? null : $date;
     }
 
     private function string(mixed $valeur): ?string

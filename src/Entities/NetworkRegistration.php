@@ -4,34 +4,41 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Entities;
 
+use DateTimeImmutable;
+
 /**
- * A company identifier's registration on an exchange network.
+ * A directory entry making an identifier addressable on an invoicing network.
  *
- * Being registered is not the same as being reachable. An entry can exist with
- * no serving platform attached, in which case the directory knows the company
- * but cannot say where to deliver — the platform then rejects the invoice with
- * "No route found". That distinction is the whole point of this object.
+ * This is what makes a company reachable: without it, an invoice addressed to
+ * the company is rejected at the sender with "No route found for given key".
+ *
+ * Fields mirror what the platform actually returns — nothing is assumed.
  */
-final class NetworkRegistration
+final readonly class NetworkRegistration
 {
     public function __construct(
-        public readonly string $network,
-        public readonly ?string $status,
-        public readonly ?string $validFrom,
-        public readonly ?string $validTo,
-        public readonly ?string $platformName,
-        public readonly ?string $directoryId,
+        public string $directoryId,
+        /** Network-level electronic address, e.g. "0225:902695436". */
+        public string $directoryAddress,
+        /** Network this entry belongs to, e.g. "DOMESTIC_FR". */
+        public ?string $networkIdentifier,
+        public ?DateTimeImmutable $validFrom,
+        /** True when the company invoices itself through this entry. */
+        public bool $isSelfBilling = false,
     ) {}
 
     /**
-     * Whether an invoice addressed here can actually be delivered.
+     * Whether the entry is in force at the given moment.
      *
-     * A registration without a serving platform is an address nobody collects
-     * from. Observed for real: entries carrying a directoryId and a validFrom,
-     * yet no platform, whose invoices were refused.
+     * A registration filed today for next month is real but not yet usable, so
+     * a future start date does not make the company reachable.
      */
-    public function isReachable(): bool
+    public function isActiveAt(DateTimeImmutable $moment): bool
     {
-        return $this->platformName !== null && $this->platformName !== '';
+        if ($this->directoryAddress === '') {
+            return false;
+        }
+
+        return $this->validFrom === null || $this->validFrom <= $moment;
     }
 }

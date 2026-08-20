@@ -394,10 +394,19 @@ ne reçoit rien, et rien ne le disait avant qu'une facture ne rebondisse.
       `no-serving-platform`), pas une phrase — la langue appartient à l'application hôte
 - [x] `einvoicing:doctor` contrôle chaque entreprise et nomme la cause
 - [x] Lecture seule : aucun enregistrement d'entité, aucune écriture dans l'annuaire
-- [x] 7 tests sur la forme réelle des réponses, dont l'entreprise sans identifiant et la pagination
+- [x] 11 tests **sur la réponse réelle copiée à la lettre**, dont l'endpoint unitaire qui répond
+      par une liste, l'inscription sans adresse et l'inscription à effet futur
 - [x] `docs/entreprises.md`, dépannage et README raccordés
-- [x] **DoD** : vérifié en réel sur la sandbox — 8 entreprises déclarées, **0 joignable**, ce qui
-      explique le rejet `No route found` rencontré à l'émission de test
+- [x] **DoD** : vérifié en réel sur la sandbox — 8 entreprises déclarées, **8 joignables**,
+      cohérent avec les factures effectivement reçues
+
+**Correction du 20/08.** La première version reposait sur un champ `platformDetail` qui **n'existe
+pas** dans la réponse : il avait été supposé, pas relevé, et les tests validaient cette forme
+inventée. Résultat, 8 entreprises sur 8 déclarées injoignables alors que deux d'entre elles
+venaient de recevoir une facture — la contradiction a été vue à l'écran, pas par les tests.
+La joignabilité se lit en réalité sur `networkRegistered[].directoryAddress` et sa date d'effet.
+Au passage, l'adresse qui route (`0225:…`) n'est pas l'identifiant légal (`0002:…`) affiché
+jusque-là. Règle rappelée : une fixture se copie d'une réponse réelle, elle ne se rédige pas.
 
 ---
 
@@ -457,3 +466,4 @@ ne reçoit rien, et rien ne le disait avant qu'une facture ne rebondisse.
 | 2026-08-19 | Statuts | corrigé | Rattachement à la facture par le numéro de l'émetteur — 4/4 en réel |
 | 2026-08-19 | D14 | complété | Recherche de factures sur `/v1.1/invoice/search`, vérifiée en réel |
 | 2026-08-20 | D17 | fait | Lecture des entreprises et de leur joignabilité — 7 tests, 0/8 joignables en réel |
+| 2026-08-20 | D17 | **corrigé** | `platformDetail` n'existe pas : joignabilité relue sur `directoryAddress` — 8/8 en réel |

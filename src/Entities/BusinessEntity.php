@@ -4,38 +4,47 @@ declare(strict_types=1);
 
 namespace AmazScript\Einvoicing\Entities;
 
+use DateTimeImmutable;
+
 /**
- * A company declared on the platform.
+ * A company declared on the platform, and whether it can actually be invoiced.
  *
- * Declared is not the same as reachable: an entity can exist in the account
- * while none of its identifiers is served by a platform, in which case nobody
- * can invoice it.
+ * Being declared and being reachable are two different states, and only the
+ * second one matters: an invoice sent to a company that holds no active
+ * directory entry is rejected at the sender with "No route found for given
+ * key", never reaching the recipient at all.
  */
-final class BusinessEntity
+final readonly class BusinessEntity
 {
     /**
      * @param  list<EntityIdentifier>  $identifiers
      */
     public function __construct(
-        public readonly string $id,
-        public readonly string $name,
-        public readonly ?string $type,
-        public readonly ?string $scope,
-        public readonly ?string $country,
-        public readonly ?string $siren,
-        public readonly ?string $siret,
-        public readonly array $identifiers = [],
+        public string $id,
+        public string $name,
+        public ?string $siren = null,
+        public ?string $siret = null,
+        public ?string $type = null,
+        public ?string $country = null,
+        public array $identifiers = [],
     ) {}
 
-    public function isReachable(): bool
+    /**
+     * Whether an invoice addressed to this company can be routed today.
+     */
+    public function isReachable(?DateTimeImmutable $moment = null): bool
     {
-        foreach ($this->identifiers as $identifier) {
-            if ($identifier->isReachable()) {
-                return true;
-            }
-        }
+        return $this->activeRegistration($moment) !== null;
+    }
 
-        return false;
+    /**
+     * The electronic address invoices are delivered to, e.g. "0225:902695436".
+     *
+     * This is the value quoted back in a "No route found" rejection.
+     */
+    public function electronicAddress(?DateTimeImmutable $moment = null): ?string
+    {
+        return $this->activeRegistration($moment)?->directoryAddress;
     }
 
     /**
@@ -44,11 +53,11 @@ final class BusinessEntity
      * A code rather than a sentence: a library has no business deciding the
      * language its host application speaks to its users in.
      *
-     * @return 'no-identifier'|'no-registration'|'no-serving-platform'|null
+     * @return 'no-identifier'|'no-registration'|'registration-not-yet-active'|null
      */
-    public function unreachableReason(): ?string
+    public function unreachableReason(?DateTimeImmutable $moment = null): ?string
     {
-        if ($this->isReachable()) {
+        if ($this->isReachable($moment)) {
             return null;
         }
 
@@ -58,11 +67,26 @@ final class BusinessEntity
 
         foreach ($this->identifiers as $identifier) {
             if ($identifier->registrations !== []) {
-                // The directory knows the address but nobody collects from it.
-                return 'no-serving-platform';
+                // Filed, but its start date has not come yet.
+                return 'registration-not-yet-active';
             }
         }
 
         return 'no-registration';
+    }
+
+    private function activeRegistration(?DateTimeImmutable $moment): ?NetworkRegistration
+    {
+        $moment ??= new DateTimeImmutable;
+
+        foreach ($this->identifiers as $identifier) {
+            foreach ($identifier->registrations as $registration) {
+                if ($registration->isActiveAt($moment)) {
+                    return $registration;
+                }
+            }
+        }
+
+        return null;
     }
 }

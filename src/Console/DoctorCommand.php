@@ -211,9 +211,9 @@ final class DoctorCommand extends Command
     }
 
     /**
-     * A company can be declared without being reachable, in which case invoices
-     * addressed to it bounce with "No route found". Nothing else in the setup
-     * reveals that, so it is checked here.
+     * A company can be declared without holding an active directory entry, in
+     * which case invoices addressed to it bounce at the sender with "No route
+     * found". Nothing else in the setup reveals that, so it is checked here.
      */
     private function checkEntities(BusinessEntityGateway $entities): void
     {
@@ -257,8 +257,8 @@ final class DoctorCommand extends Command
     {
         return match ($raison) {
             'no-identifier' => 'aucun identifiant déclaré',
-            'no-registration' => 'identifiants déclarés, aucun inscrit sur un réseau',
-            'no-serving-platform' => 'inscrite, mais aucune plateforme ne dessert cette adresse',
+            'no-registration' => 'aucun identifiant inscrit à l\'annuaire',
+            'registration-not-yet-active' => 'inscrite à l\'annuaire, mais pas avant sa date d\'effet',
             default => $raison,
         };
     }

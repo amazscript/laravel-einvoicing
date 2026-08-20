@@ -11,12 +11,23 @@ Une entreprise peut être :
 | État | Ce que la plateforme en sait | Peut-elle recevoir ? |
 |---|---|---|
 | déclarée | elle existe dans votre parc | non |
-| inscrite sur un réseau | son adresse électronique est publiée | non |
-| desservie par une plateforme | quelqu'un relève cette adresse | **oui** |
+| inscrite à l'annuaire, date d'effet à venir | l'inscription est déposée | pas encore |
+| inscrite à l'annuaire, en vigueur | son adresse électronique route | **oui** |
 
 Seul le troisième état permet la réception. Les deux premiers produisent un rejet
 `No route found for given key (electronicAddress : …)` chez l'émetteur — jamais chez vous, puisque
 rien ne vous parvient. D'où l'intérêt de le contrôler avant, pas après.
+
+## Deux adresses à ne pas confondre
+
+Une entreprise porte un **identifiant légal** (`0002:449290493`, son SIREN) et, si elle est
+inscrite, une **adresse d'annuaire** (`0225:449290493`). Seule la seconde route une facture, et
+c'est elle que cite un rejet. Elles se ressemblent, elles ne servent pas à la même chose.
+
+```php
+$entreprise->identifiers[0]->legalAddress();  // "0002:449290493" — qui elle est
+$entreprise->electronicAddress();             // "0225:449290493" — où elle reçoit
+```
 
 ## Le contrôle
 
@@ -27,8 +38,8 @@ php artisan einvoicing:doctor
 ```
 Entreprises
  ✓ entreprises déclarées        8
- ✗ joignables                     1/8
-   · UNIBAT34                      inscrite, mais aucune plateforme ne dessert cette adresse
+ ✗ joignables                     7/8
+   · UNIBAT34                      aucun identifiant inscrit à l'annuaire
 ```
 
 Chaque ligne nomme la cause :
@@ -36,11 +47,11 @@ Chaque ligne nomme la cause :
 | Message | Cause | Qui règle |
 |---|---|---|
 | `aucun identifiant déclaré` | ni SIREN ni SIRET rattaché | vous, côté plateforme |
-| `identifiants déclarés, aucun inscrit sur un réseau` | l'entreprise n'est pas publiée dans l'annuaire | votre plateforme |
-| `inscrite, mais aucune plateforme ne dessert cette adresse` | l'adresse existe, personne ne la relève | votre plateforme |
+| `aucun identifiant inscrit à l'annuaire` | l'entreprise n'est pas publiée | votre plateforme |
+| `inscrite à l'annuaire, mais pas avant sa date d'effet` | inscription déposée, `validFrom` à venir | patienter jusqu'à cette date |
 
-Les trois relèvent de l'onboarding auprès de votre Plateforme Agréée. Le package les constate, il
-ne les corrige pas — il n'écrit rien dans l'annuaire.
+Les deux premières relèvent de l'onboarding auprès de votre Plateforme Agréée. Le package les
+constate, il ne les corrige pas — il n'écrit rien dans l'annuaire.
 
 ## En code
 
@@ -60,8 +71,15 @@ foreach (Einvoicing::entities()->unreachable() as $entreprise) {
 ```
 
 `unreachableReason()` rend un code stable — `no-identifier`, `no-registration`,
-`no-serving-platform` — et non une phrase : à votre application de choisir sa langue. Il vaut `null`
-quand l'entreprise est joignable.
+`registration-not-yet-active` — et non une phrase : à votre application de choisir sa langue. Il
+vaut `null` quand l'entreprise est joignable.
+
+Les deux méthodes acceptent une date, ce qui permet de répondre à « sera-t-elle joignable le
+1er septembre ? » :
+
+```php
+$entreprise->isReachable(new DateTimeImmutable('2026-09-01'));
+```
 
 `all()` parcourt l'annuaire page par page. Rien n'est chargé tant que rien n'est lu :
 

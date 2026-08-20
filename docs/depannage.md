@@ -43,7 +43,8 @@ fréquente.
 ### Le destinataire n'est pas dans l'annuaire
 
 Statut `REJECTED` portant `No route found for given key (electronicAddress : …)`. L'entreprise
-existe, mais aucune plateforme ne dessert son adresse électronique.
+existe, mais son adresse électronique n'est pas inscrite à l'annuaire, ou son inscription n'a pas
+encore pris effet. L'adresse citée est celle de l'annuaire (`0225:…`), pas le SIREN (`0002:…`).
 
 `php artisan einvoicing:doctor` le dit avant qu'une facture ne rebondisse, entreprise par
 entreprise, avec la cause. La correction, elle, passe par votre plateforme : voir
