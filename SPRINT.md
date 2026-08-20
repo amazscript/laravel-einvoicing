@@ -514,8 +514,21 @@ côté réception. Les deux traitements sont opposés parce que les deux situati
 - [x] SIREN vérifié avant l'appel : mieux vaut échouer ici que créer une entité inutilisable
 - [x] 9 tests
 - [x] `docs/entreprises.md` complété
-- [ ] **DoD** : déclaration réelle sur la sandbox — **non fait**, une écriture crée une entité
-      durable dans le parc de l'utilisateur ; à lancer sur sa demande
+- [x] **DoD** : déclaration réelle faite le 20/08 sur l'entreprise de l'utilisateur —
+      déclarée, inscrite à l'annuaire (`0225:…`), joignable, dossier local créé, `doctor` vert
+      sur 9 entreprises
+
+**Deux bugs que seule l'écriture réelle pouvait montrer.**
+
+`declareLegalUnit()` levait une exception quand la réponse ne portait pas d'`id` — or l'entité
+**avait bien été créée**. Signaler un échec après une écriture réussie invite au retry, et le retry
+crée le doublon. Le code rend désormais une chaîne vide (« créée, non nommée ») et sait déballer une
+réponse rendue sous forme de liste, comme les autres endpoints unitaires.
+
+`register()` envoyait un corps vide quand aucune option n'était passée : un tableau PHP vide
+s'encode `[]` là où l'endpoint attend `{}`, et il répondait « Expected object, received array » sans
+rien inscrire. L'inscription échouait silencieusement dans le cas le plus courant — celui sans
+option.
 
 **Trouvé dans la spec.** `platformDetail` y est marqué *White Label ONLY* : voilà pourquoi il
 n'apparaissait dans aucune de nos réponses, et pourquoi le diagnostic de joignabilité bâti dessus
@@ -627,3 +640,4 @@ diagnostic bâti sur un champ absent serait exactement l'erreur du matin.
 | 2026-08-20 | D21 | fait | Réponses acheteur — 10 tests ; IN_HAND et REFUSED envoyés et revenus en réel |
 | 2026-08-20 | D22 | fait | Déclarer et inscrire une entreprise — 9 tests ; écriture réelle non lancée |
 | 2026-08-20 | D24 | fait | E-reporting B2C — 10 tests ; refus réel sur régime de TVA manquant, précondition documentée |
+| 2026-08-20 | D22 | corrigé | Écriture réelle : exception après création réussie, et corps vide encodé `[]` |

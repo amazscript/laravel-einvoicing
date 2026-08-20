@@ -35,6 +35,10 @@ respecte [SemVer](https://semver.org/lang/fr/).
   publier son adresse à l'annuaire. Deux gestes distincts — le premier la fait connaître, seul le
   second la rend joignable, et l'écart entre les deux est ce qui fait rebondir une facture.
 - Le SIREN est vérifié avant l'appel plutôt qu'après le refus.
+- Une création dont la plateforme ne renvoie pas l'identifiant n'est plus signalée comme un échec :
+  l'entité est bien créée, et croire l'inverse mène à un retry qui la duplique.
+- L'inscription n'envoie jamais un corps vide : un tableau PHP vide s'encode `[]` là où l'endpoint
+  attend `{}`, et l'inscription échouait alors sans rien dire.
 
 ### E-reporting (palier v0.4, en cours)
 

@@ -5,7 +5,6 @@ declare(strict_types=1);
 use AmazScript\Einvoicing\Enums\EntityScope;
 use AmazScript\Einvoicing\Enums\InvoicingNetwork;
 use AmazScript\Einvoicing\Enums\VatRegime;
-use AmazScript\Einvoicing\Exceptions\EinvoicingServerException;
 use AmazScript\Einvoicing\Facades\Einvoicing;
 use Illuminate\Support\Facades\Http;
 
@@ -100,15 +99,38 @@ it('omet le régime de TVA plutôt que d\'envoyer un vide', function (): void {
     expect(dernierAppel('legalunit')['corps'])->not->toHaveKey('vatRegime');
 });
 
-it('refuse une création dont la plateforme ne rend pas l\'identifiant', function (): void {
+it('ne crie pas à l\'échec quand la plateforme a créé sans nommer', function (): void {
     Http::fake([
         '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
         ONBOARDING_API.'/v1/config/business/entity/legalunit' => Http::response(['type' => 'BUSINESS_ENTITY'], 201),
     ]);
 
-    // Une entité créée mais innommée ne pourrait plus jamais être retrouvée.
-    Einvoicing::entities()->declareLegalUnit('SOCIETE', '948779160');
-})->throws(EinvoicingServerException::class);
+    // Relevé en réel : l'entité est bien créée. Lever une exception ferait
+    // croire à un échec, et le retry qui suivrait créerait un doublon.
+    expect(Einvoicing::entities()->declareLegalUnit('SOCIETE', '948779160'))->toBe('');
+});
+
+it('déballe une création rendue sous forme de liste', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/legalunit' => Http::response([['type' => 'BUSINESS_ENTITY', 'id' => 'be-liste']], 201),
+    ]);
+
+    expect(Einvoicing::entities()->declareLegalUnit('SOCIETE', '948779160'))->toBe('be-liste');
+});
+
+it('n\'envoie jamais un corps vide à l\'inscription', function (): void {
+    Http::fake([
+        '*/token' => Http::response(['access_token' => 'jeton', 'expires_in' => 300]),
+        ONBOARDING_API.'/v1/config/business/entity/identifier/*' => Http::response(['id' => 'dir-1'], 201),
+    ]);
+
+    Einvoicing::entities()->register('948779160');
+
+    // Un tableau PHP vide s'encode `[]` là où l'endpoint attend `{}` : il
+    // répond « Expected object, received array » et n'inscrit rien.
+    expect(dernierAppel('/identifier/')['corps'])->toHaveKey('selfBilling');
+});
 
 it('inscrit une entreprise sur le réseau français', function (): void {
     Http::fake([

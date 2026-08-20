@@ -9,7 +9,6 @@ use AmazScript\Einvoicing\Entities\BusinessEntity;
 use AmazScript\Einvoicing\Entities\EntityIdentifier;
 use AmazScript\Einvoicing\Entities\NetworkRegistration;
 use AmazScript\Einvoicing\Exceptions\EinvoicingException;
-use AmazScript\Einvoicing\Exceptions\EinvoicingServerException;
 use DateTimeImmutable;
 use Illuminate\Support\LazyCollection;
 
@@ -60,18 +59,28 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
     {
         $reponse = $this->client->post(Endpoints::declareLegalUnit(), $payload);
 
-        $id = $reponse['id'] ?? null;
-
-        if (! is_string($id) || $id === '') {
-            throw new EinvoicingServerException('Platform created the entity without returning an identifier.');
+        if (array_is_list($reponse)) {
+            $premier = $reponse[0] ?? null;
+            $reponse = is_array($premier) ? $premier : [];
         }
 
-        return $id;
+        $id = $reponse['id'] ?? $reponse['businessEntityId'] ?? null;
+
+        // No exception on a missing identifier: the entity was created either
+        // way, and reporting failure would invite a retry that duplicates it.
+        // An empty string says "created, unnamed" — the caller can find it back
+        // by SIREN.
+        return is_string($id) ? $id : '';
     }
 
     public function registerOnNetwork(string $scheme, string $value, string $network, array $payload = []): void
     {
-        $this->client->post(Endpoints::registerOnNetwork($scheme, $value, $network), $payload);
+        // An empty PHP array encodes as `[]`, and the endpoint wants an object:
+        // it answers "Expected object, received array" and registers nothing.
+        $this->client->post(
+            Endpoints::registerOnNetwork($scheme, $value, $network),
+            $payload === [] ? ['selfBilling' => false] : $payload,
+        );
     }
 
     /**

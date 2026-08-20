@@ -116,7 +116,9 @@ final class EntityQuery
 
         $this->gateway->registerOnNetwork($scheme, $chiffres, $network->value, array_filter([
             'validityStartDate' => $from?->format('Y-m-d'),
-            'selfBilling' => $selfBilling ?: null,
+            // Always sent: an empty body encodes as `[]` where the endpoint
+            // expects an object, and the registration silently does not happen.
+            'selfBilling' => $selfBilling,
         ], static fn (mixed $v): bool => $v !== null));
     }
 }
