@@ -6,6 +6,7 @@
 PLAYGROUND := ../einvoicing-playground
 PHP_COVERAGE := php -d pcov.enabled=1
 
+
 .DEFAULT_GOAL := help
 
 # ---------------------------------------------------------------- vérification
@@ -27,7 +28,11 @@ test-coverage: ## Couverture de l'ensemble du package (seuil 70 %)
 
 .PHONY: test-integration
 test-integration: ## Tests contre la sandbox réelle (identifiants requis)
-	@set -a; . $(PLAYGROUND)/.env; set +a; vendor/bin/pest --group=integration
+	@# Seules les variables IOPOLE_ sont passées : charger tout le .env du
+	@# playground imposerait aussi son cache et sa base de données, que
+	@# l'environnement de test ne connaît pas.
+	@env $$(grep -E '^IOPOLE_[A-Z_]+=.' $(PLAYGROUND)/.env | tr '\n' ' ') \
+		vendor/bin/pest --group=integration
 
 .PHONY: analyse
 analyse: ## Analyse statique, niveau 8
