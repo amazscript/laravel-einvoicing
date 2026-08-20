@@ -21,6 +21,14 @@ respecte [SemVer](https://semver.org/lang/fr/).
 - Les statuts de factures émises sont routés par l'identifiant de la facture : ils nomment le client
   comme destinataire, jamais l'émetteur, et le routage multi-tenant n'y trouvait rien.
 
+### Réponses de l'acheteur
+
+- `approve()`, `refuse($motif)`, `acknowledge()`, `dispute()`, `reportPayment()` sur une facture
+  reçue, et `answer()` pour les neuf codes acheteur.
+- Un refus sans motif et un paiement sans montant sont refusés **avant** l'appel réseau : la
+  plateforme les rejetterait, et « refusée » tout court n'apprend rien au fournisseur.
+- 28 motifs de refus normatifs (`RejectionReason`), une chaîne restant acceptée si la liste évolue.
+
 ### Corrigé
 
 - `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :

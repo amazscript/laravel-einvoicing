@@ -126,6 +126,17 @@ final class IopoleInvoiceGateway implements InvoiceGateway
         return $this->listOf(Endpoints::statusesNotSeen());
     }
 
+    public function postStatus(string $providerInvoiceId, array $payload): string
+    {
+        $reponse = $this->client->post(Endpoints::postInvoiceStatus($providerInvoiceId), $payload);
+
+        $id = $reponse['id'] ?? null;
+
+        // A status the platform accepted but did not name cannot be tracked, and
+        // saying nothing about that would leave the caller believing otherwise.
+        return is_string($id) ? $id : '';
+    }
+
     public function markInvoiceAsSeen(string $providerInvoiceId): void
     {
         $this->client->put(Endpoints::markInvoiceAsSeen($providerInvoiceId));

@@ -44,6 +44,17 @@ interface InvoiceGateway
     public function download(string $fileId): string;
 
     /**
+     * Tells the network what the buyer does with an invoice it received.
+     *
+     * Under the French reform this is not a courtesy: some of these answers are
+     * required, and silence is not one of them.
+     *
+     * @param  array<string, mixed>  $payload  status code and its details
+     * @return string the identifier the platform gives this status
+     */
+    public function postStatus(string $providerInvoiceId, array $payload): string;
+
+    /**
      * Received invoices the package has not acknowledged yet.
      *
      * A safety net for a webhook that went missing. The endpoint does not

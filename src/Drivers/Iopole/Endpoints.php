@@ -31,6 +31,14 @@ final class Endpoints
     }
 
     /**
+     * The buyer's answer about an invoice it received.
+     */
+    public static function postInvoiceStatus(string $invoiceId): string
+    {
+        return '/v1/invoice/'.rawurlencode($invoiceId).'/status';
+    }
+
+    /**
      * Hands over an invoice document. multipart/form-data, single `file` part.
      */
     public static function sendInvoice(): string

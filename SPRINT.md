@@ -488,8 +488,25 @@ depuis le payload conservé.
 
 ## D21 — Accepter ou refuser une facture reçue
 
-- [ ] `POST /v1/invoice/{id}/status`
-- [ ] `Einvoicing::for($tenant)->invoice($id)->approve()` / `->reject($raison)`
+- [x] `POST /v1/invoice/{id}/status` via `InvoiceGateway::postStatus()`
+- [x] Enums `BuyerStatus` (9 codes) et `RejectionReason` (28 motifs normatifs)
+- [x] `acknowledge()`, `approve()`, `refuse()`, `dispute()`, `reportPayment()`, `answer()`
+- [x] Refus sans motif et paiement sans montant refusés **avant** l'appel réseau
+- [x] Isolation : un dossier ne répond pas pour un autre
+- [x] 10 tests
+- [x] `docs/reponses.md`
+- [x] **DoD** : `IN_HAND` puis `REFUSED` envoyés en réel, revenus par webhook et rattachés seuls
+      à la facture reçue
+
+**Choix assumé.** Ces codes sont **envoyés**, pas rapportés : l'API les valide contre un ensemble
+fermé. Une énumération y protège l'appelant d'un 400, là où elle masquerait un code authentique du
+côté réception. Les deux traitements sont opposés parce que les deux situations le sont.
+
+---
+
+# La v0.2 est complète
+
+Émettre, suivre, répondre. Éprouvé contre la sandbox réelle, pas seulement en test.
 
 ---
 
@@ -553,3 +570,4 @@ depuis le payload conservé.
 | 2026-08-20 | D18 | fait | Réception bouclée : webhook rebasculé, 202 en réel, worker surveillé par `doctor` |
 | 2026-08-20 | D19 | fait | Émission d'un fichier fourni — 9 tests, acceptée en réel, idempotence vérifiée |
 | 2026-08-20 | D20 | fait | Cycle de vie sortant — 12 tests ; routage des statuts émis et rejeu corrigés |
+| 2026-08-20 | D21 | fait | Réponses acheteur — 10 tests ; IN_HAND et REFUSED envoyés et revenus en réel |
