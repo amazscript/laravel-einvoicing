@@ -1,0 +1,16 @@
+v0.3.0 — Laravel 11 retiré, faute d'être installable
+
+Toute la branche Laravel 11 (v11.0.0 à v11.56.0) est couverte par sept avis de
+sécurité, et Composer refuse de l'installer. Le refus se reproduit hors
+intégration continue, sur un projet nu.
+
+Conserver la contrainte aurait orienté des projets vers une base vulnérable, ou
+exigé d'eux qu'ils désactivent une protection pour utiliser ce package. Le
+support est donc retiré partout : matrice CI, contraintes illuminate, testbench,
+documentation.
+
+Restent Laravel 12 et 13, qui se résolvent proprement.
+
+Aucun changement fonctionnel. Ceux qui sont sur Laravel 11 restent en v0.2.0.
+
+PHP 8.3 et 8.4 · Laravel 12 et 13 · Guzzle 7 et 8.
