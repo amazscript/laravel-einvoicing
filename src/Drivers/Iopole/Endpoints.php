@@ -31,6 +31,25 @@ final class Endpoints
     }
 
     /**
+     * Declares a legal unit.
+     */
+    public static function declareLegalUnit(): string
+    {
+        return '/v1/config/business/entity/legalunit';
+    }
+
+    /**
+     * Registers an identifier on a network — what makes an address reachable.
+     */
+    public static function registerOnNetwork(string $scheme, string $value, string $network): string
+    {
+        return '/v1/config/business/entity/identifier'
+            .'/scheme/'.rawurlencode($scheme)
+            .'/value/'.rawurlencode($value)
+            .'/network/'.rawurlencode($network);
+    }
+
+    /**
      * The buyer's answer about an invoice it received.
      */
     public static function postInvoiceStatus(string $invoiceId): string

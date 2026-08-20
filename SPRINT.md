@@ -504,6 +504,30 @@ côté réception. Les deux traitements sont opposés parce que les deux situati
 
 ---
 
+# Palier v0.3 — Onboarding en écriture
+
+## D22 — Déclarer une entreprise et l'inscrire à l'annuaire
+
+- [x] Enums `EntityScope`, `VatRegime`, `InvoicingNetwork` — valeurs relevées dans la spec
+- [x] `declareLegalUnit()` et `registerOnNetwork()` sur le contrat + driver Iopole
+- [x] `Einvoicing::entities()->declareLegalUnit()` / `->register()`
+- [x] SIREN vérifié avant l'appel : mieux vaut échouer ici que créer une entité inutilisable
+- [x] 9 tests
+- [x] `docs/entreprises.md` complété
+- [ ] **DoD** : déclaration réelle sur la sandbox — **non fait**, une écriture crée une entité
+      durable dans le parc de l'utilisateur ; à lancer sur sa demande
+
+**Trouvé dans la spec.** `platformDetail` y est marqué *White Label ONLY* : voilà pourquoi il
+n'apparaissait dans aucune de nos réponses, et pourquoi le diagnostic de joignabilité bâti dessus
+était faux de bout en bout. La spec le disait, à un endroit où je ne l'avais pas lue.
+
+## D23 — Rattacher une entreprise au compte (KYB)
+
+- [ ] `POST /v1/config/business/entity/{id}/claim`
+- [ ] Suivi de l'état de la revendication
+
+---
+
 # La v0.2 est complète
 
 Émettre, suivre, répondre. Éprouvé contre la sandbox réelle, pas seulement en test.
@@ -571,3 +595,4 @@ côté réception. Les deux traitements sont opposés parce que les deux situati
 | 2026-08-20 | D19 | fait | Émission d'un fichier fourni — 9 tests, acceptée en réel, idempotence vérifiée |
 | 2026-08-20 | D20 | fait | Cycle de vie sortant — 12 tests ; routage des statuts émis et rejeu corrigés |
 | 2026-08-20 | D21 | fait | Réponses acheteur — 10 tests ; IN_HAND et REFUSED envoyés et revenus en réel |
+| 2026-08-20 | D22 | fait | Déclarer et inscrire une entreprise — 9 tests ; écriture réelle non lancée |

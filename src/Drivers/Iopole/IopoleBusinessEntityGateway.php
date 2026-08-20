@@ -9,6 +9,7 @@ use AmazScript\Einvoicing\Entities\BusinessEntity;
 use AmazScript\Einvoicing\Entities\EntityIdentifier;
 use AmazScript\Einvoicing\Entities\NetworkRegistration;
 use AmazScript\Einvoicing\Exceptions\EinvoicingException;
+use AmazScript\Einvoicing\Exceptions\EinvoicingServerException;
 use DateTimeImmutable;
 use Illuminate\Support\LazyCollection;
 
@@ -53,6 +54,24 @@ final class IopoleBusinessEntityGateway implements BusinessEntityGateway
         }
 
         return isset($reponse['businessEntityId']) ? $this->toEntity($reponse) : null;
+    }
+
+    public function declareLegalUnit(array $payload): string
+    {
+        $reponse = $this->client->post(Endpoints::declareLegalUnit(), $payload);
+
+        $id = $reponse['id'] ?? null;
+
+        if (! is_string($id) || $id === '') {
+            throw new EinvoicingServerException('Platform created the entity without returning an identifier.');
+        }
+
+        return $id;
+    }
+
+    public function registerOnNetwork(string $scheme, string $value, string $network, array $payload = []): void
+    {
+        $this->client->post(Endpoints::registerOnNetwork($scheme, $value, $network), $payload);
     }
 
     /**

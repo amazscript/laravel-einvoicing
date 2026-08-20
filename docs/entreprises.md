@@ -88,7 +88,52 @@ Einvoicing::entities()->all()->take(10);   // une seule page appelée
 Einvoicing::entities()->find($id);         // null si inconnue
 ```
 
+## Déclarer et inscrire
+
+Deux gestes distincts, et c'est tout le sujet : **déclarer** fait connaître l'entreprise de la
+plateforme, **inscrire** la rend joignable. L'écart entre les deux est exactement ce qui produit un
+rejet `No route found`.
+
+```php
+use AmazScript\Einvoicing\Enums\InvoicingNetwork;
+
+// 1. La plateforme connaît l'entreprise — elle ne reçoit toujours rien.
+$id = Einvoicing::entities()->declareLegalUnit('UNIBAT34', '948779160');
+
+// 2. Son adresse est publiée à l'annuaire : elle peut recevoir.
+Einvoicing::entities()->register('948779160');
+```
+
+`register()` accepte un SIREN ou un SIRET, et par défaut le réseau français. Pour l'international,
+ou pour une prise d'effet différée :
+
+```php
+Einvoicing::entities()->register(
+    '948779160',
+    InvoicingNetwork::PeppolInternational,
+    from: new DateTimeImmutable('2026-09-01'),
+);
+```
+
+Une inscription à effet futur n'est pas encore une inscription : jusqu'à cette date, `doctor` la
+signale comme non joignable, et une facture émise entre-temps rebondit.
+
+### Entité publique
+
+Une administration passe par Chorus Pro et se déclare avec sa portée propre :
+
+```php
+use AmazScript\Einvoicing\Enums\{EntityScope, VatRegime};
+
+Einvoicing::entities()->declareLegalUnit(
+    'MAIRIE DE …', '210000000', EntityScope::Public, VatRegime::RealMonthly,
+);
+```
+
+Le SIREN est vérifié avant l'appel : neuf chiffres, espaces tolérés. Mieux vaut échouer ici que
+créer sur la plateforme une entité inutilisable.
+
 ## Ce que ce chapitre ne couvre pas
 
-L'**enregistrement** d'une entreprise — déclarer une unité légale, publier une adresse, demander
-son rattachement — passe par votre plateforme. Le package est en lecture seule sur ce sujet.
+Le **rattachement** d'une entreprise à votre compte (KYB) reste à faire auprès de votre plateforme :
+il engage une vérification d'identité que le package ne peut pas conduire à votre place.

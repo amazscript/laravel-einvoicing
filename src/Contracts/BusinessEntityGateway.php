@@ -27,4 +27,23 @@ interface BusinessEntityGateway
      * One company, or null when the platform does not know it.
      */
     public function find(string $businessEntityId): ?BusinessEntity;
+
+    /**
+     * Declares a legal unit on the platform.
+     *
+     * Declaring is not registering: the company exists on the platform
+     * afterwards, and still receives nothing until an address of its is
+     * registered on a network.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return string the identifier the platform assigns the entity
+     */
+    public function declareLegalUnit(array $payload): string;
+
+    /**
+     * Registers an address on a network, which is what makes it reachable.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function registerOnNetwork(string $scheme, string $value, string $network, array $payload = []): void;
 }

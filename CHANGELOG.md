@@ -29,6 +29,13 @@ respecte [SemVer](https://semver.org/lang/fr/).
   plateforme les rejetterait, et « refusée » tout court n'apprend rien au fournisseur.
 - 28 motifs de refus normatifs (`RejectionReason`), une chaîne restant acceptée si la liste évolue.
 
+### Onboarding (palier v0.3, en cours)
+
+- `Einvoicing::entities()->declareLegalUnit()` et `->register()` : déclarer une entreprise puis
+  publier son adresse à l'annuaire. Deux gestes distincts — le premier la fait connaître, seul le
+  second la rend joignable, et l'écart entre les deux est ce qui fait rebondir une facture.
+- Le SIREN est vérifié avant l'appel plutôt qu'après le refus.
+
 ### Corrigé
 
 - `einvoicing:events:retry` **refait** le routage au lieu de relire un `tenant_id` resté nul :
