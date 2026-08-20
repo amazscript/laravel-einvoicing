@@ -12,16 +12,16 @@ use Illuminate\Console\Command;
 /**
  * Compares the local webhook configuration with the platform's.
  *
- * The command changes nothing unasked: declaring a webhook redirects a stream of
- * invoices, and overwriting one by mistake would send deliveries into the void.
+ * The command only ever reads. Declaring or moving a webhook redirects a stream
+ * of invoices, and getting it wrong sends deliveries into the void, so that call
+ * stays with a human — the command shows the gap and the URL to declare.
  */
 final class SyncWebhooksCommand extends Command
 {
     protected $signature = 'einvoicing:webhooks:sync
-                            {--apply : Applique la configuration locale à la plateforme}
-                            {--url= : URL de rappel à déclarer (sinon déduite de la configuration)}';
+                            {--url= : URL de rappel à comparer (sinon déduite de la configuration)}';
 
-    protected $description = 'Compare et synchronise la déclaration du webhook';
+    protected $description = 'Compare la déclaration du webhook à la configuration locale';
 
     public function handle(Client $client): int
     {
